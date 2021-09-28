@@ -42,9 +42,8 @@
 	<property>
 		<name>xasecure.audit.destination.solr.collection</name>
 		<value>NONE</value>
-	</property>	
-	
-	
+	</property>
+
 	<!-- HDFS audit provider configuration -->
 	<property>
 		<name>xasecure.audit.destination.hdfs</name>
@@ -111,12 +110,12 @@
 	<!-- Log4j audit provider configuration -->
 	<property>
 		<name>xasecure.audit.destination.log4j</name>
-		<value>true</value>
+		<value>false</value>
 	</property>	
 
 	<property>
 		<name>xasecure.audit.destination.log4j.logger</name>
-		<value>AUDIT</value>
+		<value></value>
 	</property>	
 	
 </configuration>
