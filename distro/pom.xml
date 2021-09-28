@@ -509,7 +509,7 @@ atlas.graph.storage.conf-file=${sys:atlas.home}/conf/cassandra.yml
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.2.1</version>
                 <inherited>false</inherited>
-                <executions>
+                <!-- <executions>
                     <execution>
                         <configuration>
                             <skip>${skipTests}</skip>
@@ -528,7 +528,7 @@ atlas.graph.storage.conf-file=${sys:atlas.home}/conf/cassandra.yml
                             <goal>exec</goal>
                         </goals>
                     </execution>
-                </executions>
+                </executions> -->
             </plugin>
 
             <plugin>
