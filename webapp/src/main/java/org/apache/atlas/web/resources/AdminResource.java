@@ -122,6 +122,7 @@ import org.apache.atlas.repository.graphdb.AtlasGraph;
 import org.apache.atlas.repository.graph.AtlasGraphProvider;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import java.util.*;
+import org.apache.atlas.web.service.ActiveInstanceElectorService;
 
 /**
  * Jersey Resource for admin operations.
