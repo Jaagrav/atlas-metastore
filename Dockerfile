@@ -19,7 +19,7 @@
 FROM scratch
 FROM ubuntu:18.04
 LABEL maintainer="engineering@atlan.com"
-ARG VERSION=2.2.0
+ARG VERSION=3.0.0-SNAPSHOT
 
 COPY distro/target/apache-atlas-2.2.0-server.tar.gz  /apache-atlas-2.2.0-server.tar.gz
 
