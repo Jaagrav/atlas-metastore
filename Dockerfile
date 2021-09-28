@@ -38,7 +38,7 @@ RUN apt-get update \
     && export MAVEN_OPTS="-Xms2g -Xmx2g" \
     && export JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64" \
     && tar -xzvf /apache-atlas-2.2.0-server.tar.gz -C /opt \
-    && mv /opt/apache-atlas-${VERSION} /opt/apache-atlas \
+    && mv /opt/apache-atlas-2.2.0-server /opt/apache-atlas \
     && apt-get clean \
     && rm -rf /apache-atlas-2.2.0-server.tar.gz
 
