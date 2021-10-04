@@ -62,6 +62,7 @@ public class AtlasJanusGraphManagement implements AtlasGraphManagement {
 
     private static final Logger LOG            = LoggerFactory.getLogger(AtlasJanusGraphManagement.class);
     private static final char[] RESERVED_CHARS = { '{', '}', '"', '$', Token.SEPARATOR_CHAR };
+    private static final String CUSTOM = "CUSTOM";
 
     private AtlasJanusGraph      graph;
     private JanusGraphManagement management;
@@ -207,11 +208,11 @@ public class AtlasJanusGraphManagement implements AtlasGraphManagement {
 
     @Override
     public String addMixedIndex(String indexName, AtlasPropertyKey propertyKey, boolean isStringField) {
-        return addMixedIndex(indexName, propertyKey, isStringField, new ArrayList<>());
+        return addMixedIndex(indexName, propertyKey, isStringField, new ArrayList<>(), null);
     }
 
     @Override
-    public String addMixedIndex(String indexName, AtlasPropertyKey propertyKey, boolean isStringField, ArrayList<String> multifields) {
+    public String addMixedIndex(String indexName, AtlasPropertyKey propertyKey, boolean isStringField, ArrayList<String> multifields, String param) {
         PropertyKey     janusKey        = AtlasJanusObjectFactory.createPropertyKey(propertyKey);
         JanusGraphIndex janusGraphIndex = management.getGraphIndex(indexName);
 
@@ -220,6 +221,12 @@ public class AtlasJanusGraphManagement implements AtlasGraphManagement {
         if(isStringField) {
             params.add(Mapping.STRING.asParameter());
             LOG.debug("string type for {} with janueKey {}.", propertyKey.getName(), janusKey);
+        }
+
+        if (param != null && param.equalsIgnoreCase(CUSTOM)) {
+            //TODO Add ES specific customParameters into es index like below
+            /*params.add(Parameter.of(ParameterType.customParameterName("boost"), 5));
+            params.add(Parameter.of(ParameterType.customParameterName("similarity"), "boolean"));*/
         }
 
         if (multifields != null && multifields.size() > 0) {

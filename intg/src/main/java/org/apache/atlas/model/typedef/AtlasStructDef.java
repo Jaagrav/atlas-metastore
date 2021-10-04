@@ -297,6 +297,7 @@ public class AtlasStructDef extends AtlasBaseTypeDef implements Serializable {
         private Map<String, String>      options;
         private String                   displayName;
         private ArrayList<String>        multifields;
+        private String                   param;
 
         public AtlasAttributeDef() { this(null, null); }
 
@@ -343,6 +344,12 @@ public class AtlasStructDef extends AtlasBaseTypeDef implements Serializable {
         public AtlasAttributeDef(String name, String typeName, boolean isOptional, Cardinality cardinality,
                                  int valuesMinCount, int valuesMaxCount, boolean isUnique, boolean isIndexable, boolean includeInNotification, String defaultValue,
                                  List<AtlasConstraintDef> constraints, Map<String,String> options, String description, int searchWeight, IndexType indexType) {
+            this(name, typeName, isOptional, cardinality, valuesMinCount, valuesMaxCount, isUnique, isIndexable, includeInNotification, null, constraints, null, null, searchWeight, indexType, null);
+        }
+
+        public AtlasAttributeDef(String name, String typeName, boolean isOptional, Cardinality cardinality,
+                                 int valuesMinCount, int valuesMaxCount, boolean isUnique, boolean isIndexable, boolean includeInNotification, String defaultValue,
+                                 List<AtlasConstraintDef> constraints, Map<String,String> options, String description, int searchWeight, IndexType indexType, String param) {
             setName(name);
             setTypeName(typeName);
             setIsOptional(isOptional);
@@ -379,6 +386,7 @@ public class AtlasStructDef extends AtlasBaseTypeDef implements Serializable {
                 setIndexType(other.getIndexType());
                 setDisplayName(other.getDisplayName());
                 setMultifields(other.getMultifields());
+                setParam(other.getParam());
             }
         }
 
@@ -563,6 +571,14 @@ public class AtlasStructDef extends AtlasBaseTypeDef implements Serializable {
             this.multifields = multifields;
         }
 
+        public String getParam() {
+            return param;
+        }
+
+        public void setParam(String param) {
+            this.param = param;
+        }
+
         public StringBuilder toString(StringBuilder sb) {
             if (sb == null) {
                 sb = new StringBuilder();
@@ -585,6 +601,7 @@ public class AtlasStructDef extends AtlasBaseTypeDef implements Serializable {
             sb.append(", indexType='").append(indexType).append('\'');
             sb.append(", displayName='").append(displayName).append('\'');
             sb.append(", multifields='").append(multifields).append('\'');
+            sb.append(", param='").append(param).append('\'');
             sb.append(", constraints=[");
             if (CollectionUtils.isNotEmpty(constraints)) {
                 int i = 0;
@@ -623,12 +640,13 @@ public class AtlasStructDef extends AtlasBaseTypeDef implements Serializable {
                     Objects.equals(searchWeight, that.searchWeight) &&
                     Objects.equals(indexType, that.indexType) &&
                     Objects.equals(displayName, that.displayName) &&
-                    Objects.equals(multifields, that.multifields);
+                    Objects.equals(multifields, that.multifields) &&
+                    Objects.equals(param, that.param);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(name, typeName, isOptional, cardinality, valuesMinCount, valuesMaxCount, isUnique, isIndexable, includeInNotification, defaultValue, constraints, options, description, searchWeight, indexType, displayName, multifields);
+            return Objects.hash(name, typeName, isOptional, cardinality, valuesMinCount, valuesMaxCount, isUnique, isIndexable, includeInNotification, defaultValue, constraints, options, description, searchWeight, indexType, displayName, multifields, param);
         }
 
         @Override
