@@ -109,6 +109,10 @@ public class AtlasStructDef extends AtlasBaseTypeDef implements Serializable {
         return attributeDefs;
     }
 
+    protected String getAttributeUniqueField(AtlasAttributeDef attribute) {
+        return attribute != null ? attribute.getName() : null;
+    }
+
     public void setAttributeDefs(List<AtlasAttributeDef> attributeDefs) {
         if (this.attributeDefs != null && this.attributeDefs == attributeDefs) {
             return;
@@ -124,7 +128,7 @@ public class AtlasStructDef extends AtlasBaseTypeDef implements Serializable {
             ListIterator<AtlasAttributeDef> iter = attributeDefs.listIterator(attributeDefs.size());
             while (iter.hasPrevious()) {
                 AtlasAttributeDef attributeDef = iter.previous();
-                String            attribName   = attributeDef != null ? attributeDef.getName() : null;
+                String            attribName   = getAttributeUniqueField(attributeDef);
 
                 if (attribName != null) {
                     attribName = attribName.toLowerCase();
