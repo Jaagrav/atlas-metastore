@@ -132,9 +132,10 @@ public class AtlasTypeDefGraphStoreV2 extends AtlasTypeDefGraphStore {
     }
 
     @VisibleForTesting
-    public AtlasVertex findTypeVertexByDisplayName(String displayName) {
+    public AtlasVertex findTypeVertexByDisplayName(String displayName, TypeCategory category) {
         Iterator results = atlasGraph.query().has(VERTEX_TYPE_PROPERTY_KEY, VERTEX_TYPE)
                 .has(Constants.TYPE_DISPLAYNAME_PROPERTY_KEY, displayName)
+                .has(TYPE_CATEGORY_PROPERTY_KEY, category)
                 .vertices().iterator();
 
         return (results != null && results.hasNext()) ? (AtlasVertex) results.next() : null;
