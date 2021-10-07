@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +39,7 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_
 @JsonIgnoreProperties(ignoreUnknown=true)
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.PROPERTY)
-public class AtlasBusinessMetadataDef extends AtlasStructDef implements Serializable {
+public class AtlasBusinessMetadataDef extends AtlasStructDef implements AtlasNamedTypeDef, Serializable {
     private static final long serialVersionUID = 1L;
 
     public static final String ATTR_OPTION_APPLICABLE_ENTITY_TYPES = "applicableEntityTypes";
@@ -98,21 +99,37 @@ public class AtlasBusinessMetadataDef extends AtlasStructDef implements Serializ
         return sb;
     }
 
+    @Override
     public String getDisplayName() {
         return displayName;
     }
 
+    @Override
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
     public void setRandomNameForEntityAndAttributeDefs() {
-        setName(generateRandomName());
+        setRandomName();
         this.getAttributeDefs().forEach((attr) -> attr.setName(generateRandomName()));
     }
 
-    public static String generateRandomName() {
-        return RandomStringUtils.randomAlphabetic(1) + RandomStringUtils.randomAlphanumeric(21);
+    public void setRandomNameForNewAttributeDefs(AtlasBusinessMetadataDef oldBusinessMetadataDef) {
+        List<String> oldNames = new ArrayList<>();
+        if (oldBusinessMetadataDef !=  null) {
+            for (AtlasAttributeDef attr : oldBusinessMetadataDef.getAttributeDefs()) {
+                oldNames.add(attr.getName());
+            }
+        }
+        for (AtlasAttributeDef attr : this.getAttributeDefs()){
+            if (!oldNames.contains(attr.getName())){
+                attr.setName(generateRandomName());
+            }
+        }
+    }
+
+    private void setRandomName() {
+        setName(generateRandomName());
     }
 
     @Override

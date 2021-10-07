@@ -219,8 +219,8 @@ public class AtlasTypeDefGraphStoreV2 extends AtlasTypeDefGraphStore {
         ret.setProperty(Constants.MODIFICATION_TIMESTAMP_PROPERTY_KEY, typeDef.getUpdateTime().getTime());
         ret.setProperty(Constants.VERSION_PROPERTY_KEY, typeDef.getVersion());
         ret.setProperty(Constants.TYPEOPTIONS_PROPERTY_KEY, AtlasType.toJson(typeDef.getOptions()));
-        if (typeDef.getCategory() == org.apache.atlas.model.TypeCategory.BUSINESS_METADATA) {
-            AtlasBusinessMetadataDef bmTypeDef = (AtlasBusinessMetadataDef)typeDef;
+        if (typeDef instanceof AtlasNamedTypeDef) {
+            AtlasNamedTypeDef bmTypeDef = (AtlasNamedTypeDef)typeDef;
             ret.setProperty(Constants.TYPE_DISPLAYNAME_PROPERTY_KEY, bmTypeDef.getDisplayName());
         }
         return ret;
@@ -243,8 +243,8 @@ public class AtlasTypeDefGraphStoreV2 extends AtlasTypeDefGraphStore {
         updateVertexProperty(vertex, Constants.TYPEDESCRIPTION_PROPERTY_KEY, typeDef.getDescription());
         updateVertexProperty(vertex, Constants.TYPEVERSION_PROPERTY_KEY, typeDef.getTypeVersion());
         updateVertexProperty(vertex, Constants.TYPEOPTIONS_PROPERTY_KEY, AtlasType.toJson(typeDef.getOptions()));
-        if (typeDef.getCategory() == org.apache.atlas.model.TypeCategory.BUSINESS_METADATA) {
-            AtlasBusinessMetadataDef bmTypeDef= (AtlasBusinessMetadataDef)typeDef;
+        if (typeDef instanceof AtlasNamedTypeDef) {
+            AtlasNamedTypeDef bmTypeDef= (AtlasNamedTypeDef)typeDef;
             updateVertexProperty(vertex, Constants.TYPE_DISPLAYNAME_PROPERTY_KEY, bmTypeDef.getDisplayName());
         }
         if (StringUtils.isNotEmpty(typeDef.getServiceType())) {
@@ -331,8 +331,8 @@ public class AtlasTypeDefGraphStoreV2 extends AtlasTypeDefGraphStore {
         typeDef.setGuid(guid);
         typeDef.setCreatedBy(createdBy);
         typeDef.setUpdatedBy(updatedBy);
-        if (typeDef.getCategory() == org.apache.atlas.model.TypeCategory.BUSINESS_METADATA) {
-            ((AtlasBusinessMetadataDef)typeDef).setDisplayName(displayName);
+        if (typeDef instanceof AtlasNamedTypeDef) {
+            ((AtlasNamedTypeDef)typeDef).setDisplayName(displayName);
         }
         if (createTime != null) {
             typeDef.setCreateTime(new Date(createTime));
