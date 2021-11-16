@@ -1019,7 +1019,8 @@ public class EntityREST {
                                                    @QueryParam("count") @DefaultValue("100") short count,
                                                    @QueryParam("offset") @DefaultValue("-1") int offset,
                                                    @QueryParam("sortBy") String sortBy,
-                                                   @QueryParam("sortOrder") String sortOrder) throws AtlasBaseException {
+                                                   @QueryParam("sortOrder") String sortOrder,
+                                                   @QueryParam("updatedAttribute") String updatedAttribute) throws AtlasBaseException {
         AtlasPerfTracer perf = null;
 
         try {
@@ -1045,7 +1046,7 @@ public class EntityREST {
             if (sortBy != null || offset > -1) {
                 ret = auditRepository.listEventsV2(guid, auditAction, sortBy, StringUtils.equalsIgnoreCase(sortOrder, "desc"), offset, count);
             } else if(auditAction != null) {
-                ret = auditRepository.listEventsV2(guid, auditAction, startKey, count);
+                ret = auditRepository.listEventsV2(guid, auditAction, startKey, count, updatedAttribute);
             } else {
                 List events = auditRepository.listEvents(guid, startKey, count);
 

@@ -77,8 +77,11 @@ public class CassandraBasedAuditRepository extends AbstractStorageBasedAuditRepo
           + "user text, "
           + "detail text, "
           + "entity text, "
+          + "updated_attributes text, "
           + "PRIMARY KEY (entityid, created)"
           + ") WITH CLUSTERING ORDER BY (created DESC);";
+
+  private static final String  AUDIT_TABLE_INDEX = "CREATE CUSTOM INDEX ON audit (updated_attributes) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = { 'mode': 'CONTAINS' };";
 
   private static final String ENTITYID = "entityid";
   private static final String CREATED = "created";
@@ -87,9 +90,11 @@ public class CassandraBasedAuditRepository extends AbstractStorageBasedAuditRepo
   private static final String DETAIL = "detail";
   private static final String ENTITY = "entity";
 
-  private static final String INSERT_STATEMENT_TEMPLATE = "INSERT INTO audit (entityid,created,action,user,detail,entity) VALUES (?,?,?,?,?,?)";
+  private static final String INSERT_STATEMENT_TEMPLATE = "INSERT INTO audit (entityid,created,action,user,detail,entity,updated_attributes) VALUES (?,?,?,?,?,?,?)";
   private static final String SELECT_STATEMENT_TEMPLATE = "select * from audit where entityid=? order by created desc limit 10;";
+  private static final String SELECT_STATEMENT_TEMPLATE_WITH_FILTERING = "select * from audit where entityid=? and updated_attributes like '%?%' order by created desc limit 10;";
   private static final String SELECT_DATE_STATEMENT_TEMPLATE = "select * from audit where entityid=? and created<=? order by created desc limit 10;";
+  private static final String SELECT_DATE_STATEMENT_TEMPLATE_WITH_FILTERING = "select * from audit where entityid=? and created<=? and updated_attributes like '%?%' order by created desc limit 10;";
 
 
   private String keyspace;
@@ -102,6 +107,8 @@ public class CassandraBasedAuditRepository extends AbstractStorageBasedAuditRepo
   private PreparedStatement insertStatement;
   private PreparedStatement selectStatement;
   private PreparedStatement selectDateStatement;
+  private PreparedStatement selectStatementWithFiltering;
+  private PreparedStatement selectDateStatementWithFiltering;
 
   @Override
   public void putEventsV1(List<EntityAuditEvent> events) throws AtlasException {
@@ -119,7 +126,7 @@ public class CassandraBasedAuditRepository extends AbstractStorageBasedAuditRepo
     BatchStatement batch = new BatchStatement();
     events.forEach(event -> batch.add(stmt.bind(event.getEntityId(), event.getTimestamp(),
         event.getAction().toString(), event.getUser(), event.getDetails(),
-        (persistEntityDefinition ? event.getEntityDefinitionString() : null))));
+        (persistEntityDefinition ? event.getEntityDefinitionString() : null), event.getUpdatedAttributes())));
     cassSession.execute(batch);
   }
 
@@ -129,6 +136,24 @@ public class CassandraBasedAuditRepository extends AbstractStorageBasedAuditRepo
       stmt = new BoundStatement(selectStatement).bind(entityId);
     } else {
       stmt = new BoundStatement(selectDateStatement).bind(entityId, Long.valueOf(startKey.split(FIELD_SEPARATOR)[1]));
+    }
+    return stmt;
+  }
+
+  private BoundStatement getSelectStatementV2(String entityId, String startKey, String updatedAttribute) {
+    BoundStatement stmt;
+    if (StringUtils.isNotEmpty(updatedAttribute)) {
+      if (StringUtils.isEmpty(startKey)) {
+        stmt = new BoundStatement(selectStatementWithFiltering).bind(entityId, updatedAttribute);
+      } else {
+        stmt = new BoundStatement(selectDateStatementWithFiltering).bind(entityId, updatedAttribute, Long.valueOf(startKey.split(FIELD_SEPARATOR)[1]));
+      }
+    } else {
+      if (StringUtils.isEmpty(startKey)) {
+        stmt = new BoundStatement(selectStatement).bind(entityId);
+      } else {
+        stmt = new BoundStatement(selectDateStatement).bind(entityId, Long.valueOf(startKey.split(FIELD_SEPARATOR)[1]));
+      }
     }
     return stmt;
   }
@@ -163,11 +188,16 @@ public class CassandraBasedAuditRepository extends AbstractStorageBasedAuditRepo
 
   @Override
   public List<EntityAuditEventV2> listEventsV2(String entityId, EntityAuditEventV2.EntityAuditActionV2 auditAction, String startKey, short maxResults) throws AtlasBaseException {
+    return listEventsV2(entityId, auditAction,startKey, maxResults, null);
+  }
+
+  @Override
+  public List<EntityAuditEventV2> listEventsV2(String entityId, EntityAuditEventV2.EntityAuditActionV2 auditAction, String startKey, short maxResults, String updatedAttribute) throws AtlasBaseException {
     if (LOG.isDebugEnabled()) {
       LOG.debug("Listing events for entity id {}, starting timestamp {}, #records {}", entityId, startKey, maxResults);
     }
 
-    ResultSet rs = cassSession.execute(getSelectStatement(entityId, startKey));
+    ResultSet rs = cassSession.execute(getSelectStatementV2(entityId, startKey, updatedAttribute));
     List<EntityAuditEventV2> entityResults = new ArrayList<>();
     for (Row row : rs) {
       String rowEntityId = row.getString(ENTITYID);
@@ -233,6 +263,7 @@ public class CassandraBasedAuditRepository extends AbstractStorageBasedAuditRepo
         cassSession = cluster.connect(keyspace);
         // create the audit table
         cassSession.execute(AUDIT_TABLE_SCHEMA);
+        cassSession.execute(AUDIT_TABLE_INDEX);
       } else {
         cassSession.close();
         cassSession = cluster.connect(keyspace);
@@ -241,6 +272,8 @@ public class CassandraBasedAuditRepository extends AbstractStorageBasedAuditRepo
       insertStatement = cassSession.prepare(INSERT_STATEMENT_TEMPLATE.replace("KEYSPACE", keyspace));
       selectStatement = cassSession.prepare(SELECT_STATEMENT_TEMPLATE.replace("KEYSPACE", keyspace));
       selectDateStatement = cassSession.prepare(SELECT_DATE_STATEMENT_TEMPLATE.replace("KEYSPACE", keyspace));
+      selectStatementWithFiltering = cassSession.prepare(SELECT_STATEMENT_TEMPLATE_WITH_FILTERING.replace("KEYSPACE", keyspace));
+      selectDateStatementWithFiltering = cassSession.prepare(SELECT_DATE_STATEMENT_TEMPLATE_WITH_FILTERING.replace("KEYSPACE", keyspace));
     } catch (Exception e) {
       throw new AtlasException(e);
     }

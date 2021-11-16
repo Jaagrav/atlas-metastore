@@ -132,7 +132,7 @@ public class EntityAuditListenerV2 implements EntityChangeListenerV2 {
                 action = ENTITY_UPDATE;
             }
 
-            createEvent(updatedEvents.next(), entity, action);
+            createEventV2(updatedEvents.next(), entity, action);
         }
 
         auditRepository.putEventsV2(updatedEvents.toList());
@@ -417,11 +417,37 @@ public class EntityAuditListenerV2 implements EntityChangeListenerV2 {
 
         return entityAuditEventV2;
     }
+    private EntityAuditEventV2 createEventV2(EntityAuditEventV2 entityAuditEventV2, AtlasEntity entity, EntityAuditActionV2 action, String details, String updated_attributes) {
+        entityAuditEventV2.setEntityId(entity.getGuid());
+        entityAuditEventV2.setTimestamp(System.currentTimeMillis());
+        entityAuditEventV2.setUser(RequestContext.get().getUser());
+        entityAuditEventV2.setAction(action);
+        entityAuditEventV2.setDetails(details);
+        entityAuditEventV2.setEntity(entity);
+        entityAuditEventV2.setUpdatedAttributes(updated_attributes);
+
+        return entityAuditEventV2;
+    }
 
     private EntityAuditEventV2 createEvent(EntityAuditEventV2 event, AtlasEntity entity, EntityAuditActionV2 action) {
         String detail = getAuditEventDetail(entity, action);
 
         return createEvent(event, entity, action, detail);
+    }
+
+    private EntityAuditEventV2 createEventV2(EntityAuditEventV2 event, AtlasEntity entity, EntityAuditActionV2 action) {
+        String detail = getAuditEventDetail(entity, action);
+        String updated_attributes = getAuditEventUpdatedAttributes(entity);
+
+        return createEventV2(event, entity, action, detail, updated_attributes);
+    }
+
+    private String getAuditEventUpdatedAttributes(AtlasEntity entity) {
+        if (entity.getAttributes() != null) {
+            String updated_attributes = entity.getAttributes().keySet().toString();
+            return updated_attributes;
+        }
+        return null;
     }
 
     private String getAuditEventDetail(AtlasEntity entity, EntityAuditActionV2 action) {

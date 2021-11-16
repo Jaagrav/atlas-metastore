@@ -27,6 +27,7 @@ import org.apache.atlas.model.audit.EntityAuditEventV2;
 import org.apache.atlas.service.Service;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,6 +98,11 @@ public abstract class AbstractStorageBasedAuditRepository implements Service, En
     }
 
     return ret;
+  }
+
+  @Override
+  public List<EntityAuditEventV2> listEventsV2(String entityId, EntityAuditEventV2.EntityAuditActionV2 auditAction, String startKey, short maxResults, String updatedAttribute) throws AtlasBaseException {
+    throw new NotImplementedException();
   }
 
   @Override

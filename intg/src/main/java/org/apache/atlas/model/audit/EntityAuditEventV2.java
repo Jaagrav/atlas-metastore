@@ -34,6 +34,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
@@ -119,6 +120,7 @@ public class EntityAuditEventV2 implements Serializable, Clearable {
     private String              eventKey;
     private AtlasEntity         entity;
     private EntityAuditType     type;
+    private String              updated_attributes;
 
     public EntityAuditEventV2() { }
 
@@ -202,6 +204,14 @@ public class EntityAuditEventV2 implements Serializable, Clearable {
         this.type = type;
     }
 
+    public String getUpdatedAttributes() {
+        return updated_attributes;
+    }
+
+    public void setUpdatedAttributes(String updated_attributes) {
+        this.updated_attributes = updated_attributes;
+    }
+
     @JsonIgnore
     public String getEntityDefinitionString() {
         if (entity != null) {
@@ -229,12 +239,13 @@ public class EntityAuditEventV2 implements Serializable, Clearable {
                Objects.equals(details, that.details) &&
                Objects.equals(eventKey, that.eventKey) &&
                Objects.equals(entity, that.entity) &&
+               Objects.equals(updated_attributes, that.updated_attributes) &&
                Objects.equals(type, that.type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(entityId, timestamp, user, action, details, eventKey, entity, type);
+        return Objects.hash(entityId, timestamp, user, action, details, eventKey, entity, type, updated_attributes);
     }
 
     @Override
@@ -249,6 +260,7 @@ public class EntityAuditEventV2 implements Serializable, Clearable {
         sb.append(", eventKey='").append(eventKey).append('\'');
         sb.append(", entity=").append(entity);
         sb.append(", type=").append(type);
+        sb.append(", updated_attributes=").append(updated_attributes);
         sb.append('}');
 
         return sb.toString();
@@ -275,6 +287,7 @@ public class EntityAuditEventV2 implements Serializable, Clearable {
         eventKey = null;
         entity = null;
         type = null;
+        updated_attributes = null;
     }
 
     private String getJsonPartFromDetails() {

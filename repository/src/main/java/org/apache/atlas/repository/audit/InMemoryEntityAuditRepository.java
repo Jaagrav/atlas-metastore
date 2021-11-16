@@ -24,6 +24,7 @@ import org.apache.atlas.annotation.ConditionalOnAtlasProperty;
 import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.model.audit.EntityAuditEventV2;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.NotImplementedException;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Singleton;
@@ -135,6 +136,11 @@ public class InMemoryEntityAuditRepository implements EntityAuditRepository {
         }
 
         return events;
+    }
+
+    @Override
+    public List<EntityAuditEventV2> listEventsV2(String entityId, EntityAuditEventV2.EntityAuditActionV2 auditAction, String startKey, short maxResults, String updatedAttribute) throws AtlasBaseException {
+        throw new NotImplementedException();
     }
 
     @Override
