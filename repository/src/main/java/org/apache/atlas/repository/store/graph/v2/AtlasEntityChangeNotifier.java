@@ -602,9 +602,9 @@ public class AtlasEntityChangeNotifier implements IAtlasEntityChangeNotifier {
                 if (operation == EntityOperation.DELETE || operation == EntityOperation.PURGE) {
                     entity = new AtlasEntity(entityHeader);
                 } else {
+                    entity = new AtlasEntity(entityHeader);
                     String entityGuid = entityHeader.getGuid();
-
-                    entity = fullTextMapperV2.getAndCacheEntity(entityGuid);
+                    fullTextMapperV2.getAndCacheEntity(entityGuid);
                 }
 
                 if (entity != null) {
