@@ -276,4 +276,9 @@ public class AtlasAuthorizationUtils {
 
         return ret;
     }
+
+    public static void logAudit(String log) {
+        LOG.info(log);
+    }
+
 }
