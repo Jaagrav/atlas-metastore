@@ -25,6 +25,7 @@ on:
       - beta
       - development
       - master
+      - metastore
 
 jobs:
   build:
