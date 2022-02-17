@@ -4612,38 +4612,6 @@
               "type": "text"
             }
           }
-        },
-        {
-          "name": "replicatedFrom",
-          "typeName": "array<AtlasServer>",
-          "isOptional": true,
-          "cardinality": "SET",
-          "valuesMinCount": 0,
-          "valuesMaxCount": 2147483647,
-          "isUnique": false,
-          "isIndexable": false,
-          "includeInNotification": false,
-          "skipScrubbing": false,
-          "searchWeight": -1,
-          "options": {
-            "isSoftReference": "true"
-          }
-        },
-        {
-          "name": "replicatedTo",
-          "typeName": "array<AtlasServer>",
-          "isOptional": true,
-          "cardinality": "SET",
-          "valuesMinCount": 0,
-          "valuesMaxCount": 2147483647,
-          "isUnique": false,
-          "isIndexable": false,
-          "includeInNotification": false,
-          "skipScrubbing": false,
-          "searchWeight": -1,
-          "options": {
-            "isSoftReference": "true"
-          }
         }
       ],
       "superTypes": [],
