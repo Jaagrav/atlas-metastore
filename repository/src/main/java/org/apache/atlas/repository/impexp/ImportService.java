@@ -113,7 +113,7 @@ public class ImportService {
             setEntityTransformerHandlers(source, transformers);
 
             startTimestamp = System.currentTimeMillis();
-            //processTypes(source.getTypesDef(), result);
+            processTypes(source.getTypesDef(), result);
             setStartPosition(request, source);
 
             processEntities(userName, source, result);
