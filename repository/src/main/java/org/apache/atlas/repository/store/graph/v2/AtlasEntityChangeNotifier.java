@@ -74,11 +74,10 @@ public class AtlasEntityChangeNotifier implements IAtlasEntityChangeNotifier {
 
     private final Set<EntityChangeListener>   entityChangeListeners;
     private final Set<EntityChangeListenerV2> entityChangeListenersV2;
-    private final AtlasInstanceConverter      instanceConverter;
     private final FullTextMapperV2            fullTextMapperV2;
+    private final AtlasInstanceConverter      instanceConverter;
     private final AtlasTypeRegistry           atlasTypeRegistry;
     private final boolean                     isV2EntityNotificationEnabled;
-
 
     @Inject
     public AtlasEntityChangeNotifier(Set<EntityChangeListener> entityChangeListeners,

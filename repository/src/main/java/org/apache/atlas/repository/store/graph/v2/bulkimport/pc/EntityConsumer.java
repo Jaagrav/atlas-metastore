@@ -31,6 +31,7 @@ import org.apache.atlas.repository.store.graph.v2.AtlasEntityStreamForImport;
 import org.apache.atlas.repository.store.graph.v2.BulkImporterImpl;
 import org.apache.atlas.repository.store.graph.v2.EntityGraphRetriever;
 import org.apache.atlas.repository.store.graph.v2.EntityStream;
+import org.apache.atlas.repository.store.graph.v2.bulkimport.GuidMutationResponsePair;
 import org.apache.atlas.type.AtlasTypeRegistry;
 import org.apache.atlas.utils.AtlasPerfMetrics;
 import org.apache.commons.collections.CollectionUtils;
@@ -59,7 +60,7 @@ public class EntityConsumer extends WorkItemConsumer<AtlasEntity.AtlasEntityWith
     private final EntityGraphRetriever entityRetrieverBulk;
 
     private List<AtlasEntity.AtlasEntityWithExtInfo> entityBuffer = new ArrayList<>();
-    private List<String> localResults = new ArrayList<>();
+    private List<GuidMutationResponsePair> localResults = new ArrayList<>();
 
     public EntityConsumer(AtlasTypeRegistry typeRegistry,
                           AtlasGraph atlasGraph, AtlasEntityStore entityStore,
@@ -119,7 +120,7 @@ public class EntityConsumer extends WorkItemConsumer<AtlasEntity.AtlasEntityWith
     private void importUsingBulkEntityStore(AtlasEntity.AtlasEntityWithExtInfo entityWithExtInfo) throws AtlasBaseException {
         EntityStream oneEntityStream = new AtlasEntityStreamForImport(entityWithExtInfo, null);
         EntityMutationResponse result = entityStoreBulk.createOrUpdateForImportNoCommit(oneEntityStream);
-        localResults.add(entityWithExtInfo.getEntity().getGuid());
+        localResults.add(new GuidMutationResponsePair(entityWithExtInfo.getEntity().getGuid(), result));
         entityBuffer.add(entityWithExtInfo);
     }
 
@@ -133,9 +134,9 @@ public class EntityConsumer extends WorkItemConsumer<AtlasEntity.AtlasEntityWith
             try {
                 LOG.info("Regular: EntityStore: {}: Starting...", this.counter.get());
                 AtlasEntityStreamForImport oneEntityStream = new AtlasEntityStreamForImport(entityWithExtInfo, null);
-                this.entityStore.createOrUpdateForImportNoCommit(oneEntityStream);
+                EntityMutationResponse entityMutationResponse = this.entityStore.createOrUpdateForImportNoCommit(oneEntityStream);
                 atlasGraph.commit();
-                localResults.add(entityWithExtInfo.getEntity().getGuid());
+                localResults.add(new GuidMutationResponsePair(entityWithExtInfo.getEntity().getGuid(), entityMutationResponse));
                 dispatchResults();
             } catch (Exception e) {
                 atlasGraph.rollback();
@@ -143,7 +144,7 @@ public class EntityConsumer extends WorkItemConsumer<AtlasEntity.AtlasEntityWith
             } finally {
                 LOG.info("Regular: EntityStore: {}: Commit: Done!", this.counter.get());
                 atlasGraph.commit();
-                addResult(entityWithExtInfo.getEntity().getGuid());
+                addResult(new GuidMutationResponsePair(entityWithExtInfo.getEntity().getGuid(), null));
                 clear();
                 LOG.info("Regular: EntityStore: {}: Done!", this.counter.get());
             }

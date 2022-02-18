@@ -18,6 +18,7 @@
 
 package org.apache.atlas.repository.store.graph.v2.bulkimport.pc;
 
+import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.model.impexp.AtlasImportResult;
 import org.apache.atlas.model.instance.AtlasEntity;
 import org.apache.atlas.pc.StatusReporter;
@@ -26,6 +27,8 @@ import org.apache.atlas.pc.WorkItemManager;
 import org.apache.atlas.repository.migration.DataMigrationStatusService;
 import org.apache.atlas.repository.store.graph.v2.BulkImporterImpl;
 import org.apache.atlas.repository.store.graph.v2.EntityImportStream;
+import org.apache.atlas.repository.store.graph.v2.IAtlasEntityChangeNotifier;
+import org.apache.atlas.repository.store.graph.v2.bulkimport.GuidMutationResponsePair;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,11 +44,16 @@ public class EntityCreationManager<AtlasEntityWithExtInfo> extends WorkItemManag
     private String currentTypeName;
     private float currentPercent;
     private EntityImportStream entityImportStream;
+    private final IAtlasEntityChangeNotifier entityChangeNotifier;
 
-    public EntityCreationManager(WorkItemBuilder builder, int batchSize, int numWorkers, AtlasImportResult importResult, DataMigrationStatusService dataMigrationStatusService) {
+    public EntityCreationManager(WorkItemBuilder builder, int batchSize, int numWorkers,
+                                 AtlasImportResult importResult,
+                                 IAtlasEntityChangeNotifier entityChangeNotifier,
+                                 DataMigrationStatusService dataMigrationStatusService) {
         super(builder, WORKER_PREFIX, batchSize, numWorkers, true);
         this.importResult = importResult;
         this.dataMigrationStatusService = dataMigrationStatusService;
+        this.entityChangeNotifier = entityChangeNotifier;
 
         this.statusReporter = new StatusReporter<>(STATUS_REPORT_TIMEOUT_DURATION);
     }
@@ -73,7 +81,7 @@ public class EntityCreationManager<AtlasEntityWithExtInfo> extends WorkItemManag
         return currentIndex;
     }
 
-    private void produce(long currentIndex, String typeName, AtlasEntity.AtlasEntityWithExtInfo entityWithExtInfo) {
+    private void produce(long currentIndex, String typeName, AtlasEntity.AtlasEntityWithExtInfo entityWithExtInfo) throws AtlasBaseException {
         String previousTypeName = getCurrentTypeName();
 
         if (StringUtils.isNotEmpty(typeName)
@@ -93,7 +101,10 @@ public class EntityCreationManager<AtlasEntityWithExtInfo> extends WorkItemManag
     public void extractResults() {
         Object result;
         while (((result = getResults().poll())) != null) {
-            statusReporter.processed((String) result);
+            GuidMutationResponsePair guidMutationResponsePair = (GuidMutationResponsePair) result;
+            if (guidMutationResponsePair.getMutationResponse() != null) {
+                statusReporter.processed(guidMutationResponsePair.getGuid());
+            }
         }
 
         logStatus();
