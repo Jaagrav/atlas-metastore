@@ -130,7 +130,10 @@ public class AtlasGraphUtilsV2 {
     }
 
     public static String getTypeName(AtlasElement element) {
-        return element.getProperty(ENTITY_TYPE_PROPERTY_KEY, String.class);
+        MetricRecorder metric = RequestContext.get().startMetricRecord("AtlasGraphUtils.getTypeName");
+        String ret =  element.getProperty(ENTITY_TYPE_PROPERTY_KEY, String.class);
+        RequestContext.get().endMetricRecord(metric);
+        return ret;
     }
 
     public static String getEdgeLabel(String fromNode, String toNode) {
@@ -285,7 +288,10 @@ public class AtlasGraphUtilsV2 {
     }
 
     public static <T extends AtlasElement, O> O getEncodedProperty(T element, String propertyName, Class<O> returnType) {
-        return getProperty(element, propertyName, returnType, true);
+        MetricRecorder metric = RequestContext.get().startMetricRecord("AtlasGraphUtils.getEncodedProperty");
+        Object ret = getProperty(element, propertyName, returnType, true);
+        RequestContext.get().endMetricRecord(metric);
+        return returnType.cast(ret);
     }
 
     public static <T extends AtlasElement, O> O getProperty(T element, String propertyName, Class<O> returnType, boolean isEncoded) {
