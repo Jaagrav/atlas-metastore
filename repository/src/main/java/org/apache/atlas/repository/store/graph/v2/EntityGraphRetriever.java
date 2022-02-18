@@ -61,6 +61,7 @@ import org.apache.atlas.type.AtlasTypeRegistry;
 import org.apache.atlas.type.AtlasTypeUtil;
 import org.apache.atlas.utils.AtlasEntityUtil;
 import org.apache.atlas.utils.AtlasJson;
+import org.apache.atlas.utils.AtlasPerfMetrics;
 import org.apache.atlas.v1.model.instance.Id;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -756,8 +757,10 @@ public class EntityGraphRetriever {
     private AtlasEntityHeader mapVertexToAtlasEntityHeader(AtlasVertex entityVertex, Set<String> attributes) throws AtlasBaseException {
         AtlasEntityHeader ret = new AtlasEntityHeader();
 
+        AtlasPerfMetrics.MetricRecorder getPropertyMetric = RequestContext.get().startMetricRecord("mapVertexToAtlasEntityHeader.getProperty");
         String  typeName     = entityVertex.getProperty(Constants.TYPE_NAME_PROPERTY_KEY, String.class);
         String  guid         = entityVertex.getProperty(Constants.GUID_PROPERTY_KEY, String.class);
+        RequestContext.get().endMetricRecord(getPropertyMetric);
         Boolean isIncomplete = isEntityIncomplete(entityVertex);
 
         ret.setTypeName(typeName);
