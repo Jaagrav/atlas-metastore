@@ -384,8 +384,11 @@ public class RequestContext {
     }
 
     public void cache(AtlasEntity entity) {
+
         if (entity != null && entity.getGuid() != null) {
+            MetricRecorder metric = RequestContext.get().startMetricRecord("RequestContext.cache");
             entityCache.put(entity.getGuid(), entity);
+            RequestContext.get().endMetricRecord(metric);
         }
     }
 

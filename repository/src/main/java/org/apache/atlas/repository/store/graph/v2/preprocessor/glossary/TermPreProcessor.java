@@ -58,6 +58,8 @@ public class TermPreProcessor implements PreProcessor {
 
     @Override
     public void processAttributes(AtlasStruct entityStruct, EntityMutationContext context, EntityMutations.EntityOperation operation) throws AtlasBaseException {
+        AtlasPerfMetrics.MetricRecorder metric = RequestContext.get().startMetricRecord("TermPreProcessor.processAttributes");
+
         if (LOG.isDebugEnabled()) {
             LOG.debug("TermPreProcessor.processAttributes: pre processing {}, {}",
                     entityStruct.getAttribute(QUALIFIED_NAME), operation);
@@ -76,6 +78,7 @@ public class TermPreProcessor implements PreProcessor {
                 processUpdateTerm(entity, vertex);
                 break;
         }
+        RequestContext.get().endMetricRecord(metric);
     }
 
     private void processCreateTerm(AtlasEntity entity, AtlasVertex vertex) throws AtlasBaseException {

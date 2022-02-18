@@ -18,6 +18,7 @@
 package org.apache.atlas.repository.store.graph.v2.preprocessor.sql;
 
 
+import org.apache.atlas.RequestContext;
 import org.apache.atlas.authorize.AtlasAuthorizationUtils;
 import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.model.instance.AtlasEntity;
@@ -28,6 +29,7 @@ import org.apache.atlas.repository.store.graph.v2.EntityGraphRetriever;
 import org.apache.atlas.repository.store.graph.v2.EntityMutationContext;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.PreProcessor;
 import org.apache.atlas.type.AtlasTypeRegistry;
+import org.apache.atlas.utils.AtlasPerfMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +53,8 @@ public class QueryCollectionPreProcessor implements PreProcessor {
     @Override
     public void processAttributes(AtlasStruct entityStruct, EntityMutationContext context,
                                   EntityMutations.EntityOperation operation) throws AtlasBaseException {
+        AtlasPerfMetrics.MetricRecorder metric = RequestContext.get().startMetricRecord("QueryCollectionPreProcessor.processAttributes");
+
         if (LOG.isDebugEnabled()) {
             LOG.debug("QueryCollectionPreProcessor.processAttributes: pre processing {}, {}", entityStruct.getAttribute(QUALIFIED_NAME), operation);
         }
@@ -66,6 +70,7 @@ public class QueryCollectionPreProcessor implements PreProcessor {
                 processUpdate(entity, vertex);
                 break;
         }
+        RequestContext.get().endMetricRecord(metric);
     }
 
     private void processCreate(AtlasStruct entity) {

@@ -65,6 +65,7 @@ public class CategoryPreProcessor implements PreProcessor {
     @Override
     public void processAttributes(AtlasStruct entityStruct, EntityMutationContext context,
                                   EntityMutations.EntityOperation operation) throws AtlasBaseException {
+        AtlasPerfMetrics.MetricRecorder metric = RequestContext.get().startMetricRecord("CategoryPreProcessor.processAttributes");
         //Handle name & qualifiedName
         if (LOG.isDebugEnabled()) {
             LOG.debug("CategoryPreProcessor.processAttributes: pre processing {}, {}",
@@ -84,6 +85,7 @@ public class CategoryPreProcessor implements PreProcessor {
                 processUpdateCategory(entity, vertex);
                 break;
         }
+        RequestContext.get().endMetricRecord(metric);
     }
 
     private void processCreateCategory(AtlasEntity entity, AtlasVertex vertex) throws AtlasBaseException {
