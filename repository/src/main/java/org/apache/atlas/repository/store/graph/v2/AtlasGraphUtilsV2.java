@@ -241,7 +241,9 @@ public class AtlasGraphUtilsV2 {
     }
 
     public static <T extends AtlasElement> void setEncodedProperty(T element, String propertyName, Object value) {
+        MetricRecorder metric = RequestContext.get().startMetricRecord("AtlasGraphUtils.setEncodedProperty");
         setProperty(element, propertyName, value, true);
+        RequestContext.get().endMetricRecord(metric);
     }
 
     public static <T extends AtlasElement> void setProperty(T element, String propertyName, Object value, boolean isEncoded) {

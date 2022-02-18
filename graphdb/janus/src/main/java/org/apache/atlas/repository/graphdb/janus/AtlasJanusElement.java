@@ -31,6 +31,7 @@ import org.apache.atlas.repository.graphdb.AtlasSchemaViolationException;
 import org.apache.atlas.repository.graphdb.AtlasVertex;
 import org.apache.atlas.repository.graphdb.janus.graphson.AtlasGraphSONMode;
 import org.apache.atlas.repository.graphdb.janus.graphson.AtlasGraphSONUtility;
+import org.apache.atlas.utils.AtlasPerfMetrics;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Property;
 import org.codehaus.jettison.json.JSONException;
