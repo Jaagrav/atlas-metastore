@@ -29,6 +29,7 @@ import org.apache.atlas.model.TypeCategory;
 import org.apache.atlas.model.instance.AtlasClassification;
 import org.apache.atlas.model.instance.AtlasEntity;
 import org.apache.atlas.model.instance.AtlasEntityHeader;
+import org.apache.atlas.model.instance.AtlasRelationshipHeader;
 import org.apache.atlas.model.instance.AtlasObjectId;
 import org.apache.atlas.model.instance.AtlasRelationship;
 import org.apache.atlas.model.tasks.AtlasTask;
@@ -511,6 +512,9 @@ public abstract class DeleteHandlerV1 {
         end2Entity = entityRetriever.toAtlasEntityHeaderWithClassifications(edge.getInVertex());
 
         AtlasAuthorizationUtils.verifyAccess(new AtlasRelationshipAccessRequest(typeRegistry, AtlasPrivilege.RELATIONSHIP_REMOVE, relationShipType, end1Entity, end2Entity ));
+
+        RequestContext.get().setEntityWithRelationship(end1Entity.getGuid(), new AtlasRelationshipHeader(relationShipType,null,new AtlasObjectId(end1Entity.getGuid() ,end1Entity.getTypeName())
+                , new AtlasObjectId(end2Entity.getGuid(), end2Entity.getTypeName()), null ));
 
         RequestContext.get().endMetricRecord(metric);
     }

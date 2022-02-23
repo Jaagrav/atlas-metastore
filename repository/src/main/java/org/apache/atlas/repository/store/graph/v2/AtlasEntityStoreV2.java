@@ -40,6 +40,7 @@ import org.apache.atlas.model.instance.AtlasEntity.AtlasEntitiesWithExtInfo;
 import org.apache.atlas.model.instance.AtlasEntity.AtlasEntityWithExtInfo;
 import org.apache.atlas.model.instance.AtlasEntity.Status;
 import org.apache.atlas.model.instance.AtlasEntityHeader;
+import org.apache.atlas.model.instance.AtlasRelationshipHeader;
 import org.apache.atlas.model.instance.AtlasEntityHeaders;
 import org.apache.atlas.model.instance.AtlasObjectId;
 import org.apache.atlas.model.instance.EntityMutationResponse;
@@ -1338,14 +1339,14 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
                             "create entity: type=", entity.getTypeName());
                 }
             }
-
+            RequestContext        reqContext           = RequestContext.get();
             // for existing entities, skip update if incoming entity doesn't have any change
             if (CollectionUtils.isNotEmpty(context.getUpdatedEntities())) {
                 MetricRecorder checkForUnchangedEntities = RequestContext.get().startMetricRecord("checkForUnchangedEntities");
 
                 List<AtlasEntity>     entitiesToSkipUpdate = new ArrayList<>();
                 AtlasEntityComparator entityComparator     = new AtlasEntityComparator(typeRegistry, entityRetriever, context.getGuidAssignments(), !replaceClassifications, !replaceBusinessAttributes);
-                RequestContext        reqContext           = RequestContext.get();
+
 
                 for (AtlasEntity entity : context.getUpdatedEntities()) {
                     if (entity.getStatus() == AtlasEntity.Status.DELETED) {// entity status could be updated during import
@@ -1383,23 +1384,27 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
                     context.getUpdatedEntities().removeAll(entitiesToSkipUpdate);
                 }
 
-                // Check if authorized to update entities
-                if (!reqContext.isImportInProgress()) {
-                    for (AtlasEntity entity : context.getUpdatedEntities()) {
+                reqContext.endMetricRecord(checkForUnchangedEntities);
+            }
+
+            EntityMutationResponse ret = entityGraphMapper.mapAttributesAndClassifications(context, isPartialUpdate, replaceClassifications, replaceBusinessAttributes);
+
+            // Check if authorized to update entities
+            if (!reqContext.isImportInProgress()) {
+                Map<String, AtlasRelationshipHeader> entityRelationShipMap = RequestContext.get().getEntityWithRelationship();
+
+                for (AtlasEntity entity : context.getUpdatedEntities()) {
+                    if(skipAuthorizationForGlossaryTermRelationship(entityRelationShipMap, entity.getGuid()))  {
                         AtlasEntityHeader entityHeaderWithClassifications = entityRetriever.toAtlasEntityHeaderWithClassifications(entity.getGuid());
                         AtlasEntityHeader entityHeader = new AtlasEntityHeader(entity);
-                        if(CollectionUtils.isNotEmpty(entityHeaderWithClassifications.getClassifications())) {
+                        if (CollectionUtils.isNotEmpty(entityHeaderWithClassifications.getClassifications())) {
                             entityHeader.setClassifications(entityHeaderWithClassifications.getClassifications());
                         }
                         AtlasAuthorizationUtils.verifyAccess(new AtlasEntityAccessRequest(typeRegistry, AtlasPrivilege.ENTITY_UPDATE, entityHeader),
                                 "update entity: type=", entity.getTypeName());
                     }
                 }
-
-                reqContext.endMetricRecord(checkForUnchangedEntities);
             }
-
-            EntityMutationResponse ret = entityGraphMapper.mapAttributesAndClassifications(context, isPartialUpdate, replaceClassifications, replaceBusinessAttributes);
 
             ret.setGuidAssignments(context.getGuidAssignments());
 
@@ -1416,6 +1421,26 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
 
             AtlasPerfTracer.log(perf);
         }
+    }
+
+    private boolean skipAuthorizationForGlossaryTermRelationship(Map<String,AtlasRelationshipHeader> entityRelationShipMap, String guid) {
+
+        AtlasRelationshipHeader relationshipHeader = entityRelationShipMap.get(guid);
+
+        String relationShipTypeName = null, end1TypeName = null, end2TypeName = null;
+        Set<String> end2SuperType = null;
+        if (relationshipHeader != null) {
+            relationShipTypeName = relationshipHeader.getTypeName();
+
+            end1TypeName = relationshipHeader.getEnd1().getTypeName();
+            end2TypeName = relationshipHeader.getEnd2().getTypeName();
+
+            AtlasEntityType entType = typeRegistry.getEntityTypeByName(end2TypeName);
+            end2SuperType = entType.getTypeAndAllSuperTypes();
+        }
+
+        return (!"AtlasGlossarySemanticAssignment".equals(relationShipTypeName) && "AtlasGlossaryTerm".equals(end1TypeName)
+                && (end2SuperType != null && end2SuperType.contains("Asset")));
     }
 
     private EntityMutationContext preCreateOrUpdate(EntityStream entityStream, EntityGraphMapper entityGraphMapper, boolean isPartialUpdate) throws AtlasBaseException {
