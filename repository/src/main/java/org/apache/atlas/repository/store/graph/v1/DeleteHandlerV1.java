@@ -1249,74 +1249,127 @@ public abstract class DeleteHandlerV1 {
     public void removeHasLineageOnDelete(Collection<AtlasVertex> vertices) {
         AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("removeHasLineageOnDelete");
 
-        for (AtlasVertex vertex : vertices) {
-            if (ACTIVE.equals(getStatus(vertex))) {
-                AtlasEntityType entityType = typeRegistry.getEntityTypeByName(getTypeName(vertex));
+        for (AtlasVertex vertexToBeDeleted : vertices) {
+            if (ACTIVE.equals(getStatus(vertexToBeDeleted))) {
+                AtlasEntityType entityType = typeRegistry.getEntityTypeByName(getTypeName(vertexToBeDeleted));
                 boolean isProcess = entityType.getTypeAndAllSuperTypes().contains(PROCESS_SUPER_TYPE);
                 boolean isCatalog = entityType.getTypeAndAllSuperTypes().contains(CATALOG_SUPER_TYPE);
 
                 if (isCatalog || isProcess) {
-                    if (vertex.getProperty(HAS_LINEAGE, Boolean.class) != null && vertex.getProperty(HAS_LINEAGE, Boolean.class)) {
-                        AtlasGraphUtilsV2.setEncodedProperty(vertex, HAS_LINEAGE, false);
-                    }
 
-                    Iterator<AtlasEdge> edgeIterator = vertex.getEdges(AtlasEdgeDirection.BOTH, PROCESS_EDGE_LABELS).iterator();
+                    Iterator<AtlasEdge> edgeIterator = vertexToBeDeleted.getEdges(AtlasEdgeDirection.BOTH, PROCESS_EDGE_LABELS).iterator();
 
-                    List<AtlasVertex> otherVertices = new ArrayList<>();
                     Set<AtlasEdge> edgesToBeDeleted = new HashSet<>();
 
                     while (edgeIterator.hasNext()) {
                         AtlasEdge edge = edgeIterator.next();
                         if (ACTIVE.equals(getStatus(edge))) {
-                            otherVertices.add(isProcess ? edge.getInVertex() : edge.getOutVertex());
                             edgesToBeDeleted.add(edge);
                         }
                     }
 
-                    resetHasLineageAttributeOnVertex(otherVertices, edgesToBeDeleted);
+                    removeHasLineageOnInputOutputDelete(edgesToBeDeleted, vertexToBeDeleted);
                 }
             }
         }
         RequestContext.get().endMetricRecord(metricRecorder);
     }
 
-    private void resetHasLineageAttributeOnVertex(List<AtlasVertex> vertices, Set<AtlasEdge> edgesToBeDeleted) {
-        Iterator<AtlasEdge> edgeIterator;
-        for (AtlasVertex otherVertex : vertices) {
-            edgeIterator = otherVertex.getEdges(AtlasEdgeDirection.BOTH, PROCESS_EDGE_LABELS).iterator();
 
-            boolean removeAttr = true;
-            while (edgeIterator.hasNext()) {
-                AtlasEdge edge = edgeIterator.next();
-                if (!edgesToBeDeleted.contains(edge) && ACTIVE.equals(getStatus(edge))) {
-                    removeAttr = false;
-                    break;
+    public void removeHasLineageOnInputOutputDelete(Collection<AtlasEdge> removedEdges, AtlasVertex deletedVertex) {
+        AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("removeHasLineageOnInputOutputDelete");
+
+        for (AtlasEdge atlasEdge : removedEdges) {
+
+            AtlasVertex processVertex = atlasEdge.getOutVertex();
+            AtlasVertex assetVertex = atlasEdge.getInVertex();
+
+            if (getStatus(assetVertex) == ACTIVE) {
+                Iterator<AtlasEdge> edgeIterator = assetVertex.getEdges(AtlasEdgeDirection.BOTH, PROCESS_EDGE_LABELS).iterator();
+                int processEdgeCount = 0;
+                Map edgeVertexMap = new HashMap();
+                while (edgeIterator.hasNext()) {
+                    AtlasEdge edge = edgeIterator.next();
+                    if (getStatus(edge) == ACTIVE && (!removedEdges.contains(edge))) {
+                        processEdgeCount++;
+                        AtlasVertex processVertex1 = edge.getOutVertex();
+                        edgeVertexMap.put(edge, processVertex1);
+                    }
+                }
+
+                if (processEdgeCount == 0) { //  if hasLineage of all those process are false or there are no process
+                    if (!assetVertex.equals(deletedVertex)) {
+                        AtlasGraphUtilsV2.setEncodedProperty(assetVertex, HAS_LINEAGE, false);
+                    }
+                } else {
+                    boolean assetPresent = checkIfDownstreamLineagePresent(edgeVertexMap, removedEdges);
+                    if (!assetPresent) {
+                        AtlasGraphUtilsV2.setEncodedProperty(assetVertex, HAS_LINEAGE, false);
+                    }
                 }
             }
 
-            if (removeAttr) {
-                AtlasGraphUtilsV2.setEncodedProperty(otherVertex, HAS_LINEAGE, false);
+            if (getStatus(processVertex) == ACTIVE) {
+                Iterator<AtlasEdge> edgeIterator1 = processVertex.getEdges(AtlasEdgeDirection.BOTH, PROCESS_EDGE_LABELS).iterator();
+
+                boolean isInputPresent = false;
+                boolean isOutputPresent = false;
+
+                Map edgeVertexMap = new HashMap();
+                while (edgeIterator1.hasNext()) {
+                    AtlasEdge edge = edgeIterator1.next();
+                    if (getStatus(edge) == ACTIVE) {
+                        if (!removedEdges.contains(edge)) {
+                            if (PROCESS_OUTPUTS.equals(edge.getLabel())) {
+                                isOutputPresent = true;
+                            }
+                            if (PROCESS_INPUTS.equals(edge.getLabel())) {
+                                isInputPresent = true;
+                            }
+                            edgeVertexMap.put(edge, edge.getInVertex());
+                        }
+                    }
+                }
+
+                if (!(isOutputPresent && isInputPresent)) {
+                    if (!processVertex.equals(deletedVertex)) {
+                        boolean assetPresent = checkIfDownstreamLineagePresent(edgeVertexMap, removedEdges);
+                        if (!assetPresent)
+                            AtlasGraphUtilsV2.setEncodedProperty(processVertex, HAS_LINEAGE, false);
+                    }
+                }
+
             }
-        }
-    }
-
-    public void resetHasLineageOnEdgeDelete(Collection<AtlasEdge> edgesToBeDeleted) throws AtlasBaseException {
-        AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("resetHasLineage");
-
-        for (AtlasEdge edgeToBeDeleted : edgesToBeDeleted) {
-            String edgeLabel = edgeToBeDeleted.getLabel();
-
-            if (!PROCESS_LABEL_LIST.contains(edgeLabel)) {
-                continue;
-            }
-
-            List<AtlasVertex> vertices = new ArrayList<AtlasVertex>();
-
-            vertices.add(edgeToBeDeleted.getInVertex());
-            vertices.add(edgeToBeDeleted.getOutVertex());
-
-            resetHasLineageAttributeOnVertex(vertices, Collections.singleton(edgeToBeDeleted));
         }
         RequestContext.get().endMetricRecord(metricRecorder);
+    }
+
+    private boolean checkIfDownstreamLineagePresent(Map edgeVertexMap,Collection<AtlasEdge> removedEdges) {
+
+        Iterator<Map.Entry<AtlasEdge, AtlasVertex>> iterator = edgeVertexMap.entrySet().iterator();
+        boolean otherEndEdgePresent = false;
+        while (iterator.hasNext()) {
+            Map.Entry<AtlasEdge, AtlasVertex> entry = iterator.next();
+            AtlasEdge edge  = entry.getKey();
+            AtlasVertex otherEndVertex = entry.getValue();
+
+            Iterator<AtlasEdge> edgeIterator = otherEndVertex.getEdges(AtlasEdgeDirection.BOTH,PROCESS_EDGE_LABELS).iterator();
+
+            boolean edgePresent = false;
+            while(edgeIterator.hasNext()) {
+                AtlasEdge otherEndVertexEdge = edgeIterator.next();
+                if(getStatus(otherEndVertexEdge) == ACTIVE && !(edge.equals(otherEndVertexEdge)
+                        || (removedEdges.contains(otherEndVertexEdge)))) {
+                    otherEndEdgePresent = true;
+                    edgePresent = true; break;
+                }
+            }
+
+            if(!edgePresent){
+                AtlasGraphUtilsV2.setEncodedProperty(otherEndVertex, HAS_LINEAGE, false);
+            }
+
+        }
+        return otherEndEdgePresent;
     }
 }

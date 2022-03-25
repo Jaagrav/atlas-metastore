@@ -45,6 +45,8 @@ import org.apache.atlas.model.instance.AtlasObjectId;
 import org.apache.atlas.model.instance.EntityMutationResponse;
 import org.apache.atlas.model.typedef.AtlasBaseTypeDef;
 import org.apache.atlas.repository.graph.GraphHelper;
+import org.apache.atlas.repository.graphdb.AtlasEdge;
+import org.apache.atlas.repository.graphdb.AtlasEdgeDirection;
 import org.apache.atlas.repository.graphdb.AtlasGraph;
 import org.apache.atlas.repository.graphdb.AtlasVertex;
 import org.apache.atlas.repository.patches.PatchContext;
@@ -82,14 +84,14 @@ import org.springframework.stereotype.Component;
 import javax.inject.Inject;
 import java.io.InputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.lang.Boolean.FALSE;
+import static org.apache.atlas.AtlasClient.PROCESS_SUPER_TYPE;
 import static org.apache.atlas.AtlasConfiguration.STORE_DIFFERENTIAL_AUDITS;
 import static org.apache.atlas.bulkimport.BulkImportResponse.ImportStatus.FAILED;
 import static org.apache.atlas.model.instance.EntityMutations.EntityOperation.*;
-import static org.apache.atlas.repository.Constants.IS_INCOMPLETE_PROPERTY_KEY;
-import static org.apache.atlas.repository.Constants.STATE_PROPERTY_KEY;
-import static org.apache.atlas.repository.Constants.ATLAS_GLOSSARY_CATEGORY_ENTITY_TYPE;
+import static org.apache.atlas.repository.Constants.*;
 import static org.apache.atlas.repository.graph.GraphHelper.getTypeName;
 import static org.apache.atlas.repository.graph.GraphHelper.isEntityIncomplete;
 import static org.apache.atlas.repository.store.graph.v2.EntityGraphMapper.validateLabels;
@@ -1616,7 +1618,7 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
 
         if (CollectionUtils.isNotEmpty(others)) {
 
-          //  deleteDelegate.getHandler().removeHasLineageOnDelete(others);
+            deleteDelegate.getHandler().removeHasLineageOnDelete(others);
             deleteDelegate.getHandler().deleteEntities(others);
         }
 
