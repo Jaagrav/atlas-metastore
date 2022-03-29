@@ -545,7 +545,14 @@ public abstract class DeleteHandlerV1 {
             boolean removePropagations = getRemovePropagations(classificationVertex);
 
             if (isTermEntityEdge || removePropagations) {
-                removeTagPropagation(classificationVertex, removePropagationsMap.get(classificationVertex));
+                if (taskManagement != null && DEFERRED_ACTION_ENABLED) {
+                    List<AtlasVertex> entityVertices = removePropagationsMap.get(classificationVertex);
+                    for (AtlasVertex entityVertex: entityVertices) {
+                        createAndQueueTask(CLASSIFICATION_PROPAGATION_DELETE, entityVertex, classificationVertex.getIdForDisplay(), null);
+                    }
+                } else {
+                    removeTagPropagation(classificationVertex, removePropagationsMap.get(classificationVertex));
+                }
             }
         }
     }
