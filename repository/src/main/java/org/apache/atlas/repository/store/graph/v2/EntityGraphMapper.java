@@ -3467,30 +3467,29 @@ public class EntityGraphMapper {
 
         for (AtlasEdge atlasEdge : inputOutputEdges) {
 
+            boolean isOutputEdge = PROCESS_OUTPUTS.equals(atlasEdge.getLabel());
+
             AtlasVertex processVertex = atlasEdge.getOutVertex();
             AtlasVertex assetVertex = atlasEdge.getInVertex();
 
-            // * If NO get all Edges of Asset and check if any process any hasLineage true.
+            if (getEntityHasLineage(processVertex)) {
+                AtlasGraphUtilsV2.setEncodedProperty(assetVertex, HAS_LINEAGE, true);
+                continue;
+            }
 
-            Iterator<AtlasEdge> edges = assetVertex.getEdges(AtlasEdgeDirection.BOTH, PROCESS_EDGE_LABELS).iterator();
+            String oppositeEdgeLabel = isOutputEdge ? PROCESS_INPUTS : PROCESS_OUTPUTS;
 
-            while (edges.hasNext()) {
-                AtlasEdge edge = edges.next();
-                AtlasVertex processVertex1 = edge.getOutVertex();
+            Iterator<AtlasEdge> oppositeEdges = processVertex.getEdges(AtlasEdgeDirection.BOTH, oppositeEdgeLabel).iterator();
 
-                Iterator<AtlasEdge> outputEdgeIterator = processVertex1.getEdges(AtlasEdgeDirection.BOTH, PROCESS_OUTPUTS).iterator();
-                boolean matched = false;
-                while (outputEdgeIterator.hasNext()) {
-                    AtlasEdge outputEdge = outputEdgeIterator.next();
-                    if (getStatus(outputEdge) == ACTIVE) {
-                        AtlasGraphUtilsV2.setEncodedProperty(assetVertex, HAS_LINEAGE, true);
-                        AtlasGraphUtilsV2.setEncodedProperty(processVertex, HAS_LINEAGE, true);
-                        matched = true;
-                        break;
-                    }
-                }
-                if (matched)
+            while (oppositeEdges.hasNext()) {
+                AtlasEdge oppositeEdge = oppositeEdges.next();
+                AtlasVertex oppositeEdgeAssetVertex = oppositeEdge.getInVertex();
+
+                if (getStatus(oppositeEdge) == ACTIVE && getStatus(oppositeEdgeAssetVertex) == ACTIVE) {
+                    AtlasGraphUtilsV2.setEncodedProperty(assetVertex, HAS_LINEAGE, true);
+                    AtlasGraphUtilsV2.setEncodedProperty(processVertex, HAS_LINEAGE, true);
                     break;
+                }
             }
         }
         RequestContext.get().endMetricRecord(metricRecorder);
