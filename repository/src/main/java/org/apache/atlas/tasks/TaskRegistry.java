@@ -31,6 +31,7 @@ import org.apache.atlas.repository.graphdb.DirectIndexQueryResult;
 import org.apache.atlas.type.AtlasType;
 import org.apache.atlas.utils.AtlasJson;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.tinkerpop.shaded.minlog.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -270,41 +271,39 @@ public class TaskRegistry {
         dsl.put("sort", Collections.singletonList(mapOf(Constants.TASK_CREATED_TIME, mapOf("order", "asc"))));
         dsl.put("size", size);
 
-        while (hasNext) {
-            int fetched = 0;
+        int fetched = 0;
 
-            dsl.put("from", from);
-            indexSearchParams.setDsl(dsl);
+        dsl.put("from", from);
+        indexSearchParams.setDsl(dsl);
 
-            AtlasIndexQuery indexQuery = graph.elasticsearchQuery(Constants.VERTEX_INDEX, indexSearchParams);
+        AtlasIndexQuery indexQuery = graph.elasticsearchQuery(Constants.VERTEX_INDEX, indexSearchParams);
 
-            try {
-                indexQueryResult = indexQuery.vertices(indexSearchParams);
-            } catch (AtlasBaseException e) {
-                LOG.error("Failed to fetch pending/in-progress task vertices to re-que");
-                e.printStackTrace();
-            }
+        try {
+            indexQueryResult = indexQuery.vertices(indexSearchParams);
+        } catch (AtlasBaseException e) {
+            LOG.error("Failed to fetch pending/in-progress task vertices to re-que");
+            e.printStackTrace();
+        }
 
-            if (indexQueryResult != null) {
-                Iterator<AtlasIndexQuery.Result> iterator = indexQueryResult.getIterator();
+        if (indexQueryResult != null) {
+            Iterator<AtlasIndexQuery.Result> iterator = indexQueryResult.getIterator();
 
-                while (iterator.hasNext()) {
-                    AtlasVertex vertex = iterator.next().getVertex();
-                    if (vertex != null) {
-                        ret.add(toAtlasTask(vertex));
-                    } else {
-                        LOG.error("Null vertex while re queuing tasks at index {}", fetched);
-                    }
-
-                    fetched++;
+            while (iterator.hasNext()) {
+                AtlasVertex vertex = iterator.next().getVertex();
+                if (vertex != null) {
+                    ret.add(toAtlasTask(vertex));
+                } else {
+                    LOG.error("Null vertex while re queuing tasks at index {}", fetched);
                 }
-            }
 
-            if (fetched != size) {
-                hasNext = false;
+                fetched++;
             }
+        }
 
-            from += size;
+        LOG.info("Fetched {} task vertices!", fetched);
+
+        if (fetched != size) {
+            hasNext = false;
         }
 
         return ret;
