@@ -270,6 +270,8 @@ public class TaskRegistry {
         dsl.put("sort", Collections.singletonList(mapOf(Constants.TASK_CREATED_TIME, mapOf("order", "asc"))));
         dsl.put("size", size);
 
+        int totalFetched = 0;
+
         while (hasNext) {
             int fetched = 0;
 
@@ -300,7 +302,9 @@ public class TaskRegistry {
                 }
             }
 
-            if (fetched != size) {
+            totalFetched = totalFetched + fetched;
+
+            if (fetched != size || totalFetched >= 10000) {
                 hasNext = false;
             }
 
