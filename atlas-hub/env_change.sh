@@ -17,6 +17,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+sed -ie "s~dsn=~dsn=${SENTRY_DSN}~g" /opt/apache-atlas/conf/sentry.properties
+sed -ie "s~tags=Instance:~tags=Instance:${INSTANCE_NAME}~g" /opt/apache-atlas/conf/sentry.properties
 
 sed -i -e "s~RANGER_SERVICE_URL~${RANGER_SERVICE_URL}~g" /opt/ranger-atlas-plugin/install.properties
 sed -i -e "s~ATLAS_REPOSITORY_NAME~${ATLAS_REPOSITORY_NAME}~g" /opt/ranger-atlas-plugin/install.properties
