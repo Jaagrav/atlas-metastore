@@ -60,7 +60,6 @@ import static org.apache.atlas.repository.Constants.*;
 import static org.apache.atlas.repository.store.graph.v2.preprocessor.PreProcessorUtils.*;
 import static org.apache.atlas.repository.store.graph.v2.tasks.MeaningsTaskFactory.UPDATE_ENTITY_MEANINGS_ON_TERM_UPDATE;
 import static org.apache.atlas.type.Constants.MEANINGS_TEXT_PROPERTY_KEY;
-import static org.apache.atlas.type.Constants.PENDING_TASKS_PROPERTY_KEY;
 
 @Component
 public class TermPreProcessor implements PreProcessor {
@@ -75,14 +74,14 @@ public class TermPreProcessor implements PreProcessor {
     private EntityDiscoveryService discovery;
 
     private AtlasEntityHeader anchor;
-    public TermPreProcessor( AtlasTypeRegistry typeRegistry, EntityGraphRetriever entityRetriever, AtlasGraph graph, TaskManagement taskManagement) throws AtlasBaseException{
+    public TermPreProcessor( AtlasTypeRegistry typeRegistry, EntityGraphRetriever entityRetriever, AtlasGraph graph, TaskManagement taskManagement) {
         this.entityRetriever = entityRetriever;
         this.typeRegistry = typeRegistry;
         this.taskManagement = taskManagement;
         try {
             this.discovery = new EntityDiscoveryService(typeRegistry, graph, null, null, null, null);
         } catch (AtlasException e) {
-            throw new AtlasBaseException(e.getMessage(), e.getCause());
+            e.printStackTrace();
         }
     }
 
@@ -216,7 +215,7 @@ public class TermPreProcessor implements PreProcessor {
         Map<String, Object> taskParams = MeaningsTask.toParameters(updatedTermName, termQName, termGuid);
         AtlasTask task = taskManagement.createTask(taskType, currentUser, taskParams);
 
-        AtlasGraphUtilsV2.addEncodedProperty(termVertex, PENDING_TASKS_PROPERTY_KEY, task.getGuid());
+        AtlasGraphUtilsV2.addItemToListProperty(termVertex, EDGE_PENDING_TASKS_PROPERTY_KEY, task.getGuid());
 
         RequestContext.get().queueTask(task);
     }

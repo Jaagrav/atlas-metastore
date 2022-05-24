@@ -1,7 +1,6 @@
 package org.apache.atlas.repository.store.graph.v2.tasks;
 import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.model.tasks.AtlasTask;
-import org.apache.atlas.repository.graphdb.AtlasGraph;
 import org.apache.atlas.repository.store.graph.v2.AtlasEntityStoreV2;
 import org.apache.atlas.repository.store.graph.v2.EntityGraphMapper;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.glossary.TermPreProcessor;
@@ -10,9 +9,9 @@ import java.util.Map;
 
 public class MeaningsTasks {
     public static class Update extends MeaningsTask {
-        public Update(AtlasTask task,  EntityGraphMapper entityGraphMapper, AtlasGraph graph,
+        public Update(AtlasTask task,  EntityGraphMapper entityGraphMapper,
                       TermPreProcessor preprocessor) {
-            super(task,entityGraphMapper, graph, preprocessor,null);
+            super(task,entityGraphMapper,preprocessor,null);
         }
 
         @Override
@@ -27,9 +26,9 @@ public class MeaningsTasks {
     }
 
     public static class Delete extends MeaningsTask {
-        public Delete(AtlasTask task, EntityGraphMapper entityGraphMapper,AtlasGraph graph,
+        public Delete(AtlasTask task, EntityGraphMapper entityGraphMapper,
                     AtlasEntityStoreV2 entityStoreV2) {
-            super(task,entityGraphMapper, graph, null,entityStoreV2);
+            super(task,entityGraphMapper,null,entityStoreV2);
         }
 
         @Override
@@ -39,6 +38,7 @@ public class MeaningsTasks {
 
 
             entityStoreV2.updateMeaningsNamesInEntitiesOnTermDelete(termQName, termGuid);
+
 
         }
     }
