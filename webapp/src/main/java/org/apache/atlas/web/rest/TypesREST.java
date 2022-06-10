@@ -36,6 +36,7 @@ import org.apache.atlas.utils.AtlasPerfTracer;
 import org.apache.atlas.web.util.Servlets;
 import org.apache.http.annotation.Experimental;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -65,6 +66,7 @@ import java.util.Set;
 @Produces({Servlets.JSON_MEDIA_TYPE, MediaType.APPLICATION_JSON})
 public class TypesREST {
     private static final Logger PERF_LOG = AtlasPerfTracer.getPerfLogger("rest.TypesREST");
+    private static final Logger LOG = LoggerFactory.getLogger(TypesREST.class);
 
     private final AtlasTypeDefStore typeDefStore;
 
@@ -371,6 +373,22 @@ public class TypesREST {
         AtlasBusinessMetadataDef ret = typeDefStore.getBusinessMetadataDefByName(name);
 
         return ret;
+    }
+
+    /**
+     * API to refresh type-def cache.
+     * @throws AtlasBaseException
+     * @HTTP 204 if type def cache is refreshed successfully
+     * @HTTP 500 if there is an error refreshing type def cache
+     */
+    @POST
+    @Path("/refresh")
+    @Timed
+    public void refreshCache() throws AtlasBaseException {
+        LOG.info("Initiating type-def cache refresh");
+        typeDefStore.init();
+        typeDefStore.notifyLoadCompletion();
+        LOG.info("Completed type-def cache refresh");
     }
 
     /* Bulk API operation */
