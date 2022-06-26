@@ -1397,6 +1397,8 @@ public class EntityGraphMapper {
             ret = ctx.getCurrentEdge();
         } else if (ctx.getValue() != null) {
             String edgeLabel = AtlasGraphUtilsV2.getEdgeLabel(ctx.getVertexProperty());
+           // String edgeLabel = ctx.getAttribute().getRelationshipEdgeLabel();
+
 
             AtlasStruct structVal = null;
             if (ctx.getValue() instanceof AtlasStruct) {
@@ -1822,7 +1824,7 @@ public class EntityGraphMapper {
         boolean ret = false;
 
         AtlasEntityType entityType = typeRegistry.getEntityTypeByName(AtlasGraphUtilsV2.getTypeName(ctx.getReferringVertex()));
-        if (entityType.hasRelationshipAttribute(attribute.getName())) {
+        if (entityType !=null && entityType.hasRelationshipAttribute(attribute.getName())) {
             AtlasRelationshipDef relationshipDef = typeRegistry.getRelationshipDefByName(ctx.getAttribute().getRelationshipName());
             ret = !(relationshipDef.getEndDef1().getCardinality() == SET && relationshipDef.getEndDef2().getCardinality() == SET);
         }
