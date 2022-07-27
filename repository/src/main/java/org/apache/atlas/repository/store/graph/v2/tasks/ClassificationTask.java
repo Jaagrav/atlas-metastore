@@ -103,10 +103,10 @@ public abstract class ClassificationTask extends AbstractTask {
 
             throw e;
         } finally {
+            RequestContext.get().endMetricRecord(metricRecorder);
             graph.commit();
         }
 
-        RequestContext.get().endMetricRecord(metricRecorder);
         return getStatus();
     }
 
