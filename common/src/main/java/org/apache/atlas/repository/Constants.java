@@ -183,7 +183,7 @@ public final class Constants {
     /**
      * search backing index name for vertex keys.
      */
-    public static final String VERTEX_INDEX = "vertex_index";
+    public static final String VERTEX_INDEX = "vertex_index_v1";
 
     /**
      * search backing index name for edge labels.
