@@ -2761,7 +2761,7 @@ public class EntityGraphMapper {
             do {
                 int toIndex;
                 if (offset + CHUNK_SIZE > impactedVerticesSize) {
-                    toIndex = (int) impactedVerticesSize-1;
+                    toIndex = (int) impactedVerticesSize;
                 }
                 else {
                     toIndex = offset + CHUNK_SIZE;
