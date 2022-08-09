@@ -455,7 +455,6 @@ public abstract class DeleteHandlerV1 {
             AtlasVertex             associatedEntityVertex = getAssociatedEntityVertex(classificationVertex);
 
             for (AtlasVertex propagatedEntityVertex : propagatedEntityVertices) {
-                AtlasPerfMetrics.MetricRecorder countMetricRecorder = RequestContext.get().startMetricRecord("countPropagations");
                 if (getClassificationEdge(propagatedEntityVertex, classificationVertex) != null) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(" --> Classification edge already exists from [{}] --> [{}][{}] using edge label: [{}]",
@@ -472,6 +471,7 @@ public abstract class DeleteHandlerV1 {
 
                     continue;
                 }
+                AtlasPerfMetrics.MetricRecorder countMetricRecorder = RequestContext.get().startMetricRecord("countPropagations");
 
                 String          entityTypeName = getTypeName(propagatedEntityVertex);
                 AtlasEntityType entityType     = typeRegistry.getEntityTypeByName(entityTypeName);
