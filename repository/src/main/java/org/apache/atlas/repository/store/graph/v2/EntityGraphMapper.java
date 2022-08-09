@@ -2766,7 +2766,7 @@ public class EntityGraphMapper {
                 else {
                     toIndex = offset + CHUNK_SIZE;
                 }
-                List<String > chunkedGuids = processChunkedPropagation(impactedVertices.subList(offset, toIndex), classificationVertex);
+                List<String> chunkedGuids = processChunkedPropagation(impactedVertices.subList(offset, toIndex), classificationVertex);
 
                 if((chunkedGuids != null) && (! chunkedGuids.isEmpty())){
                     propagatedEntitiesGuid.addAll(chunkedGuids);
@@ -2794,7 +2794,6 @@ public class EntityGraphMapper {
             AtlasClassification classification       = entityRetriever.toAtlasClassification(classificationVertex);
             List<AtlasVertex>   entitiesPropagatedTo = deleteDelegate.getHandler().addTagPropagation(classificationVertex, chunkedVerticesToPropagate);
             if (CollectionUtils.isEmpty(entitiesPropagatedTo)) {
-                chunkedVerticesToPropagate.clear();
                 return null;
             }
 
