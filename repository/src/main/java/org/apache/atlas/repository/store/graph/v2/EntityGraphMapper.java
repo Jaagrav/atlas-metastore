@@ -2790,6 +2790,8 @@ public class EntityGraphMapper {
                 return null;
             }
 
+            graph.commit();
+
             List<AtlasEntity> propagatedEntitiesChunked = updateClassificationText(classification, entitiesPropagatedTo);
 
             List<String> chunkedPropagatedEntitiesGuid = propagatedEntitiesChunked.stream().map(x -> x.getGuid()).collect(Collectors.toList());
@@ -2799,8 +2801,6 @@ public class EntityGraphMapper {
         } catch (AtlasBaseException ex) {
             LOG.error(String.format("Could not propagate chunked vertices starting with id %s", chunkedVerticesToPropagate.get(0).getId()));
             throw new AtlasBaseException(ex);
-        } finally {
-            graph.commit();
         }
     }
 
