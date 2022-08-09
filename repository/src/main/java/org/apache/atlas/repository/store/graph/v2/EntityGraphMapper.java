@@ -186,6 +186,9 @@ public class EntityGraphMapper {
     private              boolean DEFERRED_ACTION_ENABLED                             = AtlasConfiguration.TASKS_USE_ENABLED.getBoolean();
     private              boolean DIFFERENTIAL_AUDITS                                 = STORE_DIFFERENTIAL_AUDITS.getBoolean();
 
+    private static final int     MAX_NUMBER_OF_RETRIES = AtlasConfiguration.MAX_NUMBER_OF_RETRIES.getInt();
+    private static final int     CHUNK_SIZE            = AtlasConfiguration.TASKS_GRAPH_COMMIT_CHUNK_SIZE.getInt();
+
     private final GraphHelper               graphHelper;
     private final AtlasGraph                graph;
     private final DeleteHandlerDelegate     deleteDelegate;
@@ -2748,25 +2751,56 @@ public class EntityGraphMapper {
                 return null;
             }
 
-            List<String> impactedVerticesGuidsToLock = impactedVertices.stream().map(x -> GraphHelper.getGuid(x)).collect(Collectors.toList());
-            GraphTransactionInterceptor.lockObjectAndReleasePostCommit(impactedVerticesGuidsToLock);
+            List<String> propagatedEntitiesGuid = new ArrayList<>();
+            long impactedVerticesSize = impactedVertices.size();
+            int offset = 0;
 
-            AtlasClassification classification       = entityRetriever.toAtlasClassification(classificationVertex);
-            List<AtlasVertex>   entitiesPropagatedTo = deleteDelegate.getHandler().addTagPropagation(classificationVertex, impactedVertices);
+            LOG.info(String.format("Total number of vertices to propagate: %d", impactedVerticesSize));
+            AtlasPerfMetrics.MetricRecorder chunkedPropMetricRecorder = RequestContext.get().startMetricRecord("chunkedPropagationAndNotification");
 
-            if (CollectionUtils.isEmpty(entitiesPropagatedTo)) {
-                return null;
+            do {
+                List<String > chunkedGuids = processChunkedPropagation(impactedVertices.subList(offset, offset+CHUNK_SIZE), classificationVertex);
+                if((chunkedGuids != null) && (! chunkedGuids.isEmpty())){
+                    propagatedEntitiesGuid.addAll(chunkedGuids);
+                }
+                offset += CHUNK_SIZE;
             }
+            while (offset < impactedVerticesSize);
 
-            List<AtlasEntity> propagatedEntities = updateClassificationText(classification, entitiesPropagatedTo);
+            RequestContext.get().endMetricRecord(chunkedPropMetricRecorder);
 
-            entityChangeNotifier.onClassificationsAddedToEntities(propagatedEntities, Collections.singletonList(classification));
-
-            return propagatedEntities.stream().map(x -> x.getGuid()).collect(Collectors.toList());
+            return propagatedEntitiesGuid;
         } catch (Exception e) {
             LOG.error("propagateClassification(entityGuid={}, classificationVertexId={}): error while propagating classification", entityGuid, classificationVertexId, e);
 
             throw new AtlasBaseException(e);
+        }
+    }
+
+    public List<String> processChunkedPropagation(List<AtlasVertex> chunkedVerticesToPropagate, AtlasVertex classificationVertex) throws AtlasBaseException{
+        try {
+            AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("lockObjectsAfterTraverse");
+            List<String> impactedVerticesGuidsToLock = chunkedVerticesToPropagate.stream().map(x -> GraphHelper.getGuid(x)).collect(Collectors.toList());
+            RequestContext.get().endMetricRecord(metricRecorder);
+            GraphTransactionInterceptor.lockObjectAndReleasePostCommit(impactedVerticesGuidsToLock);
+            AtlasClassification classification       = entityRetriever.toAtlasClassification(classificationVertex);
+            List<AtlasVertex>   entitiesPropagatedTo = deleteDelegate.getHandler().addTagPropagation(classificationVertex, chunkedVerticesToPropagate);
+            if (CollectionUtils.isEmpty(entitiesPropagatedTo)) {
+                chunkedVerticesToPropagate.clear();
+                return null;
+            }
+
+            List<AtlasEntity> propagatedEntitiesChunked = updateClassificationText(classification, entitiesPropagatedTo);
+
+            List<String> chunkedPropagatedEntitiesGuid = propagatedEntitiesChunked.stream().map(x -> x.getGuid()).collect(Collectors.toList());
+            entityChangeNotifier.onClassificationsAddedToEntities(propagatedEntitiesChunked, Collections.singletonList(classification));
+
+            return chunkedPropagatedEntitiesGuid;
+        } catch (AtlasBaseException ex) {
+            LOG.error(String.format("Could not propagate chunked vertices starting with id %s", chunkedVerticesToPropagate.get(0).getId()));
+            throw new AtlasBaseException(ex);
+        } finally {
+            graph.commit();
         }
     }
 
@@ -3555,10 +3589,23 @@ public class EntityGraphMapper {
 
     private List<AtlasEntity> updateClassificationText(AtlasClassification classification, Collection<AtlasVertex> propagatedVertices) throws AtlasBaseException {
         List<AtlasEntity> propagatedEntities = new ArrayList<>();
+        AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("updateClassificationText");
 
         if(CollectionUtils.isNotEmpty(propagatedVertices)) {
             for(AtlasVertex vertex : propagatedVertices) {
-                AtlasEntity entity = instanceConverter.getAndCacheEntity(graphHelper.getGuid(vertex), ENTITY_CHANGE_NOTIFY_IGNORE_RELATIONSHIP_ATTRIBUTES);
+                AtlasEntity entity = null;
+                for (int i = 1; i <= MAX_NUMBER_OF_RETRIES; i++) {
+                    try {
+                        entity = instanceConverter.getAndCacheEntity(graphHelper.getGuid(vertex), ENTITY_CHANGE_NOTIFY_IGNORE_RELATIONSHIP_ATTRIBUTES);
+                        break; //do not retry on success
+                    } catch (AtlasBaseException ex) {
+                        if (i == MAX_NUMBER_OF_RETRIES) {
+                            LOG.error(String.format("Maximum retries reached for fetching vertex with id %s from graph. Retried %s times. Skipping...", vertex.getId(), i));
+                            continue;
+                        }
+                        LOG.warn(String.format("Vertex with id %s could not be fetched from graph. Retrying for %s time", vertex.getId(), i));
+                    }
+                }
 
                 if (isActive(entity)) {
                     String classificationTextForEntity = fullTextMapperV2.getClassificationTextForEntity(entity);
@@ -3572,6 +3619,7 @@ public class EntityGraphMapper {
             }
         }
 
+        RequestContext.get().endMetricRecord(metricRecorder);
         return propagatedEntities;
     }
 
