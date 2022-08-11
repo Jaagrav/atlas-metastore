@@ -114,11 +114,6 @@ public class AtlasJanusIndexQuery implements AtlasIndexQuery<AtlasJanusVertex, A
         return query.vertexTotals();
     }
 
-    @Override
-    public String directElasticsearchQuery(SearchParams searchParams) {
-        return null;
-    }
-
     /**
      * Janus implementation of AtlasIndexQuery.Result.
      */

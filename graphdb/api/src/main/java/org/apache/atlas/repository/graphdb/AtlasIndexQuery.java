@@ -70,13 +70,6 @@ public interface AtlasIndexQuery<V, E> {
     Long vertexTotals();
 
     /**
-     * Directly queries Elasticsearch.
-     * @param searchParams
-     * @return result as String
-     */
-    String directElasticsearchQuery(SearchParams searchParams);
-
-    /**
      * Query result from an index query.
      *
      * @param <V>

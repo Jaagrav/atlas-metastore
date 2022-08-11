@@ -99,8 +99,8 @@ public class EntityNotificationListenerV2 implements EntityChangeListenerV2 {
     }
 
     @Override
-    public void onClassificationsAdded(List<AtlasEntity> entities, List<AtlasClassification> classifications) throws AtlasBaseException {
-        notifyClassificationEvents(entities, CLASSIFICATION_ADD, classifications, true);
+    public void onClassificationsAdded(List<AtlasEntity> entities, List<AtlasClassification> classifications, boolean forceInline) throws AtlasBaseException {
+        notifyClassificationEvents(entities, CLASSIFICATION_ADD, classifications, forceInline);
     }
 
     @Override
@@ -178,19 +178,7 @@ public class EntityNotificationListenerV2 implements EntityChangeListenerV2 {
     }
 
     private void notifyClassificationEvents(List<AtlasEntity> entities, OperationType operationType, Object mutatedObj) throws AtlasBaseException {
-        MetricRecorder metric = RequestContext.get().startMetricRecord("classificationNotification");
-        List<EntityNotificationV2> messages = new ArrayList<>();
-
-        for (AtlasEntity entity : entities) {
-            if (isInternalType(entity.getTypeName())) {
-                continue;
-            }
-
-            messages.add(new EntityNotificationV2(toNotificationHeader(entity), mutatedObj, operationType, RequestContext.get().getRequestTime()));
-        }
-
-        sendNotifications(operationType, messages);
-        RequestContext.get().endMetricRecord(metric);
+        notifyClassificationEvents(entities, operationType, mutatedObj, false);
     }
 
     private void notifyClassificationEvents(List<AtlasEntity> entities, OperationType operationType, Object mutatedObj, boolean forceInline) throws AtlasBaseException {
@@ -205,12 +193,8 @@ public class EntityNotificationListenerV2 implements EntityChangeListenerV2 {
             messages.add(new EntityNotificationV2(toNotificationHeader(entity), mutatedObj, operationType, RequestContext.get().getRequestTime()));
         }
 
-        if (forceInline) {
-            sendNotifications(operationType, messages, true);
-        }
-        else {
-            sendNotifications(operationType, messages);
-        }
+        sendNotifications(operationType, messages, forceInline);
+
         RequestContext.get().endMetricRecord(metric);
     }
 
@@ -240,13 +224,7 @@ public class EntityNotificationListenerV2 implements EntityChangeListenerV2 {
     }
 
     private void sendNotifications(OperationType operationType, List<EntityNotificationV2> messages) throws AtlasBaseException {
-        if (!messages.isEmpty()) {
-            try {
-                notificationSender.send(messages);
-            } catch (NotificationException e) {
-                throw new AtlasBaseException(AtlasErrorCode.ENTITY_NOTIFICATION_FAILED, e, operationType.name());
-            }
-        }
+        sendNotifications(operationType, messages, false);
     }
 
     private void sendNotifications(OperationType operationType, List<EntityNotificationV2> messages, boolean forceInline) throws AtlasBaseException {

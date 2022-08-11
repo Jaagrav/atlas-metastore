@@ -144,19 +144,6 @@ public class AtlasElasticsearchQuery implements AtlasIndexQuery<AtlasJanusVertex
         return EntityUtils.toString(response.getEntity());
     }
 
-    private String performDirectIndexQueryWithSource(String query) throws IOException {
-        HttpEntity entity = new NStringEntity(query, ContentType.APPLICATION_JSON);
-
-        String endPoint = index + "/_search?_source=true";
-
-        Request request = new Request("GET", endPoint);
-        request.setEntity(entity);
-
-        Response response = lowLevelRestClient.performRequest(request);
-
-        return EntityUtils.toString(response.getEntity());
-    }
-
     private DirectIndexQueryResult getResultFromResponse(String responseString) {
         DirectIndexQueryResult result = new DirectIndexQueryResult();
 
@@ -209,15 +196,6 @@ public class AtlasElasticsearchQuery implements AtlasIndexQuery<AtlasJanusVertex
             return searchResponse.getHits().getTotalHits().value;
         }
         return vertexTotals;
-    }
-
-    @Override
-    public String directElasticsearchQuery(SearchParams searchParams) {
-        try {
-            return performDirectIndexQueryWithSource(searchParams.getQuery());
-        } catch (IOException e) {
-            throw new RuntimeException("Direct index search failed. Error: " + e);
-        }
     }
 
     public final class ResultImpl implements AtlasIndexQuery.Result<AtlasJanusVertex, AtlasJanusEdge> {

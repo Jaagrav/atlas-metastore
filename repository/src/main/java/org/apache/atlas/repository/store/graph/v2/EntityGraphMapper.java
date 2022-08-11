@@ -2693,7 +2693,7 @@ public class EntityGraphMapper {
                 Set<AtlasVertex>  vertices           = addedClassifications.get(classification);
                 List<AtlasEntity> propagatedEntities = updateClassificationText(classification, vertices);
 
-                entityChangeNotifier.onClassificationsAddedToEntities(propagatedEntities, Collections.singletonList(classification));
+                entityChangeNotifier.onClassificationsAddedToEntities(propagatedEntities, Collections.singletonList(classification), false);
             }
 
             RequestContext.get().endMetricRecord(metric);
@@ -2758,14 +2758,11 @@ public class EntityGraphMapper {
             LOG.info(String.format("Total number of vertices to propagate: %d", impactedVerticesSize));
             AtlasPerfMetrics.MetricRecorder chunkedPropMetricRecorder = RequestContext.get().startMetricRecord("chunkedPropagationAndNotification");
 
+            int toIndex;
+
             do {
-                int toIndex;
-                if (offset + CHUNK_SIZE > impactedVerticesSize) {
-                    toIndex = (int) impactedVerticesSize;
-                }
-                else {
-                    toIndex = offset + CHUNK_SIZE;
-                }
+                toIndex = ((offset + CHUNK_SIZE > impactedVerticesSize) ? (int) impactedVerticesSize : (offset + CHUNK_SIZE));
+
                 List<String> chunkedGuids = processChunkedPropagation(impactedVertices.subList(offset, toIndex), classificationVertex);
 
                 if((chunkedGuids != null) && (! chunkedGuids.isEmpty())){
@@ -2802,7 +2799,7 @@ public class EntityGraphMapper {
             graph.commit();
 
             List<String> chunkedPropagatedEntitiesGuid = propagatedEntitiesChunked.stream().map(x -> x.getGuid()).collect(Collectors.toList());
-            entityChangeNotifier.onClassificationsAddedToEntities(propagatedEntitiesChunked, Collections.singletonList(classification));
+            entityChangeNotifier.onClassificationsAddedToEntities(propagatedEntitiesChunked, Collections.singletonList(classification), true);
 
             return chunkedPropagatedEntitiesGuid;
         } catch (AtlasBaseException ex) {

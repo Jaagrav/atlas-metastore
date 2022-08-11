@@ -210,6 +210,7 @@ public class TaskRegistry {
         graph.commit();
     }
 
+    @GraphTransaction
     public void complete(AtlasVertex taskVertex, AtlasTask task) {
         if (task.getEndTime() != null) {
             setEncodedProperty(taskVertex, Constants.TASK_END_TIME, task.getEndTime());
@@ -224,8 +225,6 @@ public class TaskRegistry {
         }
 
         updateStatus(taskVertex, task);
-
-        graph.commit();
 
         LOG.info(String.format("TaskRegistry complete %s", task.toString()));
     }
@@ -306,10 +305,6 @@ public class TaskRegistry {
             ret = getTasksForReQueueIndexSearch();
         }
 
-        if (ret.size() > 0) {
-            LOG.info(String.format("Fetched tasks: %s",
-                    String.join(",", ret.stream().map(AtlasTask::getGuid).collect(Collectors.toList()))));
-        }
         return ret;
     }
 
@@ -374,11 +369,6 @@ public class TaskRegistry {
 
                 try {
                     indexQueryResult = indexQuery.vertices(indexSearchParams);
-
-                    String res = indexQuery.directElasticsearchQuery(indexSearchParams);
-                    if (res.contains("PENDING") || res.contains("IN_PROGRESS")) {
-                        LOG.info("Index search response while fetching tasks: " + res);
-                    }
                 } catch (AtlasBaseException e) {
                     LOG.error("Failed to fetch pending/in-progress task vertices to re-que");
                     e.printStackTrace();
@@ -397,6 +387,9 @@ public class TaskRegistry {
                                     atlasTask.getStatus().equals(AtlasTask.Status.IN_PROGRESS) ){
                                 LOG.info(String.format("Fetched task from index search: %s", atlasTask.toString()));
                                 ret.add(atlasTask);
+                            }
+                            else {
+                                LOG.warn(String.format("There is a mismatch on tasks status between ES and Cassandra for guid: %s", atlasTask.getGuid()));
                             }
                         } else {
                             LOG.warn("Null vertex while re-queuing tasks at index {}", fetched);
