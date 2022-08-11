@@ -2887,7 +2887,7 @@ public class EntityGraphMapper {
                                         && t.getType().equals(CLASSIFICATION_PROPAGATION_ADD))
                                 .collect(Collectors.toList());
                         for (AtlasTask entityClassificationPendingTask: entityClassificationPendingTasks) {
-                            if (AtlasTask.Status.IN_PROGRESS.name().equals(entityClassificationPendingTask.getStatus())) {
+                            if (AtlasTask.Status.IN_PROGRESS.equals(entityClassificationPendingTask.getStatus())) {
                                 throw new AtlasBaseException("Classification propagation is going on, Try attaching after some time");
                             }
                             String taskGuid = entityClassificationPendingTask.getGuid();
