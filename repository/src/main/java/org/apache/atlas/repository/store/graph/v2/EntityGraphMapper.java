@@ -2877,6 +2877,12 @@ public class EntityGraphMapper {
 
                     boolean pendingTaskExists  = entityPendingTasks.stream()
                             .anyMatch(x -> classificationHasPendingTask(x, classificationVertexId, entityGuid));
+                    boolean inProgressTaskExists = entityPendingTasks.stream()
+                            .anyMatch(x -> classificationHasInProgressTask(x, classificationVertexId, entityGuid));
+
+                    if (inProgressTaskExists) {
+                        throw new AtlasBaseException("Classification propagation is in progress, try after some time");
+                    }
 
                     if (pendingTaskExists) {
                         List<AtlasTask> entityClassificationPendingTasks = entityPendingTasks.stream()
@@ -2886,10 +2892,8 @@ public class EntityGraphMapper {
                                         && t.getParameters().get("classificationVertexId").equals(classificationVertexId)
                                         && t.getType().equals(CLASSIFICATION_PROPAGATION_ADD))
                                 .collect(Collectors.toList());
+
                         for (AtlasTask entityClassificationPendingTask: entityClassificationPendingTasks) {
-                            if (AtlasTask.Status.IN_PROGRESS.equals(entityClassificationPendingTask.getStatus())) {
-                                throw new AtlasBaseException("Classification propagation is going on, Try attaching after some time");
-                            }
                             String taskGuid = entityClassificationPendingTask.getGuid();
                             taskManagement.deleteByGuid(taskGuid, TaskManagement.DeleteType.SOFT);
                             AtlasGraphUtilsV2.deleteProperty(entityVertex, PENDING_TASKS_PROPERTY_KEY, taskGuid);
@@ -2952,7 +2956,19 @@ public class EntityGraphMapper {
 
     private boolean classificationHasPendingTask(AtlasTask task, String classificationVertexId, String entityGuid) {
         try {
-            if (CLASSIFICATION_PROPAGATION_ADD.equals(task.getType())) {
+            if (CLASSIFICATION_PROPAGATION_ADD.equals(task.getType()) && AtlasTask.Status.PENDING.equals(task.getStatus())) {
+                return task.getParameters().get(ClassificationTask.PARAM_CLASSIFICATION_VERTEX_ID).equals(classificationVertexId)
+                        && task.getParameters().get(ClassificationTask.PARAM_ENTITY_GUID).equals(entityGuid);
+            }
+        } catch (NullPointerException npe) {
+            LOG.warn("Task classificationVertexId or entityGuid is null");
+        }
+        return false;
+    }
+
+    private boolean classificationHasInProgressTask(AtlasTask task, String classificationVertexId, String entityGuid) {
+        try {
+            if (CLASSIFICATION_PROPAGATION_ADD.equals(task.getType()) && AtlasTask.Status.IN_PROGRESS.equals(task.getStatus())) {
                 return task.getParameters().get(ClassificationTask.PARAM_CLASSIFICATION_VERTEX_ID).equals(classificationVertexId)
                         && task.getParameters().get(ClassificationTask.PARAM_ENTITY_GUID).equals(entityGuid);
             }
