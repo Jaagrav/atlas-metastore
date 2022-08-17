@@ -565,7 +565,15 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
         }
 
         AtlasVertex vertex = AtlasGraphUtilsV2.findByGuid(graph, guid);
-        ensureNonAccessControlEntityType(Collections.singletonList(getTypeName(vertex)));
+        if (vertex != null) {
+            ensureNonAccessControlEntityType(Collections.singletonList(getTypeName(vertex)));
+        } else {
+            if (LOG.isDebugEnabled()) {
+                // Entity does not exist - treat as non-error, since the caller
+                // wanted to delete the entity and it's already gone.
+                LOG.debug("Deletion request ignored for non-existent entity with guid " + guid);
+            }
+        }
 
         return deleteById(vertex);
     }
