@@ -371,7 +371,7 @@ public class AtlasPersonaService {
         context.setAllowPolicyUpdate();
 
         //TODO: disabled for testing purpose, enable later
-        //validateConnectionAdmin(context);
+        validateConnectionAdmin(context);
 
         //verify Unique name across current Persona's policies
         verifyUniqueNameForPersonaPolicy(context, getName(personaPolicy), personaWithExtInfo);
@@ -1018,7 +1018,7 @@ public class AtlasPersonaService {
             for (AtlasEntity policy : policies) {
                 List<String> assets = getAssets(policy);
 
-                if (!StringUtils.equals(guidToExclude, policy.getGuid()) && assets.equals(newPersonaPolicyAssets)) {
+                if (!StringUtils.equals(guidToExclude, policy.getGuid()) && context.isDataMaskPolicy() == isDataMaskPolicy(policy) && assets.equals(newPersonaPolicyAssets)) {
                     //TODO: Ranger error code
                     throw new AtlasBaseException("Not allowed to create duplicate policy for same assets, existing policy name " + getName(policy));
                 }

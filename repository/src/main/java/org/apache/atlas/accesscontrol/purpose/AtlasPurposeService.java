@@ -20,6 +20,7 @@ package org.apache.atlas.accesscontrol.purpose;
 import org.apache.atlas.AtlasErrorCode;
 import org.apache.atlas.ESAliasStore;
 import org.apache.atlas.RequestContext;
+import org.apache.atlas.accesscontrol.AccessControlUtil;
 import org.apache.atlas.discovery.EntityDiscoveryService;
 import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.model.instance.AtlasEntity;
@@ -264,7 +265,7 @@ public class AtlasPurposeService {
         PurposeContext context = new PurposeContext(purposeExtInfo, purposePolicy);
         context.setDeletePurposePolicy(true);
 
-        updatePurposePolicy(context, purposePolicyToRangerPolicy(context));
+        updatePurposePolicies(context, purposePolicyToRangerPolicy(context));
 
         List<String> actions = getActions(purposePolicy);
         if (actions.contains(ACCESS_ENTITY_READ)) {
@@ -349,83 +350,82 @@ public class AtlasPurposeService {
         return ret;
     }
 
-    private RangerPolicy createOrUpdatePurposePolicy(PurposeContext context) throws AtlasBaseException {
+    private void createOrUpdatePurposePolicy(PurposeContext context) throws AtlasBaseException {
         //convert persona policy into Ranger policies
-        RangerPolicy provisionalRangerPolicy = purposePolicyToRangerPolicy(context);
-        LOG.info(AtlasType.toJson(provisionalRangerPolicy));
+        List<RangerPolicy> provisionalRangerPolicies = purposePolicyToRangerPolicy(context);
+        LOG.info(AtlasType.toJson(provisionalRangerPolicies));
 
         if (context.isCreateNewPurposePolicy()) {
-            return createPurposePolicy(context, provisionalRangerPolicy);
+            createPurposePolicies(context, provisionalRangerPolicies);
         } else {
-            return updatePurposePolicy(context, provisionalRangerPolicy);
+            updatePurposePolicies(context, provisionalRangerPolicies);
         }
     }
 
-    private RangerPolicy createPurposePolicy(PurposeContext context, RangerPolicy provisionalPolicy) throws AtlasBaseException {
-        RangerPolicy ret = null;
-        AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("createPurposePolicy");
+    private void createPurposePolicies(PurposeContext context, List<RangerPolicy> provisionalRangerPolicies) throws AtlasBaseException {
+        AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("provisionalRangerPolicies");
 
-        updatePurposePolicy(context, provisionalPolicy);
+        updatePurposePolicies(context, provisionalRangerPolicies);
 
         RequestContext.get().endMetricRecord(metricRecorder);
-        return ret;
     }
 
-    private RangerPolicy updatePurposePolicy(PurposeContext context, RangerPolicy provisionalPolicy) throws AtlasBaseException {
+    private void updatePurposePolicies(PurposeContext context, List<RangerPolicy> provisionalPolicies) throws AtlasBaseException {
+        AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("updatePurposePolicies");
         RangerPolicy ret;
-        AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("updatePurposePolicy");
-        RangerPolicy rangerPolicy = null;
 
         if (context.getExistingPurposePolicy() != null && !AtlasEntity.Status.ACTIVE.equals(context.getExistingPurposePolicy().getStatus())) {
             throw new AtlasBaseException(OPERATION_NOT_SUPPORTED, "Entity not Active");
         }
 
-        List<RangerPolicy> rangerPolicies = fetchRangerPoliciesByLabel(atlasRangerService,
-                "tag",
-                String.valueOf(provisionalPolicy.getPolicyType()),
-                getPurposeLabel(context.getPurpose().getGuid()));
-
-        if (CollectionUtils.isEmpty(rangerPolicies)) {
-            rangerPolicy = fetchRangerPolicyByResources(atlasRangerService,
+        for (RangerPolicy provisionalPolicy : provisionalPolicies) {
+            List<RangerPolicy> rangerPolicies = fetchRangerPoliciesByLabel(atlasRangerService,
                     "tag",
                     String.valueOf(provisionalPolicy.getPolicyType()),
-                    provisionalPolicy);
+                    getPurposeLabel(context.getPurpose().getGuid()));
 
-        } else if (rangerPolicies.size() == 1) {
-            rangerPolicy = rangerPolicies.get(0);
-        } else {
-            String resourcesSignature = new RangerPolicyResourceSignature(provisionalPolicy).getSignature();
+            RangerPolicy rangerPolicy = null;
+            if (CollectionUtils.isEmpty(rangerPolicies)) {
+                rangerPolicy = fetchRangerPolicyByResources(atlasRangerService,
+                        "tag",
+                        String.valueOf(provisionalPolicy.getPolicyType()),
+                        provisionalPolicy);
 
-            for (RangerPolicy matchedRangerPolicy : rangerPolicies) {
-                String labelMatchedPolicyResourcesSignature = new RangerPolicyResourceSignature(matchedRangerPolicy).getSignature();
+            } else if (rangerPolicies.size() == 1) {
+                rangerPolicy = rangerPolicies.get(0);
+            } else {
+                String resourcesSignature = new RangerPolicyResourceSignature(provisionalPolicy).getSignature();
 
-                if (resourcesSignature.equals(labelMatchedPolicyResourcesSignature)) {
-                    rangerPolicy = matchedRangerPolicy;
+                for (RangerPolicy matchedRangerPolicy : rangerPolicies) {
+                    String labelMatchedPolicyResourcesSignature = new RangerPolicyResourceSignature(matchedRangerPolicy).getSignature();
+
+                    if (resourcesSignature.equals(labelMatchedPolicyResourcesSignature)) {
+                        rangerPolicy = matchedRangerPolicy;
+                    }
                 }
             }
-        }
 
-        if (rangerPolicy == null) {
-            ret = atlasRangerService.createRangerPolicy(provisionalPolicy);
-        } else {
-
-            rangerPolicy.setPolicyItems(provisionalPolicy.getPolicyItems());
-            rangerPolicy.setDenyPolicyItems(provisionalPolicy.getDenyPolicyItems());
-            rangerPolicy.setDataMaskPolicyItems(provisionalPolicy.getDataMaskPolicyItems());
-
-            if (context.isDeletePurposePolicy()) {
-                rangerPolicy.getPolicyLabels().remove(getPurposePolicyLabel(context.getPurposePolicy().getGuid()));
+            if (rangerPolicy == null) {
+                ret = atlasRangerService.createRangerPolicy(provisionalPolicy);
             } else {
-                rangerPolicy.getPolicyLabels().addAll(getLabelsForPurposePolicy(context.getPurpose().getGuid(), context.getPurposePolicy().getGuid()));
+
+                rangerPolicy.setPolicyItems(provisionalPolicy.getPolicyItems());
+                rangerPolicy.setDenyPolicyItems(provisionalPolicy.getDenyPolicyItems());
+                rangerPolicy.setDataMaskPolicyItems(provisionalPolicy.getDataMaskPolicyItems());
+
+                if (context.isDeletePurposePolicy()) {
+                    rangerPolicy.getPolicyLabels().remove(getPurposePolicyLabel(context.getPurposePolicy().getGuid()));
+                } else {
+                    rangerPolicy.getPolicyLabels().addAll(getLabelsForPurposePolicy(context.getPurpose().getGuid(), context.getPurposePolicy().getGuid()));
+                }
+
+                ret = atlasRangerService.updateRangerPolicy(rangerPolicy);
+
+                LOG.info("Updated Ranger Policy with ID {}", ret.getId());
             }
-
-            ret = atlasRangerService.updateRangerPolicy(rangerPolicy);
-
-            LOG.info("Updated Ranger Policy with ID {}", ret.getId());
         }
 
         RequestContext.get().endMetricRecord(metricRecorder);
-        return ret;
     }
 
     private void updatePurposePoliciesTag(PurposeContext context, AtlasEntity existingPurposeEntity) throws AtlasBaseException {
@@ -471,9 +471,11 @@ public class AtlasPurposeService {
         }
     }
 
-    private RangerPolicy purposePolicyToRangerPolicy(PurposeContext context) throws AtlasBaseException {
+    private List<RangerPolicy> purposePolicyToRangerPolicy(PurposeContext context) throws AtlasBaseException {
         AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("purposePolicyToRangerPolicy");
-        RangerPolicy rangerPolicy;
+
+        List<RangerPolicy> ret = new ArrayList<>();
+        RangerPolicy rangerAccessPolicy, rangerMaskPolicy;
 
         AtlasEntity purpose = context.getPurpose();
 
@@ -482,74 +484,69 @@ public class AtlasPurposeService {
             throw new AtlasBaseException("Tags list is empty");
         }
 
-        rangerPolicy = getRangerPolicy(context);
+        rangerAccessPolicy = getRangerPolicy(context, 0);
+        rangerMaskPolicy = getRangerPolicy(context, 1);
 
         Map<String, RangerPolicy.RangerPolicyResource> resources = new HashMap<>();
         resources.put(RESOURCE_TAG, new RangerPolicy.RangerPolicyResource(tags, false, false));
-        rangerPolicy.setResources(resources);
 
-        if (context.isMetadataPolicy()) {
-            metadataPolicyToRangerPolicy(context, rangerPolicy);
-        } else if (context.isDataPolicy()) {
-            dataPolicyToRangerPolicy(context, rangerPolicy);
+        rangerAccessPolicy.setResources(resources);
+        rangerMaskPolicy.setResources(resources);
+
+        policyToRangerPolicy(context, rangerAccessPolicy, rangerMaskPolicy);
+
+        if (CollectionUtils.isNotEmpty(rangerAccessPolicy.getPolicyItems()) || CollectionUtils.isNotEmpty(rangerAccessPolicy.getDenyPolicyItems())) {
+            ret.add(rangerAccessPolicy);
+        }
+
+        if (CollectionUtils.isNotEmpty(rangerMaskPolicy.getDataMaskPolicyItems())) {
+            ret.add(rangerMaskPolicy);
         }
 
         RequestContext.get().endMetricRecord(metricRecorder);
-        return rangerPolicy;
+        return ret;
     }
 
-    private void metadataPolicyToRangerPolicy(PurposeContext context, RangerPolicy rangerPolicy) throws AtlasBaseException {
-        rangerPolicy.setName("purpose-tag-" + UUID.randomUUID());
+    private void policyToRangerPolicy(PurposeContext context, RangerPolicy rangerAccessPolicy, RangerPolicy rangerMaskPolicy) {
+        rangerAccessPolicy.setName("purpose-tag-" + UUID.randomUUID());
 
-        for (AtlasEntity metadataPolicy : getMetadataPolicies(context.getPurposeExtInfo())) {
-            if (context.isDeletePurposePolicy() && metadataPolicy.getGuid().equals(context.getPurposePolicy().getGuid())) {
+        for (AtlasEntity policy : getPolicies(context.getPurposeExtInfo())) {
+            if (context.isDeletePurposePolicy() && policy.getGuid().equals(context.getPurposePolicy().getGuid())) {
                 continue;
             }
 
-            List<String> actions = getActions(metadataPolicy);
-
+            List<String> actions = getActions(policy);
             List<RangerPolicy.RangerPolicyItemAccess> accesses = new ArrayList<>();
-            for (String action: actions) {
-                if (action.equals(LINK_ASSET_ACTION)) {
-                    accesses.add(new RangerPolicy.RangerPolicyItemAccess(formatAccessType(ACCESS_ADD_REL)));
-                    accesses.add(new RangerPolicy.RangerPolicyItemAccess(formatAccessType(ACCESS_UPDATE_REL)));
-                    accesses.add(new RangerPolicy.RangerPolicyItemAccess(formatAccessType(ACCESS_REMOVE_REL)));
-                } else {
-                    accesses.add(new RangerPolicy.RangerPolicyItemAccess(formatAccessType(action)));
+
+            if (isDataPolicy(policy)) {
+                for (String action : actions) {
+                    accesses.add(new RangerPolicy.RangerPolicyItemAccess(formatAccessType("heka", action)));
                 }
-            }
 
-            setPolicyItem(metadataPolicy, rangerPolicy, accesses, null);
+                if (isDataMaskPolicy(policy)) {
+                    rangerMaskPolicy.setName("purpose-tag-mask-" + UUID.randomUUID());
+                    String maskType = getDataPolicyMaskType(policy);
+                    RangerPolicyItemDataMaskInfo maskInfo = new RangerPolicyItemDataMaskInfo(formatMaskType(maskType), null, null);
+                    setPolicyItem(policy, rangerMaskPolicy, accesses, maskInfo);
+                    rangerMaskPolicy.getPolicyLabels().add(getPurposePolicyLabel(policy.getGuid()));
 
-            rangerPolicy.getPolicyLabels().add(getPurposePolicyLabel(metadataPolicy.getGuid()));
-        }
-    }
-
-    private void dataPolicyToRangerPolicy(PurposeContext context, RangerPolicy rangerPolicy) throws AtlasBaseException {
-        rangerPolicy.setName("purpose-tag-" + UUID.randomUUID());
-
-        for (AtlasEntity dataPolicy : getDataPolicies(context.getPurposeExtInfo())) {
-            if (context.isDeletePurposePolicy() && dataPolicy.getGuid().equals(context.getPurposePolicy().getGuid())) {
-                continue;
-            }
-
-            List<String> actions = getActions(dataPolicy);
-
-            List<RangerPolicy.RangerPolicyItemAccess> accesses = new ArrayList<>();
-            for (String action : actions) {
-                accesses.add(new RangerPolicy.RangerPolicyItemAccess(formatAccessType("heka", action)));
-            }
-
-            if (context.isDataMaskPolicy(dataPolicy)) {
-                rangerPolicy.setName("purpose-tag-mask-" + UUID.randomUUID());
-                String maskType = getDataPolicyMaskType(dataPolicy);
-                RangerPolicyItemDataMaskInfo maskInfo = new RangerPolicyItemDataMaskInfo(formatMaskType(maskType), null, null);
-                setPolicyItem(dataPolicy, rangerPolicy, accesses, maskInfo);
+                } else {
+                    setPolicyItem(policy, rangerAccessPolicy, accesses, null);
+                    rangerAccessPolicy.getPolicyLabels().add(getPurposePolicyLabel(policy.getGuid()));
+                }
             } else {
-                setPolicyItem(dataPolicy, rangerPolicy, accesses, null);
+                for (String action : actions) {
+                    if (action.equals(LINK_ASSET_ACTION)) {
+                        accesses.add(new RangerPolicy.RangerPolicyItemAccess(formatAccessType(ACCESS_ADD_REL)));
+                        accesses.add(new RangerPolicy.RangerPolicyItemAccess(formatAccessType(ACCESS_UPDATE_REL)));
+                        accesses.add(new RangerPolicy.RangerPolicyItemAccess(formatAccessType(ACCESS_REMOVE_REL)));
+                    } else {
+                        accesses.add(new RangerPolicy.RangerPolicyItemAccess(formatAccessType(action)));
+                    }
+                }
+                setPolicyItem(policy, rangerAccessPolicy, accesses, null);
+                rangerAccessPolicy.getPolicyLabels().add(getPurposePolicyLabel(policy.getGuid()));
             }
-
-            rangerPolicy.getPolicyLabels().add(getPurposePolicyLabel(dataPolicy.getGuid()));
         }
     }
 
@@ -578,13 +575,13 @@ public class AtlasPurposeService {
         }
     }
 
-    private RangerPolicy getRangerPolicy(PurposeContext context){
+    private RangerPolicy getRangerPolicy(PurposeContext context, int policyType){
         RangerPolicy rangerPolicy = new RangerPolicy();
         AtlasEntity purpose = context.getPurpose();
 
         rangerPolicy.setPolicyLabels(Arrays.asList(getPurposeLabel(purpose.getGuid()), "type:purpose"));
 
-        rangerPolicy.setPolicyType(context.isDataMaskPolicy() ? 1 : 0);
+        rangerPolicy.setPolicyType(policyType);
         rangerPolicy.setServiceType("tag"); //TODO: disable & check
         rangerPolicy.setService("default_atlan"); //TODO: read from property config
 

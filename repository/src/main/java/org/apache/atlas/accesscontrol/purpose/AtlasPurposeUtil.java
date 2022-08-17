@@ -80,7 +80,7 @@ public class AtlasPurposeUtil extends AccessControlUtil {
 
         List mustClauseList = new ArrayList();
         mustClauseList.add(mapOf("term", mapOf("__typeName.keyword", typeName)));
-        tags.forEach(x -> mustClauseList.add(mapOf("term", mapOf("tags", x))));
+        tags.forEach(x -> mustClauseList.add(mapOf("term", mapOf("purposeClassifications", x))));
 
 
         dsl.put("query", mapOf("bool", mapOf("must", mustClauseList)));

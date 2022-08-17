@@ -132,15 +132,16 @@ public final class Constants {
     public static final String QUERY_FOLDER_ENTITY_TYPE     = "QueryFolder";
     public static final String QUERY_COLLECTION_ENTITY_TYPE = "QueryCollection";
 
-    public static final String PURPOSE_METADATA_POLICY_ENTITY_TYPE = "PurposeMetadataPolicy";
-    public static final String PURPOSE_DATA_POLICY_ENTITY_TYPE     = "PurposeDataPolicy";
-
     /*
      * Purpose / Persona
      */
     public static final String PERSONA_ENTITY_TYPE = "Persona";
     public static final String PURPOSE_ENTITY_TYPE = "Purpose";
     public static final String POLICY_ENTITY_TYPE  = "Policy";
+
+    public static final List<String> ACCESS_CONTROL_ENTITY_TYPES  = Arrays.asList(PERSONA_ENTITY_TYPE, PURPOSE_ENTITY_TYPE, POLICY_ENTITY_TYPE, "AccessControl");
+
+    public static final String ACCESS_CONTROL_RELATION_TYPE  = "access_control_policy_parent_children";
 
     public static final String POLICY_TYPE_METADATA = "metadata";
     public static final String POLICY_TYPE_GLOSSARY = "glossary";

@@ -1,5 +1,6 @@
 package org.apache.atlas.accesscontrol;
 
+import org.apache.atlas.RequestContext;
 import org.apache.atlas.discovery.EntityDiscoveryService;
 import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.model.discovery.AtlasSearchResult;
@@ -8,8 +9,10 @@ import org.apache.atlas.model.instance.AtlasEntity;
 import org.apache.atlas.model.instance.AtlasObjectId;
 import org.apache.atlas.accesscontrol.persona.AtlasPersonaUtil;
 import org.apache.atlas.ranger.AtlasRangerService;
+import org.apache.atlas.type.AtlasEntityType;
 import org.apache.atlas.type.AtlasType;
 import org.apache.atlas.util.NanoIdUtils;
+import org.apache.atlas.utils.AtlasPerfMetrics;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ranger.plugin.model.RangerPolicy;
@@ -23,7 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.apache.atlas.accesscontrol.purpose.AtlasPurposeUtil.getTags;
+import static org.apache.atlas.AtlasErrorCode.ACCESS_CONTROL_MUTATIONS_NOT_ALLOWED;
+import static org.apache.atlas.repository.Constants.ACCESS_CONTROL_ENTITY_TYPES;
+import static org.apache.atlas.repository.Constants.ACCESS_CONTROL_RELATION_TYPE;
 import static org.apache.atlas.repository.Constants.NAME;
 import static org.apache.atlas.repository.Constants.POLICY_TYPE_DATA;
 import static org.apache.atlas.repository.Constants.POLICY_TYPE_METADATA;
@@ -136,6 +141,13 @@ public class AccessControlUtil {
 
     public static boolean isDataPolicy(AtlasEntity policyEntity) {
         return POLICY_TYPE_DATA.equals(getPolicyType(policyEntity));
+    }
+
+    public static boolean isDataMaskPolicy(AtlasEntity purposePolicy) {
+        if (StringUtils.isNotEmpty(getDataPolicyMaskType(purposePolicy))) {
+            return true;
+        }
+        return false;
     }
 
     public static String getPolicyType(AtlasEntity policyEntity) {
@@ -282,5 +294,25 @@ public class AccessControlUtil {
         map.put(key, value);
 
         return map;
+    }
+
+    public static void ensureNonAccessControlEntityType(List<String> types) throws AtlasBaseException {
+        AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("ensureNonAccessControlEntityType");
+        long accessControlEntityCount = types.stream().filter(ACCESS_CONTROL_ENTITY_TYPES::contains).count();
+
+        if (accessControlEntityCount > 0) {
+            throw new AtlasBaseException(ACCESS_CONTROL_MUTATIONS_NOT_ALLOWED);
+        }
+
+        RequestContext.get().endMetricRecord(metricRecorder);
+    }
+
+    public static void ensureNonAccessControlRelType(String type) throws AtlasBaseException {
+        AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("ensureNonAccessControlRelType");
+        if (ACCESS_CONTROL_RELATION_TYPE.equals(type)) {
+            throw new AtlasBaseException(ACCESS_CONTROL_MUTATIONS_NOT_ALLOWED);
+        }
+
+        RequestContext.get().endMetricRecord(metricRecorder);
     }
 }

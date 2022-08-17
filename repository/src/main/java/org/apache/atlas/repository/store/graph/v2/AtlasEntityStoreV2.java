@@ -96,6 +96,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.Boolean.FALSE;
 import static org.apache.atlas.AtlasConfiguration.STORE_DIFFERENTIAL_AUDITS;
+import static org.apache.atlas.accesscontrol.AccessControlUtil.ensureNonAccessControlEntityType;
 import static org.apache.atlas.bulkimport.BulkImportResponse.ImportStatus.FAILED;
 import static org.apache.atlas.model.instance.AtlasEntity.Status.ACTIVE;
 import static org.apache.atlas.model.instance.EntityMutations.EntityOperation.*;
@@ -488,6 +489,8 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
             LOG.debug("==> updateByUniqueAttributes({}, {})", entityType.getTypeName(), uniqAttributes);
         }
 
+        ensureNonAccessControlEntityType(Collections.singletonList(entityType.getTypeName()));
+
         if (updatedEntityInfo == null || updatedEntityInfo.getEntity() == null) {
             throw new AtlasBaseException(AtlasErrorCode.INVALID_PARAMETERS, "no entity to update.");
         }
@@ -512,6 +515,7 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
 
         AtlasEntityHeader entity     = entityRetriever.toAtlasEntityHeaderWithClassifications(guid);
         AtlasEntityType   entityType = (AtlasEntityType) typeRegistry.getType(entity.getTypeName());
+        ensureNonAccessControlEntityType(Collections.singletonList(entityType.getTypeName()));
         AtlasAttribute    attr       = entityType.getAttribute(attrName);
 
         AtlasAuthorizationUtils.verifyAccess(new AtlasEntityAccessRequest(typeRegistry, AtlasPrivilege.ENTITY_UPDATE, entity), "update entity ByUniqueAttributes : guid=", guid );
@@ -657,6 +661,7 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
             }
 
             AtlasEntityHeader entityHeader = entityRetriever.toAtlasEntityHeaderWithClassifications(vertex);
+            ensureNonAccessControlEntityType(Collections.singletonList(entityHeader.getTypeName()));
 
             AtlasAuthorizationUtils.verifyAccess(new AtlasEntityAccessRequest(typeRegistry, AtlasPrivilege.ENTITY_DELETE, entityHeader), "delete entity: guid=", guid);
 
@@ -717,6 +722,8 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
         if (MapUtils.isEmpty(uniqAttributes)) {
             throw new AtlasBaseException(AtlasErrorCode.INSTANCE_BY_UNIQUE_ATTRIBUTE_NOT_FOUND, uniqAttributes.toString());
         }
+
+        ensureNonAccessControlEntityType(Collections.singletonList(entityType.getTypeName()));
 
         Collection<AtlasVertex> deletionCandidates = new ArrayList<>();
         AtlasVertex             vertex             = AtlasGraphUtilsV2.findByUniqueAttributes(graph, entityType, uniqAttributes);
@@ -1590,6 +1597,13 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
             AtlasEntity entity = entityStream.getByGuid(guid);
 
             if (entity != null) { // entity would be null if guid is not in the stream but referenced by an entity in the stream
+                try {
+                    ensureNonAccessControlEntityType(Collections.singletonList(entity.getTypeName()));
+                } catch (AtlasBaseException e) {
+                    e.setEntityGuid(element.getValue());
+                    throw e;
+                }
+
                 AtlasEntityType entityType = typeRegistry.getEntityTypeByName(entity.getTypeName());
 
                 if (entityType == null) {
@@ -1736,6 +1750,8 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
         MetricRecorder metric = RequestContext.get().startMetricRecord("filterCategoryVertices");
         for (AtlasVertex vertex : deletionCandidates) {
             String typeName = getTypeName(vertex);
+            ensureNonAccessControlEntityType(Collections.singletonList(typeName));
+
             if (ATLAS_GLOSSARY_CATEGORY_ENTITY_TYPE.equals(typeName)) {
                 categories.add(vertex);
             } else {

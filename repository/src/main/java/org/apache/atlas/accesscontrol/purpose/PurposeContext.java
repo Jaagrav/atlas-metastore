@@ -29,8 +29,6 @@ import java.util.List;
 
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getDataPolicyMaskType;
 import static org.apache.atlas.accesscontrol.purpose.AtlasPurposeUtil.getIsAllow;
-import static org.apache.atlas.repository.Constants.PURPOSE_DATA_POLICY_ENTITY_TYPE;
-import static org.apache.atlas.repository.Constants.PURPOSE_METADATA_POLICY_ENTITY_TYPE;
 
 public class PurposeContext {
 
@@ -158,13 +156,6 @@ public class PurposeContext {
     public void setIsDataPolicy(boolean isDataPolicy) {
         this.isDataPolicy = isDataPolicy;
         this.isMetadataPolicy = false;
-    }
-
-    public boolean isDataMaskPolicy(AtlasEntity purposePolicy) {
-        if (StringUtils.isNotEmpty(getDataPolicyMaskType(purposePolicy))) {
-            return true;
-        }
-        return false;
     }
 
     public boolean isMetadataPolicy() {
