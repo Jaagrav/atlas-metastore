@@ -489,8 +489,6 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
             LOG.debug("==> updateByUniqueAttributes({}, {})", entityType.getTypeName(), uniqAttributes);
         }
 
-        ensureNonAccessControlEntityType(Collections.singletonList(entityType.getTypeName()));
-
         if (updatedEntityInfo == null || updatedEntityInfo.getEntity() == null) {
             throw new AtlasBaseException(AtlasErrorCode.INVALID_PARAMETERS, "no entity to update.");
         }
@@ -561,19 +559,25 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
     }
 
     @Override
-    @GraphTransaction
     public EntityMutationResponse deleteById(final String guid) throws AtlasBaseException {
         if (StringUtils.isEmpty(guid)) {
             throw new AtlasBaseException(AtlasErrorCode.INSTANCE_GUID_NOT_FOUND, guid);
         }
 
+        AtlasVertex vertex = AtlasGraphUtilsV2.findByGuid(graph, guid);
+        ensureNonAccessControlEntityType(Collections.singletonList(getTypeName(vertex)));
+
+        deleteById(vertex);
+    }
+
+    @GraphTransaction
+    public EntityMutationResponse deleteById(final AtlasVertex vertex) throws AtlasBaseException {
         Collection<AtlasVertex> deletionCandidates = new ArrayList<>();
-        AtlasVertex             vertex             = AtlasGraphUtilsV2.findByGuid(graph, guid);
 
         if (vertex != null) {
             AtlasEntityHeader entityHeader = entityRetriever.toAtlasEntityHeaderWithClassifications(vertex);
 
-            AtlasAuthorizationUtils.verifyAccess(new AtlasEntityAccessRequest(typeRegistry, AtlasPrivilege.ENTITY_DELETE, entityHeader), "delete entity: guid=", guid);
+            AtlasAuthorizationUtils.verifyAccess(new AtlasEntityAccessRequest(typeRegistry, AtlasPrivilege.ENTITY_DELETE, entityHeader), "delete entity: guid=", entityHeader.getGuid());
 
             deletionCandidates.add(vertex);
         } else {
@@ -723,8 +727,6 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
             throw new AtlasBaseException(AtlasErrorCode.INSTANCE_BY_UNIQUE_ATTRIBUTE_NOT_FOUND, uniqAttributes.toString());
         }
 
-        ensureNonAccessControlEntityType(Collections.singletonList(entityType.getTypeName()));
-
         Collection<AtlasVertex> deletionCandidates = new ArrayList<>();
         AtlasVertex             vertex             = AtlasGraphUtilsV2.findByUniqueAttributes(graph, entityType, uniqAttributes);
 
@@ -777,6 +779,7 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
             if (entityType == null) {
                 throw new AtlasBaseException(AtlasErrorCode.TYPE_NAME_INVALID, TypeCategory.ENTITY.name(), objectId.getTypeName());
             }
+            ensureNonAccessControlEntityType(Collections.singletonList(entityType.getTypeName()));
 
             AtlasVertex vertex = AtlasGraphUtilsV2.findByUniqueAttributes(graph, entityType, objectId.getUniqueAttributes());
 
@@ -1597,13 +1600,6 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
             AtlasEntity entity = entityStream.getByGuid(guid);
 
             if (entity != null) { // entity would be null if guid is not in the stream but referenced by an entity in the stream
-                try {
-                    ensureNonAccessControlEntityType(Collections.singletonList(entity.getTypeName()));
-                } catch (AtlasBaseException e) {
-                    e.setEntityGuid(element.getValue());
-                    throw e;
-                }
-
                 AtlasEntityType entityType = typeRegistry.getEntityTypeByName(entity.getTypeName());
 
                 if (entityType == null) {
@@ -1750,8 +1746,6 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
         MetricRecorder metric = RequestContext.get().startMetricRecord("filterCategoryVertices");
         for (AtlasVertex vertex : deletionCandidates) {
             String typeName = getTypeName(vertex);
-            ensureNonAccessControlEntityType(Collections.singletonList(typeName));
-
             if (ATLAS_GLOSSARY_CATEGORY_ENTITY_TYPE.equals(typeName)) {
                 categories.add(vertex);
             } else {

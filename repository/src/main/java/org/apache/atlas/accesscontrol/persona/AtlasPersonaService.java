@@ -31,6 +31,7 @@ import org.apache.atlas.model.instance.EntityMutationResponse;
 import org.apache.atlas.repository.graphdb.AtlasGraph;
 import org.apache.atlas.repository.store.graph.AtlasEntityStore;
 import org.apache.atlas.repository.store.graph.v2.AtlasEntityStream;
+import org.apache.atlas.repository.store.graph.v2.AtlasGraphUtilsV2;
 import org.apache.atlas.repository.store.graph.v2.EntityGraphRetriever;
 import org.apache.atlas.type.AtlasType;
 import org.apache.atlas.type.AtlasTypeUtil;
@@ -230,7 +231,8 @@ public class AtlasPersonaService {
 
         aliasStore.deleteAlias(getESAliasName(persona));
 
-        entityStore.deleteById(persona.getGuid());
+        entityStore.deleteById(AtlasGraphUtilsV2.findByGuid(persona.getGuid()));
+
         RequestContext.get().endMetricRecord(metricRecorder);
     }
 
@@ -615,7 +617,7 @@ public class AtlasPersonaService {
             aliasStore.updateAlias(context);
         }
 
-        entityStore.deleteById(personaPolicy.getGuid());
+        entityStore.deleteById(AtlasGraphUtilsV2.findByGuid(personaPolicy.getGuid()));
         RequestContext.get().endMetricRecord(metricRecorder);
     }
 

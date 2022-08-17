@@ -29,6 +29,7 @@ import org.apache.atlas.model.instance.AtlasEntityHeaders;
 import org.apache.atlas.model.instance.AtlasObjectId;
 import org.apache.atlas.model.instance.AtlasHasLineageRequests;
 import org.apache.atlas.model.instance.EntityMutationResponse;
+import org.apache.atlas.repository.graphdb.AtlasVertex;
 import org.apache.atlas.repository.store.graph.v2.EntityStream;
 import org.apache.atlas.type.AtlasEntityType;
 import org.apache.atlas.bulkimport.BulkImportResponse;
@@ -227,6 +228,13 @@ public interface AtlasEntityStore {
      * @return
      */
     EntityMutationResponse deleteById(String guid) throws AtlasBaseException;
+
+    /**
+     * Delete an entity by its vertex object
+     * @param vertex
+     * @return
+     */
+    EntityMutationResponse deleteById(AtlasVertex vertex) throws AtlasBaseException;
 
     /**
      * Deletes an entity using its type and unique attributes

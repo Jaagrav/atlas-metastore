@@ -32,6 +32,7 @@ import org.apache.atlas.ranger.AtlasRangerService;
 import org.apache.atlas.repository.graphdb.AtlasGraph;
 import org.apache.atlas.repository.store.graph.AtlasEntityStore;
 import org.apache.atlas.repository.store.graph.v2.AtlasEntityStream;
+import org.apache.atlas.repository.store.graph.v2.AtlasGraphUtilsV2;
 import org.apache.atlas.repository.store.graph.v2.EntityGraphRetriever;
 import org.apache.atlas.type.AtlasType;
 import org.apache.atlas.type.AtlasTypeRegistry;
@@ -227,7 +228,7 @@ public class AtlasPurposeService {
 
         aliasStore.deleteAlias(getESAliasName(purpose));
 
-        entityStore.deleteById(purpose.getGuid());
+        entityStore.deleteById(AtlasGraphUtilsV2.findByGuid(purpose.getGuid()));
         RequestContext.get().endMetricRecord(metricRecorder);
     }
 
@@ -272,7 +273,7 @@ public class AtlasPurposeService {
             aliasStore.updateAlias(context);
         }
 
-        entityStore.deleteById(purposePolicy.getGuid());
+        entityStore.deleteById(AtlasGraphUtilsV2.findByGuid(purposePolicy.getGuid()));
 
         RequestContext.get().endMetricRecord(metricRecorder);
     }

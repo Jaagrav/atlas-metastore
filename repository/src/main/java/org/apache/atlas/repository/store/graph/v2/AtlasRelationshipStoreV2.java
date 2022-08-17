@@ -139,8 +139,6 @@ public class AtlasRelationshipStoreV2 implements AtlasRelationshipStore {
             LOG.debug("==> update({})", relationship);
         }
 
-        ensureNonAccessControlRelType(relationship.getTypeName());
-
         String guid = relationship.getGuid();
 
         if (StringUtils.isEmpty(guid)) {
@@ -311,9 +309,7 @@ public class AtlasRelationshipStoreV2 implements AtlasRelationshipStore {
             if (getState(edge) == DELETED) {
                 throw new AtlasBaseException(AtlasErrorCode.RELATIONSHIP_ALREADY_DELETED, guid);
             }
-
             ensureNonAccessControlRelType(getTypeName(edge));
-
             edgesToDelete.add(edge);
             deletedRelationships.add(entityRetriever.mapEdgeToAtlasRelationship(edge));
         }
@@ -351,6 +347,7 @@ public class AtlasRelationshipStoreV2 implements AtlasRelationshipStore {
 
         AtlasEdge edge = graphHelper.getEdgeForGUID(guid);
 
+
         if (edge == null) {
             throw new AtlasBaseException(AtlasErrorCode.RELATIONSHIP_GUID_NOT_FOUND, guid);
         }
@@ -358,7 +355,6 @@ public class AtlasRelationshipStoreV2 implements AtlasRelationshipStore {
         if (getState(edge) == DELETED) {
             throw new AtlasBaseException(AtlasErrorCode.RELATIONSHIP_ALREADY_DELETED, guid);
         }
-
         ensureNonAccessControlRelType(getTypeName(edge));
         deleteDelegate.getHandler().resetHasLineageOnInputOutputDelete(Collections.singleton(edge), null);
         deleteDelegate.getHandler().deleteRelationships(Collections.singleton(edge), forceDelete);
@@ -429,8 +425,6 @@ public class AtlasRelationshipStoreV2 implements AtlasRelationshipStore {
 
     public AtlasEdge createRelationship(AtlasVertex end1Vertex, AtlasVertex end2Vertex, AtlasRelationship relationship, boolean existingRelationshipCheck) throws AtlasBaseException {
         AtlasEdge ret;
-
-        ensureNonAccessControlRelType(relationship.getTypeName());
 
         try {
             validateRelationship(end1Vertex, end2Vertex, relationship);
