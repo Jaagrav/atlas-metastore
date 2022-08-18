@@ -2784,10 +2784,10 @@ public class EntityGraphMapper {
 
     public List<String> processChunkedPropagation(List<AtlasVertex> chunkedVerticesToPropagate, AtlasVertex classificationVertex) throws AtlasBaseException{
         try {
-            AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("lockObjectsAfterTraverse");
+            /*AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("lockObjectsAfterTraverse");
             List<String> impactedVerticesGuidsToLock = chunkedVerticesToPropagate.stream().map(x -> GraphHelper.getGuid(x)).collect(Collectors.toList());
             RequestContext.get().endMetricRecord(metricRecorder);
-            GraphTransactionInterceptor.lockObjectAndReleasePostCommit(impactedVerticesGuidsToLock);
+            GraphTransactionInterceptor.lockObjectAndReleasePostCommit(impactedVerticesGuidsToLock);*/
             AtlasClassification classification       = entityRetriever.toAtlasClassification(classificationVertex);
             List<AtlasVertex>   entitiesPropagatedTo = deleteDelegate.getHandler().addTagPropagation(classificationVertex, chunkedVerticesToPropagate);
             if (CollectionUtils.isEmpty(entitiesPropagatedTo)) {
