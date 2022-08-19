@@ -2788,20 +2788,24 @@ public class EntityGraphMapper {
             List<String> impactedVerticesGuidsToLock = chunkedVerticesToPropagate.stream().map(x -> GraphHelper.getGuid(x)).collect(Collectors.toList());
             RequestContext.get().endMetricRecord(metricRecorder);
             GraphTransactionInterceptor.lockObjectAndReleasePostCommit(impactedVerticesGuidsToLock);
-            AtlasClassification classification       = entityRetriever.toAtlasClassification(classificationVertex);
             List<AtlasVertex>   entitiesPropagatedTo = deleteDelegate.getHandler().addTagPropagation(classificationVertex, chunkedVerticesToPropagate);
             if (CollectionUtils.isEmpty(entitiesPropagatedTo)) {
                 return null;
             }
 
-            List<AtlasEntity> propagatedEntitiesChunked = updateClassificationText(classification, entitiesPropagatedTo);
-
             graph.commit();
 
-            List<String> chunkedPropagatedEntitiesGuid = propagatedEntitiesChunked.stream().map(x -> x.getGuid()).collect(Collectors.toList());
-            entityChangeNotifier.onClassificationsAddedToEntities(propagatedEntitiesChunked, Collections.singletonList(classification), true);
-
-            return chunkedPropagatedEntitiesGuid;
+            AtlasClassification classification       = entityRetriever.toAtlasClassification(classificationVertex);
+            List<AtlasEntity> propagatedEntities = new ArrayList<>();
+            for(AtlasVertex vertex : chunkedVerticesToPropagate) {
+                AtlasEntity entity = instanceConverter.getEntityV2(vertex);
+                if (isActive(entity)) {
+                    propagatedEntities.add(entity);
+                }
+            }
+            entityChangeNotifier.onClassificationsAddedToEntities(propagatedEntities, Collections.singletonList(classification), true);
+            propagatedEntities.clear();
+            return null;
         } catch (AtlasBaseException ex) {
             LOG.error(String.format("Could not propagate chunked vertices starting with id %s", chunkedVerticesToPropagate.get(0).getId()));
             throw new AtlasBaseException(ex);

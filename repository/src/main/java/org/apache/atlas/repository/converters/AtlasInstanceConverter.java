@@ -35,6 +35,7 @@ import org.apache.atlas.model.instance.EntityMutations.EntityOperation;
 import org.apache.atlas.model.instance.GuidMapping;
 import org.apache.atlas.model.legacy.EntityResult;
 import org.apache.atlas.repository.graphdb.AtlasGraph;
+import org.apache.atlas.repository.graphdb.AtlasVertex;
 import org.apache.atlas.repository.store.graph.v2.EntityGraphRetriever;
 import org.apache.atlas.v1.model.instance.Referenceable;
 import org.apache.atlas.v1.model.instance.Struct;
@@ -299,10 +300,13 @@ public class AtlasInstanceConverter {
         return getAndCacheEntity(guid, false);
     }
 
+    public AtlasEntity getEntityV2(AtlasVertex vertex) throws AtlasBaseException {
+        return entityGraphRetriever.toAtlasEntity(vertex);
+    }
+
     public AtlasEntity getAndCacheEntity(String guid, boolean ignoreRelationshipAttributes) throws AtlasBaseException {
-//        RequestContext context = RequestContext.get();
-//        AtlasEntity    entity  = context.getEntity(guid);
-          AtlasEntity    entity  = null;
+        RequestContext context = RequestContext.get();
+        AtlasEntity    entity  = context.getEntity(guid);
 
         if (entity == null) {
             if (ignoreRelationshipAttributes) {
@@ -311,13 +315,13 @@ public class AtlasInstanceConverter {
                 entity = entityGraphRetriever.toAtlasEntity(guid);
             }
 
-//            if (entity != null) {
-//                context.cache(entity);
-//
-//                if (LOG.isDebugEnabled()) {
-//                    LOG.debug("Cache miss -> GUID = {}", guid);
-//                }
-//            }
+            if (entity != null) {
+                context.cache(entity);
+
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Cache miss -> GUID = {}", guid);
+                }
+            }
         }
 
         return entity;
