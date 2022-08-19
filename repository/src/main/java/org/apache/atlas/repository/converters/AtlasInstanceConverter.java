@@ -300,8 +300,9 @@ public class AtlasInstanceConverter {
     }
 
     public AtlasEntity getAndCacheEntity(String guid, boolean ignoreRelationshipAttributes) throws AtlasBaseException {
-        RequestContext context = RequestContext.get();
-        AtlasEntity    entity  = context.getEntity(guid);
+//        RequestContext context = RequestContext.get();
+//        AtlasEntity    entity  = context.getEntity(guid);
+          AtlasEntity    entity  = null;
 
         if (entity == null) {
             if (ignoreRelationshipAttributes) {
@@ -311,7 +312,7 @@ public class AtlasInstanceConverter {
             }
 
             if (entity != null) {
-                context.cache(entity);
+//                context.cache(entity);
 
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Cache miss -> GUID = {}", guid);
