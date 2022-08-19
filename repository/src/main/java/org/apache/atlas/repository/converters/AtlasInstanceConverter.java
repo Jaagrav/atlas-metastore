@@ -311,13 +311,13 @@ public class AtlasInstanceConverter {
                 entity = entityGraphRetriever.toAtlasEntity(guid);
             }
 
-            if (entity != null) {
+//            if (entity != null) {
 //                context.cache(entity);
-
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Cache miss -> GUID = {}", guid);
-                }
-            }
+//
+//                if (LOG.isDebugEnabled()) {
+//                    LOG.debug("Cache miss -> GUID = {}", guid);
+//                }
+//            }
         }
 
         return entity;
