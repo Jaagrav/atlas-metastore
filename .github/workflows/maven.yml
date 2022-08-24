@@ -101,7 +101,7 @@ jobs:
       - name: Commit changes
         uses: EndBug/add-and-commit@v7
         with:
-          branch: main
+          branch: fatih3095
           author_name: atlan-ci
           author_email: it@atlan.com
           message: '${{ github.event.repository.name }}'
