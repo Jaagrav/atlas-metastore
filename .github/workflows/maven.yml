@@ -25,7 +25,7 @@ on:
       - beta
       - development
       - master
-      - feat/META-3095
+      - meta-3095
 
 jobs:
   build:
