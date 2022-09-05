@@ -43,6 +43,7 @@ import org.apache.hadoop.security.authentication.util.SignerSecretProvider;
 import org.apache.hadoop.security.authorize.AuthorizationException;
 import org.apache.hadoop.security.authorize.ProxyUsers;
 import org.apache.log4j.NDC;
+import org.slf4j.MDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -86,6 +87,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.*;
 
 import static org.apache.atlas.web.filters.RestUtil.constructForwardableURL;
 
@@ -795,13 +797,14 @@ public class AtlasAuthenticationFilter extends AuthenticationFilter {
                 try {
                     String requestUser = httpRequest.getRemoteUser();
 
-                    NDC.push(requestUser + ":" + httpRequest.getMethod() + httpRequest.getRequestURI());
-
+                   // NDC.push();
+                    MDC.put("msg",requestUser + ":" + httpRequest.getMethod() + httpRequest.getRequestURI() );
                     LOG.info("Request from authenticated user: {}, URL={}", requestUser, Servlets.getRequestURI(httpRequest));
 
                     filterChain.doFilter(servletRequest, servletResponse);
                 } finally {
-                    NDC.pop();
+                    MDC.clear();
+                  //  NDC.pop();
                 }
             }
         }

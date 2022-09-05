@@ -733,8 +733,10 @@
         <kafka.scala.binary.version>2.12</kafka.scala.binary.version>
         <kafka.version>2.8.1</kafka.version>
         <keycloak.version>15.0.2.1</keycloak.version>
-        <log4j.version>1.2.17</log4j.version>
+<!--        <log4j.version>1.2.17</log4j.version>-->
         <log4j2.version>2.17.1</log4j2.version>
+        <logback.version>1.2.10</logback.version>
+
         <lucene-solr.version>8.6.3</lucene-solr.version>
         <maven-site-plugin.version>3.7</maven-site-plugin.version>
         <MaxPermGen>512m</MaxPermGen>
@@ -888,48 +890,66 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-log4j12</artifactId>
                 <version>${slf4j.version}</version>
+                <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>jul-to-slf4j</artifactId>
                 <version>${slf4j.version}</version>
+                <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
             </dependency>
 
-            <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>${log4j.version}</version>
-                <scope>compile</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.sun.jdmk</groupId>
-                        <artifactId>jmxtools</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.sun.jmx</groupId>
-                        <artifactId>jmxri</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.mail</groupId>
-                        <artifactId>mail</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.jms</groupId>
-                        <artifactId>jmx</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.jms</groupId>
-                        <artifactId>jms</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>log4j</groupId>-->
+<!--                <artifactId>log4j</artifactId>-->
+<!--                <version>${log4j.version}</version>-->
+<!--                <scope>compile</scope>-->
+<!--                <exclusions>-->
+<!--                    <exclusion>-->
+<!--                        <groupId>com.sun.jdmk</groupId>-->
+<!--                        <artifactId>jmxtools</artifactId>-->
+<!--                    </exclusion>-->
+<!--                    <exclusion>-->
+<!--                        <groupId>com.sun.jmx</groupId>-->
+<!--                        <artifactId>jmxri</artifactId>-->
+<!--                    </exclusion>-->
+<!--                    <exclusion>-->
+<!--                        <groupId>javax.mail</groupId>-->
+<!--                        <artifactId>mail</artifactId>-->
+<!--                    </exclusion>-->
+<!--                    <exclusion>-->
+<!--                        <groupId>javax.jms</groupId>-->
+<!--                        <artifactId>jmx</artifactId>-->
+<!--                    </exclusion>-->
+<!--                    <exclusion>-->
+<!--                        <groupId>javax.jms</groupId>-->
+<!--                        <artifactId>jms</artifactId>-->
+<!--                    </exclusion>-->
+<!--                </exclusions>-->
+<!--            </dependency>-->
 
             <!-- hadoop -->
             <dependency>
@@ -1663,16 +1683,34 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jul-to-slf4j</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
