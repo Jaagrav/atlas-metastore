@@ -87,7 +87,7 @@ jobs:
       - name: Check out into atlan repo
         uses: actions/checkout@v2
         with:
-          ref: main
+          ref: typedefsyncv1
           repository: atlanhq/atlan
           token: ${{ secrets.my_pat }}
 
@@ -101,9 +101,9 @@ jobs:
       - name: Commit changes
         uses: EndBug/add-and-commit@v7
         with:
-          branch: main
+          branch: typedefsyncv1
           author_name: atlan-ci
           author_email: it@atlan.com
           message: '${{ github.event.repository.name }}'
           default_author: user_info
-          push: origin main
+          push: origin typedefsyncv1
