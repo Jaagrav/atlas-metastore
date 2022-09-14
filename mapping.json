@@ -1,0 +1,3003 @@
+{
+  "janusgraph_vertex_index": {
+    "aliases": {
+      "janusgraph": {}
+    },
+    "mappings": {
+      "properties": {
+        "AtlasServer": {
+          "properties": {
+            "displayName": {
+              "type": "text",
+              "copy_to": [
+                "all"
+              ]
+            },
+            "name": {
+              "type": "text",
+              "copy_to": [
+                "all"
+              ]
+            }
+          }
+        },
+        "CrSaUc51cw6oja0UrmOmRa": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "DPXmUNZ5ARvVU4ELE0bnS9": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "Hr7gNggQYcFGDg2ZPPhpv2": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "JMdck87CWfYFzhq8muqbAg": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "JtbGI0FMDz1P42lfISxeDm": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "KlFyXHi0CniX8KSbtXveCO": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "L8K04f8anqQjGmtBEllbrr": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "M5KNojOThAJH8mR5JAXTnB": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "Pq3ZHEJlEPRWobm6n86f4m": {
+          "type": "long",
+          "fields": {
+            "date": {
+              "type": "date",
+              "format": "epoch_millis"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "T2UqqH3qOCKc6b8v0jhqdH": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "UaaIBzkWhufnewgW5nLlF3": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "WaQCeK40eVn87mYyErUgdl": {
+          "type": "long",
+          "fields": {
+            "date": {
+              "type": "date",
+              "format": "epoch_millis"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "Zj6Wwbktx1nzhS8UU6EdCD": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__AtlasUserProfile": {
+          "properties": {
+            "name": {
+              "type": "text",
+              "copy_to": [
+                "all"
+              ]
+            }
+          }
+        },
+        "__AtlasUserSavedSearch": {
+          "properties": {
+            "name": {
+              "type": "text",
+              "copy_to": [
+                "all"
+              ]
+            }
+          }
+        },
+        "__categories": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__classificationNames": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__classificationsText": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__createdBy": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__customAttributes": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__entityDeletedTimestamp": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__glossary": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__guid": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__hasLineage": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__historicalGuids": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__idxRecovery_name": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__isIncomplete": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__labels": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__meaningNames": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__meanings": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__meaningsText": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_comma_analyzer"
+        },
+        "__modificationTimestamp": {
+          "type": "long",
+          "fields": {
+            "date": {
+              "type": "date",
+              "format": "epoch_millis"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__modifiedBy": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__parentCategory": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__patch": {
+          "properties": {
+            "action": {
+              "type": "text",
+              "copy_to": [
+                "all"
+              ]
+            },
+            "description": {
+              "type": "text",
+              "copy_to": [
+                "all"
+              ]
+            },
+            "id": {
+              "type": "text",
+              "copy_to": [
+                "all"
+              ]
+            },
+            "state": {
+              "type": "text",
+              "copy_to": [
+                "all"
+              ]
+            },
+            "type": {
+              "type": "text",
+              "copy_to": [
+                "all"
+              ]
+            }
+          }
+        },
+        "__pendingTasks": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__propagatedClassificationNames": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__propagatedTraitNames": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__state": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__superTypeNames": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "normalizer": "atlan_normalizer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__task_attemptCount": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__task_createdBy": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__task_endTime": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__task_errorMessage": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__task_guid": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__task_modificationTimestamp": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__task_startTime": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__task_status": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__task_timeTakenInSeconds": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__task_timestamp": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__task_type": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__task_v_type": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__timestamp": {
+          "type": "long",
+          "fields": {
+            "date": {
+              "type": "date",
+              "format": "epoch_millis"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__traitNames": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__type": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__typeName": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "normalizer": "atlan_normalizer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__type_name": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__type_servicetype": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__u___AtlasUserProfile": {
+          "properties": {
+            "name": {
+              "type": "text",
+              "copy_to": [
+                "all"
+              ]
+            }
+          }
+        },
+        "__u_awsArn": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__u_fullName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__u_qualifiedName": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__u_uniqueName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "__vIdInImport": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "abbreviation": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "adminGroups": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "adminRoles": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "adminUsers": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "alias": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "all": {
+          "type": "text"
+        },
+        "allowQuery": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "allowQueryPreview": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "announcementMessage": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "announcementTitle": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "announcementType": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "announcementUpdatedAt": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "announcementUpdatedBy": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "apiName": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            }
+          },
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "ast": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "awsAccountId": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "awsArn": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "awsCloudWatchMetricName": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "awsCloudWatchMetricScope": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "awsOwnerId": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "awsOwnerName": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "awsPartition": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "awsRegion": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "awsResourceId": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "awsService": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "awsTagKey": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "awsTagValue": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "category": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "certificateStatus": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "certificateStatusMessage": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "certificateUpdatedAt": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "certificateUpdatedBy": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "certificationNote": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "certifierDisplayName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "clientId": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "code": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "collectionQualifiedName": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "columnCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "connectionName": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "connectionQualifiedName": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "connectorIcon": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "connectorImage": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "connectorName": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "constraint": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "credentialStrategy": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "dashboardCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "dashboardQualifiedName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "dashboardType": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "dataCategory": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "dataStudioAssetOwner": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "dataStudioAssetTitle": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "normalizer": "atlan_normalizer"
+            },
+            "stemmed": {
+              "type": "text",
+              "analyzer": "atlan_text_stemmer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "dataStudioAssetType": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "dataType": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "databaseName": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "normalizer": "atlan_normalizer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "databaseQualifiedName": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "dataflowCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "datasetCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "datasetQualifiedName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "datasourceFieldType": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "datasourceQualifiedName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "defaultCredentialGuid": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "defaultDatabaseQualifiedName": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "defaultSchemaQualifiedName": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "defaultValue": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "defaultValueFormula": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "definition": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "description": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "normalizer": "atlan_normalizer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "detailColumns": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "displayName": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            }
+          },
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "eTY4oMOHZnFckj0Ws5toQv": {
+          "type": "long",
+          "fields": {
+            "date": {
+              "type": "date",
+              "format": "epoch_millis"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "endTime": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "examples": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "externalLocation": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "externalLocationFormat": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "externalLocationRegion": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "fieldCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "fields": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "folderName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "formula": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "fullName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "fullyQualifiedName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "googleProjectId": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "googleProjectName": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "googleProjectNumber": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "googleService": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "hImyyVOntWaYqMWPYxp80O": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "hasExtracts": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "hcBc6UayMKe4HtYKwnVn2x": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "host": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "icon": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "iconType": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "inlineHelpText": {
+          "type": "text",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "isCalculated": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isCaseSensitive": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isCertified": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isClustered": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isCustom": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isDiscoverable": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isDist": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isEditable": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isEncrypted": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isForeign": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isGlobal": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isIndexed": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isMergable": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isNullable": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isPartition": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isPartitioned": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isPinned": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isPolymorphicForeignKey": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isPrimary": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isPrivate": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isPublished": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isQueryPreview": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isQueryable": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isSort": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isSqlSnippet": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isTemporary": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isTopLevelProject": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isTrashedDataStudioAsset": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isUnique": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "isVisualQuery": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "language": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "lastSyncRun": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "lastSyncRunAt": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "lastSyncWorkflowName": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "link": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "longDescription": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "lookId": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "lookerExploreQualifiedName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "lookerFieldDataType": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "lookerProjectName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "lookerTimesUsed": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "lookerViewQualifiedName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "lookmlLinkId": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "m2bN5w2NFmiWV0RpMxBQG0": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "maxLength": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "mergeResultId": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "metabaseCollectionName": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "normalizer": "atlan_normalizer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "metabaseCollectionQualifiedName": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "metabaseColor": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "metabaseDashboardCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "metabaseIsPersonalCollection": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "metabaseNamespace": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "metabaseQuery": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "normalizer": "atlan_normalizer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "metabaseQueryType": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "metabaseQuestionCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "metabaseSlug": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "modeChartCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "modeChartType": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "modeCollectionCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "modeCollectionState": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "modeCollectionToken": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "modeCollectionType": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "modeId": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "modeIsPublic": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "modeIsShared": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "modeQueryCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "modeQueryName": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "normalizer": "atlan_normalizer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "modeQueryPreview": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "modeQueryQualifiedName": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "modeRawQuery": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "modeReportImportCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "modeReportName": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "normalizer": "atlan_normalizer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "modeReportPublishedAt": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "modeReportQualifiedName": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "modeToken": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "modeWorkspaceName": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "normalizer": "atlan_normalizer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "modeWorkspaceQualifiedName": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "modeWorkspaceUsername": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "modelName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "name": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "normalizer": "atlan_normalizer"
+            },
+            "stemmed": {
+              "type": "text",
+              "analyzer": "atlan_text_stemmer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "njBqDKKSW8fyWLZE3nTv2K": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "noteText": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "numericScale": {
+          "type": "float",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "objectQualifiedName": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "operation": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "operationEndTime": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "operationParams": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "operationStartTime": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "order": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "organizationQualifiedName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "ownerGroups": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "ownerName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "ownerUsers": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "pageCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "params": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "parentQualifiedName": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "partitionCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "partitionList": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "partitionOrder": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "partitionStrategy": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "picklistValues": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "pinnedAt": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "pinnedBy": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "pl8MAPpJPrfs2j2YtirI7m": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "popularityScore": {
+          "type": "float",
+          "fields": {
+            "rank_feature": {
+              "type": "rank_feature"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "port": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "powerBIColumnDataCategory": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "powerBIColumnDataType": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "powerBIColumnSummarizeBy": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "powerBIEndorsement": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "powerBIFormatString": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "powerBIIsExternalMeasure": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "powerBIIsHidden": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "powerBIMeasureExpression": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "powerBISortByColumn": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "powerBITableColumnCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "powerBITableMeasureCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "powerBITableQualifiedName": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "powerBITableSourceExpressions": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "precision": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "projectName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "projectQualifiedName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "qC5F3Cel76NvkTitugX4NS": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "qualifiedName": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "queryConfig": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "queryCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "queryCountUpdatedAt": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "queryID": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "queryUserCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "rawQuery": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "reference": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "refreshMethod": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "refreshMode": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "reportCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "reportQualifiedName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "result": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "resultCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "resultMakerID": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "resultSummary": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "rnQOVwxwvidDv6F0oCYx23": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "role": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "rowCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "rowLimit": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "s0hbUYugy3KeIyGCfRW8oQ": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "s3BucketName": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "s3BucketQualifiedName": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "s3BucketVersioningEnabled": {
+          "type": "boolean",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "s3ETag": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "s3Encryption": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "s3ObjectContentDisposition": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "s3ObjectContentType": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "s3ObjectCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "s3ObjectKey": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "s3ObjectLastModifiedTime": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "s3ObjectSize": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "s3ObjectStorageClass": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "s3ObjectVersionId": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "schemaCount": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "schemaName": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "normalizer": "atlan_normalizer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "schemaQualifiedName": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "searchParameters": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "searchType": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "shortDescription": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "siteQualifiedName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sizeBytes": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceChildCount": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceConnectionName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceContentMetadataId": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceCreatedAt": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceCreatedBy": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceCreatorId": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceDefinition": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceDefinitionDatabase": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceDefinitionSchema": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceEmbedURL": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceId": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceLastAccessedAt": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceLastViewedAt": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceLogo": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceMetadataId": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceOwners": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceParentID": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceQueryId": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceServerName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceURL": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceUpdatedAt": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceUpdatedBy": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceUserId": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourceViewCount": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sourcelastUpdaterId": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sql": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "sqlTableName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "staleSinceDate": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "staleness": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "startTime": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "subCategory": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "subDataType": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "subType": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "subtitleText": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "tableCount": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "tableName": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "normalizer": "atlan_normalizer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "tableQualifiedName": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "tableauDataType": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "tableauDatasourceFieldBinSize": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "tableauDatasourceFieldDataCategory": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "tableauDatasourceFieldDataType": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "tableauDatasourceFieldFormula": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "tableauDatasourceFieldRole": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "targetServerName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "tenantId": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "tileCount": {
+          "type": "long",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "topLevelProjectName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "topLevelProjectQualifiedName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "uiParameters": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "uniqueName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "urls": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "usage": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "userDescription": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "normalizer": "atlan_normalizer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "userName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "v1RPkZmfHIaajXcYKaB01M": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "variablesSchemaBase64": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "viewName": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "normalizer": "atlan_normalizer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ],
+          "analyzer": "atlan_text_analyzer"
+        },
+        "viewQualifiedName": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "viewScore": {
+          "type": "float",
+          "fields": {
+            "rank_feature": {
+              "type": "rank_feature"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "viewerGroups": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "viewerUsers": {
+          "type": "keyword",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "viewsCount": {
+          "type": "integer",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "visualBuilderSchemaBase64": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "vuE4gL92Njrs5rE0h3Kvmb": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "webUrl": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "workbookQualifiedName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "workspaceQualifiedName": {
+          "type": "text",
+          "copy_to": [
+            "all"
+          ]
+        },
+        "wwP8ZQvHVO2MWkkFaGQ9W2": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        },
+        "ydeqVTw3VxID1YQNLKq95z": {
+          "type": "keyword",
+          "normalizer": "atlan_normalizer",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
+          "copy_to": [
+            "all"
+          ]
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "routing": {
+          "allocation": {
+            "include": {
+              "_tier_preference": "data_content"
+            }
+          }
+        },
+        "number_of_shards": "1",
+        "provided_name": "janusgraph_vertex_index",
+        "max_result_window": "2147483647",
+        "creation_date": "1644466263191",
+        "analysis": {
+          "filter": {
+            "graph_synonyms": {
+              "type": "synonym_graph",
+              "synonyms_path": "synonym.txt"
+            },
+            "snowball_english": {
+              "type": "snowball",
+              "language": "English"
+            }
+          },
+          "char_filter": {
+            "number_filter": {
+              "pattern": "\\d+",
+              "type": "pattern_replace",
+              "replacement": " $0"
+            }
+          },
+          "normalizer": {
+            "atlan_normalizer": {
+              "filter": [
+                "lowercase"
+              ],
+              "type": "custom"
+            }
+          },
+          "analyzer": {
+            "atlan_text_stemmer": {
+              "filter": [
+                "snowball_english",
+                "lowercase"
+              ],
+              "char_filter": [
+                "number_filter"
+              ],
+              "type": "custom",
+              "tokenizer": "atlan_tokenizer"
+            },
+            "atlan_text_comma_analyzer": {
+              "filter": [
+                "lowercase"
+              ],
+              "type": "custom",
+              "tokenizer": "atlan_comma_tokenizer"
+            },
+            "search_synonyms": {
+              "filter": [
+                "graph_synonyms",
+                "lowercase"
+              ],
+              "type": "custom",
+              "tokenizer": "atlan_tokenizer"
+            },
+            "atlan_text_analyzer": {
+              "filter": [
+                "apostrophe",
+                "lowercase"
+              ],
+              "char_filter": [
+                "number_filter"
+              ],
+              "type": "custom",
+              "tokenizer": "atlan_tokenizer"
+            }
+          },
+          "tokenizer": {
+            "atlan_tokenizer": {
+              "pattern": "( |_|-|'|/|@)",
+              "type": "pattern"
+            },
+            "atlan_comma_tokenizer": {
+              "pattern": ",",
+              "type": "pattern"
+            }
+          }
+        },
+        "number_of_replicas": "1",
+        "uuid": "1x9qkvy4TvWPhCJtwjzVSg",
+        "version": {
+          "created": "7160299"
+        }
+      }
+    }
+  }
+}
