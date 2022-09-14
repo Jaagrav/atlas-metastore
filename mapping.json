@@ -1462,18 +1462,19 @@
           ]
         },
         "lookerExploreQualifiedName": {
-          "type": "text",
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
           "copy_to": [
             "all"
           ]
         },
         "lookerFieldDataType": {
           "type": "keyword",
-          "fields": {
-            "text": {
-              "type": "text"
-            }
-          },
           "copy_to": [
             "all"
           ]
@@ -1491,7 +1492,13 @@
           ]
         },
         "lookerViewQualifiedName": {
-          "type": "text",
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "atlan_text_analyzer"
+            }
+          },
           "copy_to": [
             "all"
           ]
