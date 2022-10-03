@@ -134,6 +134,13 @@ public abstract class ClassificationTask extends AbstractTask {
         }};
     }
 
+    public static Map<String, Object> toParameters(Set<String> deletedEdgeIds, String classificationVertexId) {
+        return new HashMap<String, Object>() {{
+            put(PARAM_DELETED_EDGE_IDS, AtlasType.toJson(deletedEdgeIds));
+            put(PARAM_CLASSIFICATION_VERTEX_ID, classificationVertexId);
+        }};
+    }
+
     public static Map<String, Object> toParameters(String relationshipEdgeId, AtlasRelationship relationship) {
         return new HashMap<String, Object>() {{
             put(PARAM_RELATIONSHIP_EDGE_ID, relationshipEdgeId);

@@ -149,7 +149,11 @@ public abstract class DeleteHandlerV1 {
             deleteTypeVertex(deletionCandidateVertex, isInternalType(deletionCandidateVertex));
 
             if (DEFERRED_ACTION_ENABLED) {
-                createAndQueueTask(CLASSIFICATION_ONLY_PROPAGATION_DELETE, RequestContext.get().getDeletedEdgesIds());
+                List<AtlasEdge> classificationEdges = getAllClassificationEdges(deletionCandidateVertex);
+                for (AtlasEdge classificationEdge : classificationEdges) {
+                    String classificationVertexId = classificationEdge.getInVertex().getIdForDisplay();
+                    createAndQueueTask(CLASSIFICATION_ONLY_PROPAGATION_DELETE, RequestContext.get().getDeletedEdgesIds(), classificationVertexId);
+                }
             }
         }
     }
@@ -1309,6 +1313,19 @@ public abstract class DeleteHandlerV1 {
         }
 
         Map<String, Object> taskParams  = ClassificationTask.toParameters(deletedEdgeIds);
+        AtlasTask           task        = taskManagement.createTask(taskType, currentUser, taskParams);
+
+        RequestContext.get().queueTask(task);
+    }
+
+    public void createAndQueueTask(String taskType, Set<String> deletedEdgeIds, String classificationVertexId) {
+        String currentUser = RequestContext.getCurrentUser();
+
+        if (CollectionUtils.isEmpty(deletedEdgeIds)) {
+            return;
+        }
+
+        Map<String, Object> taskParams  = ClassificationTask.toParameters(deletedEdgeIds, classificationVertexId);
         AtlasTask           task        = taskManagement.createTask(taskType, currentUser, taskParams);
 
         RequestContext.get().queueTask(task);
