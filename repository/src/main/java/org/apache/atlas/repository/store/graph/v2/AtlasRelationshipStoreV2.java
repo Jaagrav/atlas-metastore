@@ -318,7 +318,7 @@ public class AtlasRelationshipStoreV2 implements AtlasRelationshipStore {
 
         if (DEFERRED_ACTION_ENABLED) {
             for (AtlasEdge edge: edgesToDelete) {
-                String entityGuid = (String) edge.getInVertex().getId();
+                String entityGuid = edge.getInVertex().getIdForDisplay();
                 List<AtlasEdge> classificationEdges = GraphHelper.getAllClassificationEdges(graph.getVertex(entityGuid));
                 for (AtlasEdge classificationEdge : classificationEdges) {
                     String classificationVertexId = classificationEdge.getInVertex().getIdForDisplay();
@@ -365,7 +365,7 @@ public class AtlasRelationshipStoreV2 implements AtlasRelationshipStore {
         deleteDelegate.getHandler().deleteRelationships(Collections.singleton(edge), forceDelete);
 
         if (DEFERRED_ACTION_ENABLED) {
-            String entityGuid = (String) edge.getInVertex().getId();
+            String entityGuid = edge.getInVertex().getIdForDisplay();
             List<AtlasEdge> classificationEdges = GraphHelper.getAllClassificationEdges(graph.getVertex(entityGuid));
             for (AtlasEdge classificationEdge : classificationEdges) {
                 String classificationVertexId = classificationEdge.getInVertex().getIdForDisplay();
