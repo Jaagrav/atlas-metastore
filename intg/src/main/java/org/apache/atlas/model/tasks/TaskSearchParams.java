@@ -67,4 +67,14 @@ public class TaskSearchParams extends SearchParams {
 
         return ret;
     }
+
+    public Map getDSLGuid(String taskGuid){
+        Map<String, Object> match = new HashMap<>();
+        match.put("__task_guid", taskGuid);
+        Map<String, Object> query = new HashMap<>();
+        query.put("match", match);
+        Map<String, Object> queryDsl = new HashMap<>();
+        queryDsl.put("query", query);
+        return queryDsl;
+    }
 }
