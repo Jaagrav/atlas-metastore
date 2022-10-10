@@ -20,7 +20,6 @@ package org.apache.atlas.repository.store.graph.v2.tasks;
 import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.model.instance.AtlasRelationship;
 import org.apache.atlas.model.tasks.AtlasTask;
-import org.apache.atlas.repository.graphdb.AtlasEdge;
 import org.apache.atlas.repository.graphdb.AtlasGraph;
 import org.apache.atlas.repository.store.graph.AtlasRelationshipStore;
 import org.apache.atlas.repository.store.graph.v1.DeleteHandlerDelegate;
@@ -68,10 +67,10 @@ public class ClassificationPropagationTasks {
 
         @Override
         protected void run(Map<String, Object> parameters) throws AtlasBaseException {
-            Set<String> deletedEdgeIds    =  AtlasType.fromJson((String) parameters.get(PARAM_DELETED_EDGE_IDS), Set.class);
+            String deletedEdgeId         =  (String) parameters.get(PARAM_DELETED_EDGE_ID);
             String classificationVertexId =  (String) parameters.get(PARAM_CLASSIFICATION_VERTEX_ID);
 
-            entityGraphMapper.deleteClassificationOnlyPropagation(deletedEdgeIds, classificationVertexId);
+            entityGraphMapper.deleteClassificationOnlyPropagation(deletedEdgeId, classificationVertexId);
         }
     }
 
