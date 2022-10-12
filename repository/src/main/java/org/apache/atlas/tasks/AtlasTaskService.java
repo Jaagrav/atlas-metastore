@@ -6,7 +6,10 @@ import org.apache.atlas.model.tasks.AtlasTask;
 import org.apache.atlas.model.tasks.TaskSearchParams;
 import org.apache.atlas.model.tasks.TaskSearchResult;
 import org.apache.atlas.repository.Constants;
-import org.apache.atlas.repository.graphdb.*;
+import org.apache.atlas.repository.graphdb.AtlasGraph;
+import org.apache.atlas.repository.graphdb.AtlasIndexQuery;
+import org.apache.atlas.repository.graphdb.AtlasVertex;
+import org.apache.atlas.repository.graphdb.DirectIndexQueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.apache.atlas.repository.Constants.TASK_GUID;
 import static org.apache.atlas.repository.store.graph.v2.AtlasGraphUtilsV2.setEncodedProperty;
 import static org.apache.atlas.tasks.TaskRegistry.toAtlasTask;
 
@@ -27,16 +29,6 @@ public class AtlasTaskService implements TaskService {
     private final AtlasGraph graph;
 
     private final List<String> retryAllowedStatuses;
-
-    static class SearchResult {
-        Long vertexTotals;
-        DirectIndexQueryResult directIndexQueryResult;
-
-        public SearchResult(Long vertexTotals, DirectIndexQueryResult directIndexQueryResult) {
-            this.vertexTotals = vertexTotals;
-            this.directIndexQueryResult = directIndexQueryResult;
-        }
-    }
 
     @Inject
     public AtlasTaskService(AtlasGraph graph) {
@@ -51,10 +43,12 @@ public class AtlasTaskService implements TaskService {
     public TaskSearchResult getTasks(TaskSearchParams searchParams) throws AtlasBaseException {
         TaskSearchResult ret = new TaskSearchResult();
         List<AtlasTask> tasks = new ArrayList<>();
+        AtlasIndexQuery indexQuery = null;
+        DirectIndexQueryResult indexQueryResult;
 
         try {
-            SearchResult searchResult = searchTask(searchParams);
-            DirectIndexQueryResult indexQueryResult = searchResult.directIndexQueryResult;
+            indexQuery = searchTask(searchParams);
+            indexQueryResult = indexQuery.vertices(searchParams);
 
             if (indexQueryResult != null) {
                 Iterator<AtlasIndexQuery.Result> iterator = indexQueryResult.getIterator();
@@ -71,7 +65,7 @@ public class AtlasTaskService implements TaskService {
                 }
 
                 ret.setTasks(tasks);
-                ret.setApproximateCount(searchResult.vertexTotals);
+                ret.setApproximateCount(indexQuery.vertexTotals());
                 ret.setAggregations(indexQueryResult.getAggregationMap());
             }
         } catch (AtlasBaseException e) {
@@ -87,8 +81,7 @@ public class AtlasTaskService implements TaskService {
 
     @Override
     public void retryTask(String taskGuid) throws AtlasBaseException {
-        SearchResult searchResult = searchTask(constructSearch(taskGuid));
-        DirectIndexQueryResult indexQueryResult = searchResult.directIndexQueryResult;
+        DirectIndexQueryResult indexQueryResult = searchTask(taskGuid);
 
         Iterator<AtlasIndexQuery.Result> iterator = indexQueryResult.getIterator();
 
@@ -111,14 +104,14 @@ public class AtlasTaskService implements TaskService {
         }
     }
 
-    private TaskSearchParams constructSearch(String taskGuid) {
-        TaskSearchParams searchParams = new TaskSearchParams();
-        searchParams.setDsl(searchParams.getDSLGuid(taskGuid));
-        return searchParams;
+    private AtlasIndexQuery searchTask(TaskSearchParams searchParams) {
+        return graph.elasticsearchQuery(Constants.VERTEX_INDEX, searchParams);
     }
 
-    private SearchResult searchTask(TaskSearchParams searchParams) throws AtlasBaseException {
+    private DirectIndexQueryResult searchTask(String taskGuid) throws AtlasBaseException {
+        TaskSearchParams searchParams = new TaskSearchParams();
+        searchParams.setDsl(searchParams.getDSLGuid(taskGuid));
         AtlasIndexQuery indexQuery = graph.elasticsearchQuery(Constants.VERTEX_INDEX, searchParams);
-        return new SearchResult(indexQuery.vertexTotals(), indexQuery.vertices(searchParams));
+        return indexQuery.vertices(searchParams);
     }
 }
