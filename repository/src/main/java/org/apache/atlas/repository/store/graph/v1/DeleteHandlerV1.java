@@ -149,13 +149,7 @@ public abstract class DeleteHandlerV1 {
             deleteTypeVertex(deletionCandidateVertex, isInternalType(deletionCandidateVertex));
 
             if (DEFERRED_ACTION_ENABLED) {
-                List<AtlasEdge> classificationEdges = getAllClassificationEdges(deletionCandidateVertex);
-                for (AtlasEdge classificationEdge : classificationEdges) {
-                    String classificationVertexId = classificationEdge.getInVertex().getIdForDisplay();
-                    for (String deletedEdgeId: RequestContext.get().getDeletedEdgesIds()) {
-                        createAndQueueTask(CLASSIFICATION_ONLY_PROPAGATION_DELETE, deletedEdgeId, classificationVertexId);
-                    }
-                }
+                createClassificationOnlyPropagationDeleteTasksAndQueue(getAllClassificationEdges(deletionCandidateVertex), RequestContext.get().getDeletedEdgesIds());
             }
         }
     }
@@ -1280,6 +1274,15 @@ public abstract class DeleteHandlerV1 {
                 edge.removeProperty(org.apache.atlas.repository.Constants.RELATIONSHIPTYPE_BLOCKED_PROPAGATED_CLASSIFICATIONS_KEY);
             } else {
                 edge.setListProperty(org.apache.atlas.repository.Constants.RELATIONSHIPTYPE_BLOCKED_PROPAGATED_CLASSIFICATIONS_KEY, classificationIds);
+            }
+        }
+    }
+
+    public void createClassificationOnlyPropagationDeleteTasksAndQueue(List<AtlasEdge> classificationEdges, Set<String> deletedEdgeIds) {
+        for (AtlasEdge classificationEdge : classificationEdges) {
+            String classificationVertexId = classificationEdge.getInVertex().getIdForDisplay();
+            for (String deletedEdgeId: deletedEdgeIds) {
+                createAndQueueTask(CLASSIFICATION_ONLY_PROPAGATION_DELETE, deletedEdgeId, classificationVertexId);
             }
         }
     }

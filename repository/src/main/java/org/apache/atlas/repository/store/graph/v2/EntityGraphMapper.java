@@ -28,14 +28,7 @@ import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.exception.EntityNotFoundException;
 import org.apache.atlas.model.TimeBoundary;
 import org.apache.atlas.model.TypeCategory;
-import org.apache.atlas.model.instance.AtlasClassification;
-import org.apache.atlas.model.instance.AtlasEntity;
-import org.apache.atlas.model.instance.AtlasEntityHeader;
-import org.apache.atlas.model.instance.AtlasObjectId;
-import org.apache.atlas.model.instance.AtlasRelatedObjectId;
-import org.apache.atlas.model.instance.AtlasRelationship;
-import org.apache.atlas.model.instance.AtlasStruct;
-import org.apache.atlas.model.instance.EntityMutationResponse;
+import org.apache.atlas.model.instance.*;
 import org.apache.atlas.model.instance.EntityMutations.EntityOperation;
 import org.apache.atlas.model.tasks.AtlasTask;
 import org.apache.atlas.model.typedef.AtlasEntityDef;
@@ -55,28 +48,20 @@ import org.apache.atlas.repository.graphdb.AtlasVertex;
 import org.apache.atlas.repository.store.graph.AtlasRelationshipStore;
 import org.apache.atlas.repository.store.graph.EntityGraphDiscoveryContext;
 import org.apache.atlas.repository.store.graph.v1.DeleteHandlerDelegate;
+import org.apache.atlas.repository.store.graph.v1.RestoreHandlerV1;
+import org.apache.atlas.repository.store.graph.v2.preprocessor.PreProcessor;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.glossary.CategoryPreProcessor;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.glossary.GlossaryPreProcessor;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.glossary.TermPreProcessor;
-import org.apache.atlas.repository.store.graph.v2.preprocessor.PreProcessor;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.sql.QueryCollectionPreProcessor;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.sql.QueryFolderPreProcessor;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.sql.QueryPreProcessor;
 import org.apache.atlas.repository.store.graph.v2.tasks.ClassificationTask;
 import org.apache.atlas.tasks.TaskManagement;
-import org.apache.atlas.type.AtlasArrayType;
-import org.apache.atlas.repository.store.graph.v1.RestoreHandlerV1;
-import org.apache.atlas.type.AtlasBuiltInTypes;
+import org.apache.atlas.type.*;
 import org.apache.atlas.type.AtlasBusinessMetadataType.AtlasBusinessAttribute;
-import org.apache.atlas.type.AtlasClassificationType;
-import org.apache.atlas.type.AtlasEntityType;
-import org.apache.atlas.type.AtlasMapType;
-import org.apache.atlas.type.AtlasStructType;
 import org.apache.atlas.type.AtlasStructType.AtlasAttribute;
 import org.apache.atlas.type.AtlasStructType.AtlasAttribute.AtlasRelationshipEdgeDirection;
-import org.apache.atlas.type.AtlasType;
-import org.apache.atlas.type.AtlasTypeRegistry;
-import org.apache.atlas.type.AtlasTypeUtil;
 import org.apache.atlas.utils.AtlasEntityUtil;
 import org.apache.atlas.utils.AtlasJson;
 import org.apache.atlas.utils.AtlasPerfMetrics;
@@ -91,19 +76,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.Date;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -115,29 +88,28 @@ import static org.apache.atlas.model.TypeCategory.CLASSIFICATION;
 import static org.apache.atlas.model.instance.AtlasEntity.Status.ACTIVE;
 import static org.apache.atlas.model.instance.AtlasEntity.Status.DELETED;
 import static org.apache.atlas.model.instance.AtlasRelatedObjectId.KEY_RELATIONSHIP_ATTRIBUTES;
-import static org.apache.atlas.model.instance.EntityMutations.EntityOperation.CREATE;
-import static org.apache.atlas.model.instance.EntityMutations.EntityOperation.DELETE;
-import static org.apache.atlas.model.instance.EntityMutations.EntityOperation.PARTIAL_UPDATE;
-import static org.apache.atlas.model.instance.EntityMutations.EntityOperation.UPDATE;
+import static org.apache.atlas.model.instance.EntityMutations.EntityOperation.*;
 import static org.apache.atlas.model.typedef.AtlasStructDef.AtlasAttributeDef.Cardinality.SET;
+import static org.apache.atlas.repository.Constants.CLASSIFICATION_NAMES_KEY;
+import static org.apache.atlas.repository.Constants.CLASSIFICATION_TEXT_KEY;
+import static org.apache.atlas.repository.Constants.CREATED_BY_KEY;
+import static org.apache.atlas.repository.Constants.CUSTOM_ATTRIBUTES_PROPERTY_KEY;
+import static org.apache.atlas.repository.Constants.GUID_PROPERTY_KEY;
+import static org.apache.atlas.repository.Constants.IS_INCOMPLETE_PROPERTY_KEY;
+import static org.apache.atlas.repository.Constants.LABELS_PROPERTY_KEY;
+import static org.apache.atlas.repository.Constants.MODIFICATION_TIMESTAMP_PROPERTY_KEY;
+import static org.apache.atlas.repository.Constants.MODIFIED_BY_KEY;
+import static org.apache.atlas.repository.Constants.PROPAGATED_CLASSIFICATION_NAMES_KEY;
+import static org.apache.atlas.repository.Constants.STATE_PROPERTY_KEY;
+import static org.apache.atlas.repository.Constants.TIMESTAMP_PROPERTY_KEY;
 import static org.apache.atlas.repository.Constants.*;
-import static org.apache.atlas.repository.graph.GraphHelper.*;
 import static org.apache.atlas.repository.store.graph.v2.AtlasGraphUtilsV2.getIdFromVertex;
 import static org.apache.atlas.repository.store.graph.v2.AtlasGraphUtilsV2.isReference;
-import static org.apache.atlas.repository.store.graph.v2.tasks.ClassificationPropagateTaskFactory.CLASSIFICATION_PROPAGATION_ADD;
-import static org.apache.atlas.repository.store.graph.v2.tasks.ClassificationPropagateTaskFactory.CLASSIFICATION_PROPAGATION_DELETE;
-import static org.apache.atlas.repository.store.graph.v2.tasks.ClassificationPropagateTaskFactory.CLASSIFICATION_ONLY_PROPAGATION_DELETE;
+import static org.apache.atlas.repository.store.graph.v2.tasks.ClassificationPropagateTaskFactory.*;
 import static org.apache.atlas.type.AtlasStructType.AtlasAttribute.AtlasRelationshipEdgeDirection.IN;
 import static org.apache.atlas.type.AtlasStructType.AtlasAttribute.AtlasRelationshipEdgeDirection.OUT;
-import static org.apache.atlas.type.Constants.PENDING_TASKS_PROPERTY_KEY;
-import static org.apache.atlas.type.Constants.CATEGORIES_PARENT_PROPERTY_KEY;
-import static org.apache.atlas.type.Constants.CATEGORIES_PROPERTY_KEY;
-import static org.apache.atlas.type.Constants.GLOSSARY_PROPERTY_KEY;
-import static org.apache.atlas.type.Constants.HAS_LINEAGE;
-import static org.apache.atlas.type.Constants.MEANINGS_PROPERTY_KEY;
-import static org.apache.atlas.type.Constants.MEANINGS_TEXT_PROPERTY_KEY;
-import static org.apache.atlas.type.Constants.MEANING_NAMES_PROPERTY_KEY;
-
+import static org.apache.atlas.type.Constants.*;
+import static org.apache.atlas.repository.graph.GraphHelper.*;
 
 @Component
 public class EntityGraphMapper {
@@ -377,13 +349,7 @@ public class EntityGraphMapper {
                     reqContext.cache(createdEntity);
 
                     if (DEFERRED_ACTION_ENABLED) {
-                        List<AtlasEdge> classificationEdges = getAllClassificationEdges(vertex);
-                        for (AtlasEdge classificationEdge : classificationEdges) {
-                            String classificationVertexId = classificationEdge.getInVertex().getIdForDisplay();
-                            for (String deletedEdgeId: reqContext.getDeletedEdgesIds()) {
-                                deleteDelegate.getHandler().createAndQueueTask(CLASSIFICATION_ONLY_PROPAGATION_DELETE, deletedEdgeId, classificationVertexId);
-                            }
-                        }
+                        deleteDelegate.getHandler().createClassificationOnlyPropagationDeleteTasksAndQueue(getAllClassificationEdges(vertex), reqContext.getDeletedEdgesIds());
                     }
                 } catch (AtlasBaseException baseException) {
                     setEntityGuidToException(createdEntity, baseException, context);
@@ -452,13 +418,7 @@ public class EntityGraphMapper {
                     reqContext.cache(updatedEntity);
 
                     if (DEFERRED_ACTION_ENABLED) {
-                        List<AtlasEdge> classificationEdges = getAllClassificationEdges(vertex);
-                        for (AtlasEdge classificationEdge : classificationEdges) {
-                            String classificationVertexId = classificationEdge.getInVertex().getIdForDisplay();
-                            for (String deletedEdgeId: reqContext.getDeletedEdgesIds()) {
-                                deleteDelegate.getHandler().createAndQueueTask(CLASSIFICATION_ONLY_PROPAGATION_DELETE, deletedEdgeId, classificationVertexId);
-                            }
-                        }
+                        deleteDelegate.getHandler().createClassificationOnlyPropagationDeleteTasksAndQueue(getAllClassificationEdges(vertex), reqContext.getDeletedEdgesIds());
                     }
 
                 } catch (AtlasBaseException baseException) {
@@ -3324,6 +3284,77 @@ public class EntityGraphMapper {
         } catch (Exception e) {
             LOG.error("Error while removing classification id {} with error {} ", classificationVertexId, e.getMessage());
             throw new AtlasBaseException(e);
+        }
+    }
+
+    // TODO: Will be deprecated
+    public void deleteClassificationOnlyPropagation(Set<String> deletedEdgeIds) throws AtlasBaseException {
+        RequestContext.get().getDeletedEdgesIds().clear();
+        RequestContext.get().getDeletedEdgesIds().addAll(deletedEdgeIds);
+
+        for (AtlasEdge edge : deletedEdgeIds.stream().map(x -> graph.getEdge(x)).collect(Collectors.toList())) {
+
+            boolean isRelationshipEdge = deleteDelegate.getHandler().isRelationshipEdge(edge);
+            boolean isTermEntityEdge = isTermEntityEdge(edge);
+
+            if (edge == null || !isRelationshipEdge) {
+                continue;
+            }
+
+            List<AtlasVertex> currentClassificationVertices = getPropagatableClassifications(edge);
+
+            for (AtlasVertex currentClassificationVertex : currentClassificationVertices) {
+                String              classificationId                = currentClassificationVertex.getIdForDisplay();
+                String              sourceEntityId                  = getClassificationEntityGuid(currentClassificationVertex);
+                AtlasVertex         sourceEntityVertex              = AtlasGraphUtilsV2.findByGuid(this.graph, sourceEntityId);
+                AtlasClassification classification                  = entityRetriever.toAtlasClassification(currentClassificationVertex);
+                boolean             removePropagationOnEntityDelete = getRemovePropagations(currentClassificationVertex);
+
+                if (!(isTermEntityEdge || removePropagationOnEntityDelete)) {
+                    continue;
+                }
+
+                String propagationMode = CLASSIFICATION_PROPAGATION_MODE_DEFAULT;
+
+                Boolean restrictPropagationThroughLineage = AtlasGraphUtilsV2.getProperty(currentClassificationVertex, CLASSIFICATION_VERTEX_RESTRICT_PROPAGATE_THROUGH_LINEAGE, Boolean.class);
+
+                if (restrictPropagationThroughLineage != null && restrictPropagationThroughLineage) {
+                    propagationMode = CLASSIFICATION_PROPAGATION_MODE_RESTRICT_LINEAGE;
+                }
+
+                List<AtlasVertex> propagatedVertices = GraphHelper.getPropagatedVertices(currentClassificationVertex);
+                LOG.info("Traversed {} vertices with edge {} for classification vertex {}", propagatedVertices.size(), edge.getId(), classificationId);
+
+                List<AtlasVertex> propagatedEntitiesWithoutEdge = entityRetriever.getImpactedVerticesV2(sourceEntityVertex, GraphHelper.getRelationshipGuid(edge), classificationId,
+                        CLASSIFICATION_PROPAGATION_EXCLUSION_MAP.get(propagationMode));
+
+                LOG.info("Traversed {} vertices except edge {} for classification vertex {}", propagatedEntitiesWithoutEdge.size(), edge.getId(), classificationId);
+
+                List<AtlasVertex>   verticesToRemove = (List<AtlasVertex>)CollectionUtils.subtract(propagatedVertices, propagatedEntitiesWithoutEdge);
+
+                propagatedEntitiesWithoutEdge.clear();
+                propagatedVertices.clear();
+
+                LOG.info("To delete classification from {} vertices for deletion of edge {} and classification {}", verticesToRemove.size(), edge.getId(), classificationId);
+
+                while (verticesToRemove.size() >= CHUNK_SIZE)
+                {
+                    List<AtlasVertex> chunkedVerticesToRemoveTag = verticesToRemove.subList(0, CHUNK_SIZE);
+
+                    processClassificationDeletionFromVerticesInChunk(chunkedVerticesToRemoveTag, currentClassificationVertex, classification);
+
+                    chunkedVerticesToRemoveTag.clear();
+
+                    transactionInterceptHelper.intercept();
+                }
+
+                processClassificationDeletionFromVerticesInChunk(verticesToRemove, currentClassificationVertex, classification);
+
+                transactionInterceptHelper.intercept();
+
+                LOG.info("Completed remove propagation for edge {} and classification vertex {} with classification name {} and source entity {}", edge.getId(),
+                        classificationId, classification.getTypeName(), classification.getEntityGuid());
+            }
         }
     }
 

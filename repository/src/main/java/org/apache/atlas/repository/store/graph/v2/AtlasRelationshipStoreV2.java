@@ -80,6 +80,7 @@ import static org.apache.atlas.repository.Constants.PROVENANCE_TYPE_KEY;
 import static org.apache.atlas.repository.Constants.RELATIONSHIPTYPE_TAG_PROPAGATION_KEY;
 import static org.apache.atlas.repository.Constants.RELATIONSHIP_GUID_PROPERTY_KEY;
 import static org.apache.atlas.repository.Constants.VERSION_PROPERTY_KEY;
+import static org.apache.atlas.repository.graph.GraphHelper.getAllClassificationEdges;
 import static org.apache.atlas.repository.store.graph.v2.AtlasGraphUtilsV2.getState;
 import static org.apache.atlas.repository.store.graph.v2.AtlasGraphUtilsV2.getTypeName;
 import static org.apache.atlas.repository.store.graph.v2.tasks.ClassificationPropagateTaskFactory.CLASSIFICATION_ONLY_PROPAGATION_DELETE;
@@ -319,13 +320,10 @@ public class AtlasRelationshipStoreV2 implements AtlasRelationshipStore {
         if (DEFERRED_ACTION_ENABLED) {
             for (AtlasEdge edge: edgesToDelete) {
                 String entityGuid = edge.getInVertex().getIdForDisplay();
-                List<AtlasEdge> classificationEdges = GraphHelper.getAllClassificationEdges(graph.getVertex(entityGuid));
-                for (AtlasEdge classificationEdge : classificationEdges) {
-                    String classificationVertexId = classificationEdge.getInVertex().getIdForDisplay();
-                    for (String getDeletedEdgeId: RequestContext.get().getDeletedEdgesIds()) {
-                        deleteDelegate.getHandler().createAndQueueTask(CLASSIFICATION_ONLY_PROPAGATION_DELETE, getDeletedEdgeId, classificationVertexId);
-                    }
-                }
+                deleteDelegate.getHandler().createClassificationOnlyPropagationDeleteTasksAndQueue(
+                        GraphHelper.getAllClassificationEdges(graph.getVertex(entityGuid)),
+                        RequestContext.get().getDeletedEdgesIds()
+                );
             }
         }
 
@@ -368,13 +366,10 @@ public class AtlasRelationshipStoreV2 implements AtlasRelationshipStore {
 
         if (DEFERRED_ACTION_ENABLED) {
             String entityGuid = edge.getInVertex().getIdForDisplay();
-            List<AtlasEdge> classificationEdges = GraphHelper.getAllClassificationEdges(graph.getVertex(entityGuid));
-            for (AtlasEdge classificationEdge : classificationEdges) {
-                String classificationVertexId = classificationEdge.getInVertex().getIdForDisplay();
-                for (String deletedEdgeId: RequestContext.get().getDeletedEdgesIds()) {
-                    deleteDelegate.getHandler().createAndQueueTask(CLASSIFICATION_ONLY_PROPAGATION_DELETE, deletedEdgeId, classificationVertexId);
-                }
-            }
+            deleteDelegate.getHandler().createClassificationOnlyPropagationDeleteTasksAndQueue(
+                    GraphHelper.getAllClassificationEdges(graph.getVertex(entityGuid)),
+                    RequestContext.get().getDeletedEdgesIds()
+            );
         }
 
         sendNotifications(entityRetriever.mapEdgeToAtlasRelationship(edge), OperationType.RELATIONSHIP_DELETE);
