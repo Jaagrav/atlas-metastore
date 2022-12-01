@@ -47,13 +47,18 @@ define(['require',
                 publishButton: '[data-id="publishButton"]',
                 superType: "[data-id='superType']",
                 subType: "[data-id='subType']",
-                entityType: "[data-id='entityType']"
+                entityType: "[data-id='entityType']",
+                textType: '[name="textType"]'
             },
             /** ui events hash */
             events: function() {
                 var events = {};
                 events["click " + this.ui.addAttribute] = 'onClickAddTagAttributeBtn';
                 events["click " + this.ui.editButton] = 'onEditButton';
+                events["change " + this.ui.textType] = function(e) {
+                    this.isTextTypeChecked = !this.isTextTypeChecked;
+                    this.isTextTypeChecked ? this.ui.description.text(this.model.get("description")) : this.ui.description.html(this.model.get("description"));
+                };
                 return events;
             },
             /**
@@ -62,6 +67,7 @@ define(['require',
              */
             initialize: function(options) {
                 _.extend(this, _.pick(options, 'tag', 'collection', 'enumDefCollection'));
+                this.isTextTypeChecked = false;
             },
             bindEvents: function() {
                 this.listenTo(this.collection, 'reset', function() {
@@ -119,9 +125,9 @@ define(['require',
                             el.html(str);
                         });
                     }
-                this.ui.title.html('<span>' + (Utils.getName(this.model.toJSON())) + "[" +this.model.toJSON().displayName + "]" + '</span>');
+                this.ui.title.html('<span>' + (Utils.getName(this.model.toJSON())) + '</span>');
                 if (this.model.get("description")) {
-                    this.ui.description.text(this.model.get("description"));
+                    this.isTextTypeChecked ? this.ui.description.text(this.model.get("description")) : this.ui.description.html(this.model.get("description"));
                 }
                 if (attributeDefs) {
                     if (!_.isArray(attributeDefs)) {
@@ -276,14 +282,14 @@ define(['require',
                     });
             },
             textAreaChangeEvent: function(view) {
-                if (this.model.get('description') === view.ui.description.val() || view.ui.description.val().length == 0 || view.ui.description.val().trim().length === 0 || this.model.get('displayName') === view.ui.displayName.val() || view.ui.displayName.val().length == 0 || view.ui.displayName.val().trim().length === 0) {
+                if (this.model.get('description') === view.ui.description.val() || view.ui.description.val().length == 0 || view.ui.description.val().trim().length === 0) {
                     this.modal.$el.find('button.ok').prop('disabled', true);
                 } else {
                     this.modal.$el.find('button.ok').prop('disabled', false);
                 }
             },
             onPublishClick: function(view) {
-                var saveObj = _.extend(this.model.toJSON(), { 'description': view.ui.description.val().trim(), 'displayName': view.ui.displayName.val().trim() });
+                var saveObj = _.extend(this.model.toJSON(), { 'description': view.ui.description.val().trim() });
                 this.onSaveButton(saveObj, Messages.tag.updateTagDescriptionMessage);
                 this.ui.description.show();
             },
@@ -305,10 +311,6 @@ define(['require',
                     view.ui.description.on('keyup input', function(e) {
                         $(this).val($(this).val().replace(/\s+/g, ' '));
                         that.textAreaChangeEvent(view);
-                        e.stopPropagation();
-                    });
-                    view.ui.displayName.on('keyup input', function(e) {
-                        $(this).val($(this).val().replace(/\s+/g, ' '));
                         e.stopPropagation();
                     });
                     that.modal.$el.find('button.ok').prop('disabled', true);

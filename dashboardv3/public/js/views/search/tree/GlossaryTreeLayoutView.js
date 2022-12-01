@@ -196,7 +196,9 @@ define([
                 this.options.value = {};
             }
             if (!this.options.value.term && this.options.value.gType != 'category') {
-                this.ui.termSearchTree.jstree(true).deselect_all();
+                if (this.ui.termSearchTree.jstree(true)) {
+                    this.ui.termSearchTree.jstree(true).deselect_all();
+                }
                 this.glossaryTermId = null;
             } else {
                 if (this.options.value.term) {
@@ -600,6 +602,9 @@ define([
                         if (!gId) {
                             gId = guid;
                         }
+                        if (gId === guid) {
+                            that.glossaryCollection.fullCollection.remove(gId);
+                        }
                         var glossary = that.glossaryCollection.fullCollection.get(gId);
                         if (type == "GlossaryTerm") {
                             glossary.set('terms', _.reject(glossary.get('terms'), function(obj) {
@@ -633,7 +638,7 @@ define([
                         that.notificationModal = obj;
                         obj.showButtonLoader();
                         if (type == "Glossary" || type == "GLOSSARY") {
-                            that.glossaryCollection.fullCollection.get(guid).destroy(options, { silent: true, reset: false });
+                            new that.glossaryCollection.model().deleteGlossary(guid, options);
                         } else if (type == "GlossaryCategory") {
                             new that.glossaryCollection.model().deleteCategory(guid, options);
 

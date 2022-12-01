@@ -16,10 +16,13 @@
  * limitations under the License.
  */
 
-define(["require"], function(require) {
+define(["require", "underscore"], function(require, _) {
     "use strict";
 
     var Globals = {};
+    //We have assigned underscore object to the window object, So that we don't have to import,
+    // it in every file where underscore functions are used because of the version update.
+    window._ = _;
     Globals.settings = {};
     Globals.settings.PAGE_SIZE = 25;
     Globals.saveApplicationState = {
@@ -30,7 +33,8 @@ define(["require"], function(require) {
             searchUrl: "#!/search",
             glossaryUrl: "#!/glossary",
             administratorUrl: "#!/administrator",
-            debugMetricsUrl: "#!/debugMetrics"
+            debugMetricsUrl: "#!/debugMetrics",
+            relationUrl: '#!/relationship'
         },
         detailPageState: {}
     };
@@ -50,6 +54,11 @@ define(["require"], function(require) {
     Globals.isDebugMetricsEnabled = false;
     Globals.isTasksEnabled = false;
     Globals.idealTimeoutSeconds = 900;
+    Globals.isFullScreenView = false;
+    Globals.isLineageOnDemandEnabled = true;
+    Globals.lineageNodeCount = 3;
+    Globals.lineageDepth = 3;
+    Globals.fromRelationshipSearch = false;
 
     return Globals;
 });

@@ -36,6 +36,7 @@ define(['require',
 
             /** Layout sub regions */
             regions: {
+                RTermProperties: "#r_termProperties",
                 RSearchResultLayoutView: "#r_searchResultLayoutView",
                 RTagTableLayoutView: "#r_tagTableLayoutView",
                 RRelationLayoutView: "#r_relationLayoutView"
@@ -69,7 +70,9 @@ define(['require',
                 removeTag: '[data-id="removeTagTerm"]',
                 tagClick: '[data-id="tagClickTerm"]',
                 addTag: '[data-id="addTagTerm"]',
-                backButton: '[data-id="backButton"]'
+                backButton: '[data-id="backButton"]',
+                textType: '[name="textType"]',
+                tablist: '[data-id="tab-list"] li'
             },
             /** ui events hash */
             events: function() {
@@ -113,7 +116,7 @@ define(['require',
                         this.onClickTagCross(e);
                     } else {
                         Utils.setUrl({
-                            url: '#!/tag/tagAttribute/' + e.currentTarget.textContent,
+                            url: '#!/tag/tagAttribute/' + e.currentTarget.textContent.split('@')[0],
                             mergeBrowserUrl: false,
                             trigger: true
                         });
@@ -173,6 +176,20 @@ define(['require',
                 events["click " + this.ui.addTerm] = 'onClickAddTermBtn';
                 events["click " + this.ui.addCategory] = 'onClickAddTermBtn';
                 events["click " + this.ui.addTag] = 'onClickAddTagBtn';
+                events["change " + this.ui.textType] = function(e) {
+                    this.isTextTypeChecked = !this.isTextTypeChecked;
+                    this.renderDetails(this.data);
+                };
+                events["click " + this.ui.tablist] = function(e) {
+                    var tabValue = $(e.currentTarget).attr('role');
+                    Utils.setUrl({
+                        url: Utils.getUrlState.getQueryUrl().queyParams[0],
+                        urlParams: { tabActive: tabValue || 'entities' },
+                        mergeBrowserUrl: true,
+                        trigger: false,
+                        updateTabState: true
+                    });
+                };
                 return events;
             },
             /**
@@ -197,6 +214,7 @@ define(['require',
                 this.$('.fontLoader-relative').show();
                 this.getData();
                 this.bindEvents();
+                this.updateTab();
             },
             bindEvents: function() {
                 var that = this;
@@ -204,6 +222,12 @@ define(['require',
                     that.options.categoryEvent.on("Success:Term", function(options) {
                         that.glossaryCollection.fetch({ reset: true, silent: true });
                     })
+                }
+            },
+            updateTab: function() {
+                if (this.value && this.value.tabActive) {
+                    this.$('.nav.nav-tabs').find('[role="' + this.value.tabActive + '"]').addClass('active').siblings().removeClass('active');
+                    this.$('.tab-content').find('[role="' + this.value.tabActive + '"]').addClass('active').siblings().removeClass('active');
                 }
             },
             onBeforeDestroy: function() {
@@ -287,6 +311,7 @@ define(['require',
                                         "glossaryCollection": that.glossaryCollection,
                                         "searchVent": that.searchVent,
                                         "tags": tags,
+                                        "value": that.value,
                                         "getSelectedTermAttribute": function() {
                                             return that.selectedTermAttribute;
                                         },
@@ -294,6 +319,7 @@ define(['require',
                                             that.selectedTermAttribute = val;
                                         }
                                     }
+                                    that.renderTermPropertiestLayoutView(that.data);
                                     that.renderSearchResultLayoutView(obj);
                                     that.renderTagTableLayoutView(obj);
                                     that.renderRelationLayoutView(obj);
@@ -310,10 +336,18 @@ define(['require',
             },
             renderDetails: function(data) {
                 Utils.hideTitleLoader(this.$('.fontLoader'), this.ui.details);
+                //Below condition is added for sanitizing the longDescription text against XSS attack.
+                var longDescriptionContent = (data && data.longDescription) ? data.longDescription : "",
+                    sanitizeLongDescriptionContent = "";
+                if (longDescriptionContent !== "") {
+                    sanitizeLongDescriptionContent = Utils.sanitizeHtmlContent({ data: longDescriptionContent });
+                }
+                //End
                 if (data) {
+                    var longDescriptionValue = longDescriptionContent ? sanitizeLongDescriptionContent : "";
                     this.ui.title.text(data.name || data.displayText || data.qualifiedName);
                     this.ui.shortDescription.text(data.shortDescription ? data.shortDescription : "");
-                    this.ui.longDescription.text(data.longDescription ? data.longDescription : "");
+                    this.isTextTypeChecked ? this.ui.longDescription.text(longDescriptionValue) : this.ui.longDescription.html(longDescriptionValue);
                     this.generateCategories(data.categories);
                     this.generateTerm(data.terms);
                     this.generateTag(data.classifications);
@@ -344,9 +378,11 @@ define(['require',
             },
             generateTag: function(tagObject) {
                 var that = this,
-                    tagData = "";
+                    tagData = "",
+                    propagatedTagListData = "";
                 _.each(tagObject, function(val) {
-                    tagData += '<span class="btn btn-action btn-sm btn-icon btn-blue" data-id="tagClickTerm"><span>' + val.typeName + '</span><i class="fa fa-close" data-id="removeTagTerm" data-type="tag" title="Remove Classification"></i></span>';
+                    var parentName = that.getTagParentList(val.typeName);
+                    tagData += '<span class="btn btn-action btn-sm btn-icon btn-blue" data-id="tagClickTerm"><span title="' + parentName + '">' + _.escape(parentName) + '</span><i class="fa fa-close" data-id="removeTagTerm" data-type="tag" title="Remove Classification"></i></span>';
                 });
                 this.ui.tagList.find("span.btn").remove();
                 this.ui.tagList.prepend(tagData);
@@ -359,6 +395,15 @@ define(['require',
                     }
                 });
                 return terms;
+            },
+            getTagParentList: function(name) {
+                var tagObj = this.classificationDefCollection.fullCollection.find({ "name": name }),
+                    tagParents = tagObj ? tagObj.get('superTypes') : null,
+                    parentName = name;
+                if (tagParents && tagParents.length) {
+                    parentName += (tagParents.length > 1) ? ("@(" + tagParents.join() + ")") : ("@" + tagParents.join());
+                }
+                return parentName;
             },
             onClickAddTermBtn: function(e) {
                 var that = this,
@@ -438,7 +483,7 @@ define(['require',
             },
             onClickTagCross: function(e) {
                 var that = this,
-                    tagName = $(e.currentTarget).text(),
+                    tagName = $(e.currentTarget).text().split('@')[0],
                     termName = this.data.name;
                 CommonViewFunction.deleteTag(_.extend({}, {
                     msg: "<div class='ellipsis-with-margin'>Remove: " + "<b>" + _.escape(tagName) + "</b> assignment from <b>" + _.escape(termName) + "?</b></div>",
@@ -495,13 +540,25 @@ define(['require',
                     }
                 });
             },
+            renderTermPropertiestLayoutView: function(options) {
+                var that = this;
+                require(['views/glossary/TermPropertiestLayoutView'], function(TermPropertiestLayoutView) {
+                    if (that.RTermProperties) {
+                        that.RTermProperties.show(new TermPropertiestLayoutView(options));
+                    }
+                });
+            },
             renderSearchResultLayoutView: function(options) {
                 var that = this;
 
                 require(['views/search/SearchResultLayoutView'], function(SearchResultLayoutView) {
                     if (that.RSearchResultLayoutView) {
                         that.RSearchResultLayoutView.show(new SearchResultLayoutView(_.extend({}, options, {
-                            "value": { "searchType": "basic", "term": that.data.qualifiedName },
+                            "value": {
+                                "searchType": "basic",
+                                "term": that.data.qualifiedName,
+                                "includeDE": options.value.includeDE || false
+                            },
                             "fromView": "glossary"
                         })));
                     }

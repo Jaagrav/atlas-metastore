@@ -36,8 +36,7 @@ define(['require',
             templateHelpers: function() {
                 return {
                     create: this.create,
-                    description: this.description,
-                    displayName: this.displayName
+                    description: this.description
                 };
             },
 
@@ -57,7 +56,6 @@ define(['require',
             /** ui selector cache */
             ui: {
                 tagName: "[data-id='tagName']",
-                displayName: "[data-id='displayName']",
                 parentTag: "[data-id='parentTagList']",
                 description: "[data-id='description']",
                 title: "[data-id='title']",
@@ -79,7 +77,6 @@ define(['require',
                 _.extend(this, _.pick(options, 'tagCollection', 'enumDefCollection', 'model', 'tag', 'descriptionData', 'selectedTag'));
                 if (this.model) {
                     this.description = this.model.get('description');
-                    this.displayName = this.model.get('displayName');
                 } else {
                     this.create = true;
                 }
@@ -87,7 +84,8 @@ define(['require',
             },
             bindEvents: function() {},
             onRender: function() {
-                var that = this;
+                var that = this,
+                    modalOkBtn;
                 this.$('.fontLoader').show();
                 if (this.create) {
                     this.tagCollectionList();
@@ -97,6 +95,19 @@ define(['require',
                 if (!('placeholder' in HTMLInputElement.prototype)) {
                     this.ui.createTagForm.find('input,textarea').placeholder();
                 }
+                modalOkBtn = function() {
+                    var editorContent = $(that.ui.description).trumbowyg('html'),
+                        okBtn = $('.modal').find('button.ok');
+                    okBtn.removeAttr("disabled");
+                    if (editorContent === "") {
+                        okBtn.prop('disabled', true);
+                    }
+                    if (that.description === editorContent) {
+                        okBtn.prop('disabled', true);
+                    }
+                };
+                Utils.addCustomTextEditor({ selector: this.ui.description, callback: modalOkBtn, small: false });
+                $(this.ui.description).trumbowyg('html', Utils.sanitizeHtmlContent({ data: this.description }));
                 that.hideLoader();
             },
             tagCollectionList: function() {

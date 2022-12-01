@@ -35,7 +35,6 @@ define(['require',
             templateHelpers: function() {
                 return {
                     create: this.create,
-                    displayName: this.displayName,
                     description: this.description,
                     fromTable: this.fromTable,
                     isEditAttr: this.isEditAttr
@@ -62,7 +61,6 @@ define(['require',
             /** ui selector cache */
             ui: {
                 name: "[data-id='name']",
-                displayName: "[data-id='displayName']",
                 description: "[data-id='description']",
                 title: "[data-id='title']",
                 attributeData: "[data-id='attributeData']",
@@ -100,7 +98,6 @@ define(['require',
                 this.isEditAttr = this.isAttrEdit ? false : true;
                 this.businessMetadataModel = new VEntity();
                 if (this.model) {
-                    this.displayName = this.model.get('displayName');
                     this.description = this.model.get('description');
                 } else {
                     this.create = true;
@@ -178,7 +175,7 @@ define(['require',
                     attrNames = [];
                 if (attributeDefs && !this.isAttrEdit) {
                     attrNames = _.map(attributeDefs, function(model) {
-                        return model.displayName.toLowerCase();
+                        return model.name.toLowerCase();
                     });
                 }
                 validationFileds.each(function(elements) {
@@ -196,7 +193,7 @@ define(['require',
                         var attrValue = this.value.toLowerCase();
                         if (attrNames.indexOf(attrValue) > -1) {
                             Utils.notifyInfo({
-                                content: "Attribute displayName already exist"
+                                content: "Attribute name already exist"
                             });
                             $(this).addClass('errorValidate');
                             if (isAttrDuplicate) { isAttrDuplicate = false; }
@@ -225,10 +222,10 @@ define(['require',
                     return;
                 };
                 this.loaderStatus(true);
-                var displayName = this.ui.displayName.val(),
-                    description = this.ui.description.val();
+                var name = this.ui.name.val(),
+                    description = Utils.sanitizeHtmlContent({ data: this.ui.description.val() });
                 var attributeObj = this.collection.toJSON();
-                if (this.collection.length === 1 && this.collection.first().get("displayName") === "") {
+                if (this.collection.length === 1 && this.collection.first().get("name") === "") {
                     attributeObj = [];
                 }
                 this.json = {
@@ -242,8 +239,8 @@ define(['require',
                         "updatedBy": "admin",
                         "version": 1,
                         "typeVersion": "1.1",
-                        "displayName": displayName.trim(),
-                        "description": description.trim(),
+                        "name": name.trim(),
+                        "description": description ? description.trim() : "",
                         "attributeDefs": attributeObj
                     }]
                 };
@@ -282,21 +279,7 @@ define(['require',
                     if (selectedBusinessMetadataClone.attributeDefs === undefined) {
                         selectedBusinessMetadataClone.attributeDefs = [];
                     }
-
-                    var newBMAttrs = this.collection.toJSON();
-                    //replace old attribute matched with displayName
-                    for (var i = 0; i < selectedBusinessMetadataClone.attributeDefs.length; i++) {
-                       var _attr = selectedBusinessMetadataClone.attributeDefs[i];
-                       for (var n = 0; n < newBMAttrs.length; n++) {
-                          var _newAttr = newBMAttrs[n];
-                          if ( _attr.displayName === _newAttr.displayName || _attr.name === _newAttr.name) {
-                               selectedBusinessMetadataClone.attributeDefs[i] = _newAttr;
-                               newBMAttrs.splice(n, 1);
-                           }
-                       }
-                    }
-                    selectedBusinessMetadataClone.attributeDefs = selectedBusinessMetadataClone.attributeDefs.concat(newBMAttrs);
-
+                    selectedBusinessMetadataClone.attributeDefs = selectedBusinessMetadataClone.attributeDefs.concat(this.collection.toJSON());
                     this.json = {
                         "enumDefs": [],
                         "structDefs": [],

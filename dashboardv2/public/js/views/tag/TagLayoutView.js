@@ -290,7 +290,6 @@ define(['require',
                                     var modelJSON = child.toJSON();
                                     data.push({
                                         name: name,
-                                        displayName: modelJSON.displayName,
                                         children: getChildren({ children: modelJSON.subTypes })
                                     });
                                 }
@@ -304,7 +303,6 @@ define(['require',
                         var name = modelJSON.name;
                         listOfParents[name] = {
                             name: name,
-                            displayName: modelJSON.displayName,
                             children: getChildren({ children: modelJSON.subTypes })
                         }
                     }
@@ -318,19 +316,18 @@ define(['require',
                     that = this,
                     element = '',
                     getElString = function(options) {
-                        var name = options.name, displayName=options.displayName,
+                        var name = options.name,
                             hasChild = isTree && options.children && options.children.length;
                         return '<li class="parent-node" data-id="tags">' +
                             '<div><div class="tools"><i class="fa fa-ellipsis-h tagPopover"></i></div>' +
                             (hasChild ? '<i class="fa toggleArrow fa-angle-right" data-id="expandArrow" data-name="' + name + '"></i>' : '') +
-                            '<a href="#!/tag/tagAttribute/' + name + '?viewType=' + (isTree ? 'tree' : 'flat') + '&searchType=basic&tag=' + name + '" data-name="' + name + '">' + displayName + '</a></div>' +
+                            '<a href="#!/tag/tagAttribute/' + name + '?viewType=' + (isTree ? 'tree' : 'flat') + '&searchType=basic&tag=' + name + '" data-name="' + name + '">' + name + '</a></div>' +
                             (isTree && hasChild ? '<ul class="child hide">' + that.generateTree({ 'data': options.children, 'isTree': isTree }) + '</ul>' : '') + '</li>';
                     };
                 if (isTree) {
                     _.each(data, function(obj) {
                         element += getElString({
                             name: obj.name,
-                            displayName: obj.displayName,
                             children: obj.children
                         });
                     });
@@ -341,7 +338,6 @@ define(['require',
                             if (name.search(new RegExp(searchString, "i")) != -1) {
                                 element += getElString({
                                     name: obj.get('name'),
-                                    displayName: obj.get('displayName'),
                                     children: null
                                 });
                             } else {
@@ -350,7 +346,6 @@ define(['require',
                         } else {
                             element += getElString({
                                 name: obj.get('name'),
-                                displayName: obj.get('displayName'),
                                 children: null
                             });
                         }
@@ -408,7 +403,7 @@ define(['require',
                         }).open();
                     modal.$el.find('button.ok').attr("disabled", "true");
                     view.ui.tagName.on('keyup input', function(e) {
-                        view.ui.description.val($(this).val().replace(/\s+/g, ' '));
+                        $(view.ui.description).trumbowyg('html', _.escape($(this).val()).replace(/\s+/g, ' '));
                     });
                     view.ui.description.on('input keydown', function(e) {
                         $(this).val($(this).val().replace(/\s+/g, ' '));
@@ -453,8 +448,7 @@ define(['require',
                     return;
                 }
                 this.name = ref.ui.tagName.val();
-                this.displayName = ref.ui.displayName.val();
-                this.description = ref.ui.description.val();
+                this.description = Utils.sanitizeHtmlContent({ data: ref.ui.description.val() });
                 var superTypes = [];
                 if (ref.ui.parentTag.val() && ref.ui.parentTag.val()) {
                     superTypes = ref.ui.parentTag.val();
@@ -514,7 +508,7 @@ define(['require',
                 }
                 this.json = {
                     classificationDefs: [{
-                        'displayName': this.displayName.trim(),
+                        'name': this.name.trim(),
                         'description': this.description.trim(),
                         'superTypes': superTypes.length ? superTypes : [],
                         "attributeDefs": attributeObj
@@ -657,6 +651,9 @@ define(['require',
                     },
                     cust_error: function() {},
                     complete: function() {
+                        if (that.collection.fullCollection.length === 0) {
+                            that.setUrl('#!/tag', true);
+                        }
                         that.notificationModal.hideButtonLoader();
                         that.notificationModal.remove();
                     }

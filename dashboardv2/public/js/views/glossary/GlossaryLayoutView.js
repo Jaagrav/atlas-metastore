@@ -76,6 +76,8 @@ define(['require',
                         },
                         onModalClose: function() {
                             that.ui.createGlossary.removeAttr("disabled");
+                            that.ui.termTree.jstree(true).refresh();
+                            that.ui.categoryTree.jstree(true).refresh();
                         }
                     })
                 };
@@ -217,7 +219,7 @@ define(['require',
                 if (Utils.getUrlState.isGlossaryTab()) {
                     var obj = this.query[this.viewType],
                         $tree = this.ui[(this.viewType == "term" ? "termTree" : "categoryTree")];
-                    obj["gId"] = that.value.gId; //this Property added, Because when we toggle the GlossaryViewButton it does not adds the gId which is required for selection.  
+                    obj["gId"] = that.value ? that.value.gId : null; //this Property added, Because when we toggle the GlossaryViewButton it does not adds the gId which is required for selection.
                     if (obj.guid) {
                         var node = $tree.jstree(true).get_node(obj.guid);
                         if (node) {
@@ -720,6 +722,9 @@ define(['require',
                             if (!gId) {
                                 gId = guid;
                             }
+                            if (gId === guid) {
+                                that.glossaryCollection.fullCollection.remove(gId);
+                            }
                             var glossary = that.glossaryCollection.fullCollection.get(gId);
                             if (that.value) {
                                 if (that.value.gType == "term") {
@@ -766,6 +771,9 @@ define(['require',
                             });
                         },
                         complete: function() {
+                            if (that.glossaryCollection.fullCollection.length === 0) {
+                                that.guid = null;
+                            }
                             that.notificationModal.hideButtonLoader();
                             that.notificationModal.remove();
                         }
@@ -776,7 +784,7 @@ define(['require',
                             that.notificationModal = obj;
                             obj.showButtonLoader();
                             if (type == "Glossary") {
-                                that.glossaryCollection.fullCollection.get(guid).destroy(options, { silent: true, reset: false });
+                                new that.glossaryCollection.model().deleteGlossary(guid, options);
                             } else if (type == "GlossaryCategory") {
                                 new that.glossaryCollection.model().deleteCategory(guid, options);
                             } else if (type == "GlossaryTerm") {

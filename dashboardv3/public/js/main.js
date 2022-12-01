@@ -162,6 +162,13 @@ require.config({
         },
         'jquery-steps': {
             'deps': ['jquery']
+        },
+        'DOMPurify': {
+            'exports': 'DOMPurify'
+        },
+        'trumbowyg': {
+            'deps': ['jquery'],
+            'exports': 'trumbowyg'
         }
     },
 
@@ -208,7 +215,9 @@ require.config({
         'jquery-steps': 'libs/jquery-steps/jquery.steps.min',
         'dropzone': 'libs/dropzone/js/dropzone-amd-module',
         'lossless-json': 'libs/lossless-json/lossless-json',
-        'store': 'external_lib/idealTimeout/store.min'
+        'store': 'external_lib/idealTimeout/store.min',
+        'DOMPurify': 'external_lib/dompurify/purify.min',
+        'trumbowyg': 'external_lib/trumbowyg/trumbowyg'
     },
 
     /**
@@ -228,13 +237,14 @@ require(['App',
     'utils/UrlLinks',
     'collection/VEntityList',
     'collection/VTagList',
+    'collection/VRelationshipSearchList',
     'utils/Enums',
     'utils/Utils',
     'utils/Overrides',
     'bootstrap',
     'd3',
     'select2'
-], function(App, Router, Helper, CommonViewFunction, Globals, UrlLinks, VEntityList, VTagList, Enums, Utils) {
+], function(App, Router, Helper, CommonViewFunction, Globals, UrlLinks, VEntityList, VTagList, VRelationshipSearchList, Enums, Utils) {
     var that = this;
     this.asyncFetchCounter = 5 + (Enums.addOnEntities.length + 1);
     // entity
@@ -258,6 +268,10 @@ require(['App',
     this.businessMetadataDefCollection = new VEntityList();
     this.businessMetadataDefCollection.url = UrlLinks.businessMetadataDefApiUrl();
     this.businessMetadataDefCollection.modelAttrName = "businessMetadataDefs";
+    //relationship
+    this.relationshipDefCollection = new VRelationshipSearchList();
+    this.relationshipDefCollection.url = UrlLinks.relationshipDefApiUrl();
+    this.relationshipDefCollection.modelAttrName = "relationshipDefs";
 
     App.appRouter = new Router({
         entityDefCollection: this.entityDefCollection,
@@ -266,7 +280,8 @@ require(['App',
         classificationDefCollection: this.classificationDefCollection,
         metricCollection: this.metricCollection,
         classificationAndMetricEvent: this.classificationAndMetricEvent,
-        businessMetadataDefCollection: this.businessMetadataDefCollection
+        businessMetadataDefCollection: this.businessMetadataDefCollection,
+        relationshipDefCollection: this.relationshipDefCollection
     });
 
     var startApp = function() {
@@ -318,6 +333,13 @@ require(['App',
                     Globals.isTasksEnabled = response['atlas.tasks.enabled'];
                 }
                 if (response['atlas.session.timeout.secs']) { Globals.idealTimeoutSeconds = response['atlas.session.timeout.secs']; }
+                if(response['atlas.lineage.on.demand.enabled'] !== undefined){
+                    Globals.isLineageOnDemandEnabled = response['atlas.lineage.on.demand.enabled'];
+                }
+                if(response['atlas.lineage.on.demand.default.node.count'] !== undefined){
+                    Globals.lineageNodeCount = response['atlas.lineage.on.demand.default.node.count'];
+                }
+                Globals.isLineageOnDemandEnabled = true;
                 /*  Atlas idealTimeout 
        redirectUrl: url to redirect after timeout
        idealTimeLimit: timeout in seconds
@@ -400,6 +422,16 @@ require(['App',
             };
             that.businessMetadataDefCollection.fullCollection.sort({ silent: true });
             --that.asyncFetchCounter;
+            startApp();
+        }
+    });
+    this.relationshipDefCollection.fetch({
+        async:true,
+        complete: function() {
+            that.relationshipDefCollection.fullCollection.comparator = function(model) {
+                return model.get('name').toLowerCase();
+            };
+            that.relationshipDefCollection.fullCollection.sort({ silent: true });
             startApp();
         }
     });

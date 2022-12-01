@@ -215,6 +215,7 @@ define(['require',
                         isNewBusinessMetadata: isNewBusinessMetadata
                     });
                     that.RModal.show(that.view);
+                    Utils.addCustomTextEditor({ small: false });
                 });
             },
             renderTableLayoutView: function() {
@@ -280,13 +281,13 @@ define(['require',
                             }
                         }
                     },
-                    displayName: {
-                        label: "Display Name",
+                    name: {
+                        label: "Name",
                         cell: "html",
                         editable: false,
                         formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
                             fromRaw: function(rawValue, model) {
-                                return '<a title= "' + model.get('name') + '" href ="#!/administrator/businessMetadata/' + model.get('guid') + '?from=bm">' + model.get('displayName') + '</a>';
+                                return '<a title= "' + model.get('name') + '" href ="#!/administrator/businessMetadata/' + model.get('guid') + '?from=bm">' + model.get('name') + '</a>';
                             }
                         })
                     },
@@ -296,7 +297,11 @@ define(['require',
                         editable: false,
                         formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
                             fromRaw: function(rawValue, model) {
-                                return _.escape(model.get('description'));
+                                var description = model.get('description');
+                                if (description.length > 50) {
+                                    description = description.substr(0, 50) + "...";
+                                }
+                                return description;
                             }
                         })
                     },
