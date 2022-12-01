@@ -312,8 +312,7 @@ require(['App',
                 if(response['atlas.lineage.on.demand.default.node.count'] !== undefined){
                     Globals.lineageNodeCount = response['atlas.lineage.on.demand.default.node.count'];
                 }
-                Globals.isLineageOnDemandEnabled = true;
-                /*  Atlas idealTimeout 
+                /*  Atlas idealTimeout
        redirectUrl: url to redirect after timeout
        idealTimeLimit: timeout in seconds
        activityEvents: ideal keyboard mouse events
