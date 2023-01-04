@@ -628,7 +628,7 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
 
         EntityMutationResponse ret = deleteVertices(deletionCandidates);
 
-        if(ret.getDeletedEntities()!=null)
+        if(ret.getDeletedEntities() != null)
             processTermEntityDeletion(ret.getDeletedEntities());
 
         // Notify the change listeners
@@ -879,7 +879,7 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
         String taskType = isHardDelete ? UPDATE_ENTITY_MEANINGS_ON_TERM_HARD_DELETE : UPDATE_ENTITY_MEANINGS_ON_TERM_SOFT_DELETE;
         String currentUser = RequestContext.getCurrentUser();
         Map<String, Object> taskParams = MeaningsTask.toParameters(termName, termQName, termGuid);
-        AtlasTask task = taskManagement.createTask(taskType, currentUser, taskParams);
+        AtlasTask task = taskManagement.createTask(taskType, currentUser, taskParams, termQName, termGuid);
 
         if(!isHardDelete){
             AtlasVertex termVertex = AtlasGraphUtilsV2.findByGuid(termGuid);
@@ -1710,7 +1710,8 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
         for (AtlasEntityHeader entity : req.getDeletedEntities()) {
             String handler;
             if (ATLAS_GLOSSARY_CATEGORY_ENTITY_TYPE.equals(entity.getTypeName())) {
-                handler = "HARD";
+                handler  = req.getDeleteType().equals(DeleteType.PURGE) ?
+                        DeleteType.PURGE.name() : DeleteType.HARD.name();
             } else {
                 handler = RequestContext.get().getDeleteType().name();
             }
