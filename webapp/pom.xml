@@ -402,16 +402,16 @@
             <artifactId>aspectjweaver</artifactId>
             <version>1.8.9</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.atlas</groupId>
-            <artifactId>atlas-dashboardv2</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.atlas</groupId>
-            <artifactId>atlas-dashboardv3</artifactId>
-            <type>war</type>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.atlas</groupId>-->
+<!--            <artifactId>atlas-dashboardv2</artifactId>-->
+<!--            <type>war</type>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.atlas</groupId>-->
+<!--            <artifactId>atlas-dashboardv3</artifactId>-->
+<!--            <type>war</type>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.easymock</groupId>
             <artifactId>easymock</artifactId>
@@ -568,19 +568,19 @@
                 <configuration>
                     <archiveClasses>true</archiveClasses>
                     <attachClasses>true</attachClasses>
-                    <overlays>
-                        <overlay>
-                            <groupId>org.apache.atlas</groupId>
-                            <artifactId>atlas-dashboardv2</artifactId>
-                        </overlay>
-                        <overlay>
-                            <groupId>org.apache.atlas</groupId>
-                            <artifactId>atlas-dashboardv3</artifactId>
-                        </overlay>
-                        <overlay>
-                            <!-- empty groupId/artifactId represents the current build -->
-                        </overlay>
-                    </overlays>
+<!--                    <overlays>-->
+<!--                        <overlay>-->
+<!--                            <groupId>org.apache.atlas</groupId>-->
+<!--                            <artifactId>atlas-dashboardv2</artifactId>-->
+<!--                        </overlay>-->
+<!--                        <overlay>-->
+<!--                            <groupId>org.apache.atlas</groupId>-->
+<!--                            <artifactId>atlas-dashboardv3</artifactId>-->
+<!--                        </overlay>-->
+<!--                        <overlay>-->
+<!--                            &lt;!&ndash; empty groupId/artifactId represents the current build &ndash;&gt;-->
+<!--                        </overlay>-->
+<!--                    </overlays>-->
 
                     <webResources>
                         <resource>
