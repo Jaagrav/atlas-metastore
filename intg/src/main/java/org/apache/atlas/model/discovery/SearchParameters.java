@@ -45,6 +45,7 @@ public class SearchParameters extends SearchParams implements Serializable {
     private Map<String, Float>  queryFields;
     private String  typeName;
     private String  classification;
+    private String  relationshipName;
     private String  termName;
     private String  sortBy;
     private boolean excludeDeletedEntities;
@@ -57,6 +58,7 @@ public class SearchParameters extends SearchParams implements Serializable {
 
     private FilterCriteria entityFilters;
     private FilterCriteria tagFilters;
+    private FilterCriteria relationshipFilters;
     private SortOrder      sortOrder;
 
     public static final String WILDCARD_CLASSIFICATIONS = "*";
@@ -141,6 +143,14 @@ public class SearchParameters extends SearchParams implements Serializable {
      */
     public void setClassification(String classification) {
         this.classification = classification;
+    }
+
+    public String getRelationshipName() {
+        return relationshipName;
+    }
+
+    public void setRelationshipName(String relationshipName) {
+        this.relationshipName = relationshipName;
     }
 
     /**
@@ -274,6 +284,17 @@ public class SearchParameters extends SearchParams implements Serializable {
         this.tagFilters = tagFilters;
     }
 
+    /**
+     * Relationship attribute filters for the relationship
+     * @return
+     */
+    public FilterCriteria getRelationshipFilters() { return relationshipFilters; }
+
+    /**
+     * Filter the relationship on this criteria
+     * @param relationshipFilters
+     */
+    public void setRelationshipFilters(FilterCriteria relationshipFilters) { this.relationshipFilters = relationshipFilters; }
 
     /**
      * @return Attribute on which to sort the results
