@@ -20,6 +20,8 @@ import org.apache.atlas.ApplicationProperties;
 import org.apache.commons.configuration.Configuration;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -31,6 +33,8 @@ import java.util.Map;
 
 @Component
 public class AtlasKeycloakAuthenticationProvider extends AtlasAbstractAuthenticationProvider {
+  private static final Logger LOG = LoggerFactory.getLogger(AtlasKeycloakAuthenticationProvider.class);
+
   private final boolean groupsFromUGI;
   private final String groupsClaim;
 
@@ -46,6 +50,7 @@ public class AtlasKeycloakAuthenticationProvider extends AtlasAbstractAuthentica
 
   @Override
   public Authentication authenticate(Authentication authentication) {
+    LOG.info("AtlasKeycloakAuthenticationProvider.authenticate: groupsFromUGI:{}, groupsClaim:{}", groupsFromUGI, groupsClaim);
     authentication = keycloakAuthenticationProvider.authenticate(authentication);
 
     if (groupsFromUGI) {
