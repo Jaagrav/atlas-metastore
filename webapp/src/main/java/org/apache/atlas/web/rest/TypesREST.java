@@ -93,6 +93,7 @@ public class TypesREST {
     public AtlasBaseTypeDef getTypeDefByName(@PathParam("name") String name) throws AtlasBaseException {
         Servlets.validateQueryParamLength("name", name);
 
+        LOG.info("TypesREST.getTypeDefByName");
         AtlasBaseTypeDef ret = typeDefStore.getByName(name);
 
         return ret;

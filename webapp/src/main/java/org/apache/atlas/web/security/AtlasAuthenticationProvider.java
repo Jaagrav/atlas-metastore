@@ -99,6 +99,7 @@ public class AtlasAuthenticationProvider extends AtlasAbstractAuthenticationProv
     @Override
     public Authentication authenticate(Authentication authentication)
             throws AuthenticationException {
+        LOG.info("AtlasAuthenticationProvider.authenticate: ssoEnabled:{}", ssoEnabled);
 
         if(ssoEnabled){
             if (authentication != null){

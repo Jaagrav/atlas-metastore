@@ -72,6 +72,8 @@ public class AuditFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
     throws IOException, ServletException {
+
+        LOG.info("AuditFilter.doFilter");
         final long                startTime          = System.currentTimeMillis();
         final Date                requestTime         = new Date();
         final HttpServletRequest  httpRequest        = (HttpServletRequest) request;
