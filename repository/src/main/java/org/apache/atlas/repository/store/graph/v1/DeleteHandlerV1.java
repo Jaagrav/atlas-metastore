@@ -428,7 +428,6 @@ public abstract class DeleteHandlerV1 {
 
         if (taskManagement != null && DEFERRED_ACTION_ENABLED) {
             for (AtlasVertex classificationVertex : classificationVertices) {
-                //If any Refresh classification or delete classification task pending don't schedule
                 createAndQueueTask(CLASSIFICATION_PROPAGATION_ADD, toVertex, classificationVertex.getIdForDisplay(), relationshipGuid);
             }
         } else {
@@ -1356,11 +1355,6 @@ public abstract class DeleteHandlerV1 {
         List<AtlasVertex> currentClassificationVertices = GraphHelper.getPropagatableClassifications(edge);
         for (AtlasVertex currentClassificationVertex : currentClassificationVertices) {
             String currentClassificationId = currentClassificationVertex.getIdForDisplay();
-            if(skipClassificationTaskCreation(currentClassificationId)) {
-                LOG.info("Task is already scheduled for classification id {}, no need to schedule task for edge {}", currentClassificationId, edge.getIdForDisplay());
-                continue;
-            }
-
             boolean removePropagationOnEntityDelete = GraphHelper.getRemovePropagations(currentClassificationVertex);
 
             if (!(isTermEntityEdge || removePropagationOnEntityDelete)) {
@@ -1368,8 +1362,13 @@ public abstract class DeleteHandlerV1 {
                 continue;
             }
 
+            if(skipClassificationTaskCreation(currentClassificationId)) {
+                LOG.info("Task is already scheduled for classification id {}, no need to schedule task for edge {}", currentClassificationId, edge.getIdForDisplay());
+                continue;
+            }
+
             Map<String, Object> taskParams = ClassificationTask.toParameters(currentClassificationVertex.getIdForDisplay());
-            AtlasTask task  =  taskManagement.createTask(CLASSIFICATION_REFRESH_PROPAGATION, currentUser, taskParams, currentClassificationId, referenceVertex.getIdForDisplay());
+            AtlasTask task  =  taskManagement.createTask(CLASSIFICATION_REFRESH_PROPAGATION, currentUser, taskParams, currentClassificationId, GraphHelper.getGuid(referenceVertex));
 
             RequestContext.get().queueTask(task);
         }
@@ -1383,15 +1382,7 @@ public abstract class DeleteHandlerV1 {
         2. CLASSIFICATION_REFRESH_PROPAGATION task scheduled already
         skip classification task creation
          */
-        TaskSearchResult taskSearchResult = taskUtil.findPendingTasksByClassificationId(0, 1, classificationId, new ArrayList<String>(){{
-            add(CLASSIFICATION_PROPAGATION_DELETE);
-            add(CLASSIFICATION_REFRESH_PROPAGATION);
-        }}, new ArrayList<>());
 
-        if (!taskSearchResult.getTasks().isEmpty()) {
-            return true;
-        }
-        // If the task is created but not committed then need to check that also
         List<AtlasTask> queuedTasks  = RequestContext.get().getQueuedTasks();
         for(AtlasTask queuedTask : queuedTasks) {
             if(queuedTask.getClassificationId().equals(classificationId)) {
@@ -1402,6 +1393,17 @@ public abstract class DeleteHandlerV1 {
                 }
             }
         }
+
+        //Search in ES to get the tasks
+        TaskSearchResult taskSearchResult = taskUtil.findPendingTasksByClassificationId(0, 1, classificationId, new ArrayList<String>(){{
+            add(CLASSIFICATION_PROPAGATION_DELETE);
+            add(CLASSIFICATION_REFRESH_PROPAGATION);
+        }}, new ArrayList<>());
+
+        if (!taskSearchResult.getTasks().isEmpty()) {
+            return true;
+        }
+
 
         return false;
     }
