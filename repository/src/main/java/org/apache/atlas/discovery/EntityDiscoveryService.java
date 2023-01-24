@@ -1030,6 +1030,8 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
 
             Iterator<Result> iterator = indexQueryResult.getIterator();
             boolean showSearchScore = searchParams.getShowSearchScore();
+            boolean showCollapsedResults = searchParams.getShowCollapsedResults();
+            boolean showCollapsedResultsCount = searchParams.getShowCollapsedResultsCount();
 
             while (iterator.hasNext()) {
                 Result result = iterator.next();
@@ -1046,6 +1048,28 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
                     ret.addEntityScore(header.getGuid(), result.getScore());
                 }
                 ret.addEntity(header);
+                if (showCollapsedResults) {
+                    DirectIndexQueryResult indexQueryCollapsedResult = result.getCollapsedVertices();
+                    if (indexQueryCollapsedResult != null) {
+                        Iterator<Result> collapsedVerticesIterator = indexQueryCollapsedResult.getIterator();
+                        while (collapsedVerticesIterator.hasNext()) {
+                            Result collapsedResult = collapsedVerticesIterator.next();
+                            AtlasVertex collapsedVertex = collapsedResult.getVertex();
+
+                            if (collapsedVertex == null) {
+                                LOG.warn("vertex in null");
+                                continue;
+                            }
+
+                            AtlasEntityHeader collapsedHeader = entityRetriever.toAtlasEntityHeader(collapsedVertex, resultAttributes);
+                            collapsedHeader.setClassifications(entityRetriever.getAllClassifications(collapsedVertex));
+                            ret.addCollapsedEntity(header.getGuid(), collapsedHeader);
+                        }
+                    }
+                }
+                if (showCollapsedResultsCount) {
+                    ret.addCollapsedEntitiesCount(header.getGuid(), result.getCollapsedVerticesCount());
+                }
             }
 
             ret.setAggregations(indexQueryResult.getAggregationMap());

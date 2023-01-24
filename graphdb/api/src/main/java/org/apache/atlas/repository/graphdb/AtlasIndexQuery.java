@@ -97,6 +97,10 @@ public interface AtlasIndexQuery<V, E> {
          */
         double getScore();
 
+        DirectIndexQueryResult<V, E> getCollapsedVertices();
+
+        Integer getCollapsedVerticesCount();
+
     }
 
 }

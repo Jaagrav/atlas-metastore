@@ -13,6 +13,8 @@ public class SearchParams {
     Set<String> relationAttributes;
     Set<String> utmTags;
     boolean showSearchScore;
+    boolean showCollapsedResults;
+    boolean showCollapsedResultsCount;
     boolean suppressLogs;
 
     public String getQuery() {
@@ -49,6 +51,18 @@ public class SearchParams {
 
     public void setShowSearchScore(boolean showSearchScore) {
         this.showSearchScore = showSearchScore;
+    }
+
+    public boolean getShowCollapsedResults() {
+        return showCollapsedResults;
+    }
+
+    public void getShowCollapsedResults(boolean showCollapsedResults) {
+        this.showCollapsedResults = showCollapsedResults;
+    }
+
+    public boolean getShowCollapsedResultsCount() {
+        return showCollapsedResultsCount;
     }
 
     public boolean getSuppressLogs() {
