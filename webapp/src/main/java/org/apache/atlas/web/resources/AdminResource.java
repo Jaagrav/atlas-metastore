@@ -785,7 +785,7 @@ public class AdminResource {
 
 
     @GET
-    @Path("/audit/{auditGuid}/details")
+    @Path("/org/apache/ranger/audit/{auditGuid}/details")
     @Consumes(Servlets.JSON_MEDIA_TYPE)
     @Produces(Servlets.JSON_MEDIA_TYPE)
     public List<AtlasEntityHeader> getAuditDetails(@PathParam("auditGuid") String auditGuid,

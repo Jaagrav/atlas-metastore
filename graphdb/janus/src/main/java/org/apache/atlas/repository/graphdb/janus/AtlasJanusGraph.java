@@ -72,6 +72,7 @@ import org.janusgraph.core.schema.JanusGraphManagement;
 import org.janusgraph.core.schema.Parameter;
 import org.janusgraph.diskstorage.BackendException;
 import org.janusgraph.graphdb.database.StandardJanusGraph;
+import org.janusgraph.graphdb.vertices.CacheVertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -343,7 +344,7 @@ public class AtlasJanusGraph implements AtlasGraph<AtlasJanusVertex, AtlasJanusE
     public AtlasVertex<AtlasJanusVertex, AtlasJanusEdge> getVertex(String vertexId) {
         Iterator<Vertex> it     = getGraph().vertices(vertexId);
         Vertex           vertex = getSingleElement(it, vertexId);
-
+        ((CacheVertex) vertex).refresh();
         return GraphDbObjectFactory.createVertex(this, vertex);
     }
 

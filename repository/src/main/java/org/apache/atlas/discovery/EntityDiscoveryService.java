@@ -72,6 +72,7 @@ import static org.apache.atlas.model.instance.AtlasEntity.Status.ACTIVE;
 import static org.apache.atlas.model.instance.AtlasEntity.Status.DELETED;
 import static org.apache.atlas.repository.Constants.ASSET_ENTITY_TYPE;
 import static org.apache.atlas.repository.Constants.OWNER_ATTRIBUTE;
+import static org.apache.atlas.repository.graph.AtlasGraphProvider.getGraphInstance;
 import static org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery.BASIC_SEARCH_STATE_FILTER;
 import static org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery.TO_RANGE_LIST;
 
@@ -94,6 +95,7 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
     private final SuggestionsProvider             suggestionsProvider;
     private final DSLQueryExecutor                dslQueryExecutor;
     private final StatsClient                     statsClient;
+    private static AtlasTypeRegistry staticTypeRegistry;
 
     @Inject
     public EntityDiscoveryService(AtlasTypeRegistry typeRegistry,
@@ -102,6 +104,7 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
                            SearchTracker searchTracker,
                            UserProfileService userProfileService,
                            StatsClient statsClient) throws AtlasException {
+        this.staticTypeRegistry = typeRegistry;
         this.graph                    = graph;
         this.entityRetriever          = new EntityGraphRetriever(this.graph, typeRegistry);
         this.indexer                  = indexer;
@@ -962,6 +965,61 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
         }
 
         return atttOwner;
+    }
+
+    public static AtlasSearchResult directIndexSearchStatic(SearchParams searchParams) throws AtlasBaseException {
+        IndexSearchParams params = (IndexSearchParams) searchParams;
+        RequestContext.get().setRelationAttrsForSearch(params.getRelationAttributes());
+        RequestContext.get().setAllowDeletedRelationsIndexsearch(params.isAllowDeletedRelations());
+
+        AtlasGraph graph = getGraphInstance();
+        EntityGraphRetriever entityRetriever  = new EntityGraphRetriever(graph, staticTypeRegistry);
+
+        AtlasSearchResult ret = new AtlasSearchResult();
+        ret.setEntities(null);
+        AtlasIndexQuery indexQuery = null;
+
+        ret.setSearchParameters(searchParams);
+        ret.setQueryType(AtlasQueryType.INDEX);
+
+        Set<String> resultAttributes = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(searchParams.getAttributes())) {
+            resultAttributes.addAll(searchParams.getAttributes());
+        }
+
+        try {
+            indexQuery = graph.elasticsearchQuery(Constants.VERTEX_INDEX, searchParams);
+            DirectIndexQueryResult indexQueryResult = new DirectIndexQueryResult();
+            indexQueryResult.setIterator(null);
+            indexQueryResult = indexQuery.vertices(searchParams);
+
+            Iterator<Result> iterator = indexQueryResult.getIterator();
+            boolean showSearchScore = searchParams.getShowSearchScore();
+
+            while (iterator.hasNext()) {
+                Result result = iterator.next();
+                AtlasVertex vertex = result.getVertex();
+
+                if (vertex == null) {
+                    LOG.warn("vertex in null");
+                    continue;
+                }
+
+                AtlasEntityHeader header = entityRetriever.toAtlasEntityHeader(vertex, resultAttributes);
+                header.setClassifications(entityRetriever.getAllClassifications(vertex));
+                if (showSearchScore) {
+                    ret.addEntityScore(header.getGuid(), result.getScore());
+                }
+                ret.addEntity(header);
+            }
+
+            ret.setAggregations(indexQueryResult.getAggregationMap());
+            ret.setApproximateCount(indexQuery.vertexTotals());
+            RequestContext.clear();
+        } catch (Exception e) {
+            throw e;
+        }
+        return ret;
     }
 
     @Override

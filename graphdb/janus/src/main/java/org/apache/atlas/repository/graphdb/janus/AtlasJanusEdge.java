@@ -20,6 +20,7 @@ package org.apache.atlas.repository.graphdb.janus;
 import org.apache.atlas.repository.graphdb.AtlasEdge;
 import org.apache.atlas.repository.graphdb.AtlasVertex;
 import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.janusgraph.graphdb.vertices.CacheVertex;
 
 /**
  * Janus implementation of AtlasEdge.
@@ -44,11 +45,13 @@ public class AtlasJanusEdge extends AtlasJanusElement<Edge> implements AtlasEdge
 
     @Override
     public AtlasVertex<AtlasJanusVertex, AtlasJanusEdge> getInVertex() {
+        ((CacheVertex) getWrappedElement().inVertex()).refresh();
         return GraphDbObjectFactory.createVertex(graph, getWrappedElement().inVertex());
     }
 
     @Override
     public AtlasVertex<AtlasJanusVertex, AtlasJanusEdge> getOutVertex() {
+        ((CacheVertex) getWrappedElement().outVertex()).refresh();
         return GraphDbObjectFactory.createVertex(graph, getWrappedElement().outVertex());
     }
 
