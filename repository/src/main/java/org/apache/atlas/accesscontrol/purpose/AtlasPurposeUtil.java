@@ -6,7 +6,6 @@ import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.model.discovery.IndexSearchParams;
 import org.apache.atlas.model.instance.AtlasEntity;
 import org.apache.atlas.model.instance.AtlasEntityHeader;
-import org.apache.atlas.model.instance.AtlasObjectId;
 import org.apache.atlas.ranger.AtlasRangerService;
 import org.apache.atlas.repository.graphdb.AtlasGraph;
 import org.apache.commons.collections.CollectionUtils;
@@ -20,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.apache.atlas.repository.Constants.PURPOSE_ENTITY_TYPE;
 
 public class AtlasPurposeUtil extends AccessControlUtil {
 
@@ -102,17 +100,6 @@ public class AtlasPurposeUtil extends AccessControlUtil {
 
     protected static String formatAccessType(String prefix, String type){
         return String.format("%s:%s", prefix, type);
-    }
-
-    protected static String getPurposeGuid(AtlasEntity policyEntity) {
-        Object purpose = policyEntity.getRelationshipAttribute(REL_ATTR_ACCESS_CONTROL);
-        if (purpose instanceof AtlasObjectId) {
-            return ((AtlasObjectId) purpose).getGuid();
-        } else if (purpose instanceof Map) {
-            return (String) ((HashMap) purpose).get("guid");
-        }
-
-        return null;
     }
 
     public static void validateUniquenessByTags(AtlasGraph graph, List<String> tags, String typeName) throws AtlasBaseException {

@@ -54,7 +54,6 @@ import static org.apache.atlas.AtlasConfiguration.RANGER_HEKA_SERVICE_TYPE;
 import static org.apache.atlas.AtlasErrorCode.ATTRIBUTE_UPDATE_NOT_SUPPORTED;
 import static org.apache.atlas.AtlasErrorCode.BAD_REQUEST;
 import static org.apache.atlas.AtlasErrorCode.OPERATION_NOT_SUPPORTED;
-import static org.apache.atlas.accesscontrol.AccessControlUtil.ACCESS_ENTITY_READ;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.ATTR_ACCESS_CONTROL_ENABLED;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.ATTR_POLICY_ACTIONS;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.POLICY_QN_FORMAT;
@@ -68,7 +67,6 @@ import static org.apache.atlas.accesscontrol.AccessControlUtil.getIsAllow;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getIsEnabled;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getName;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getPolicies;
-import static org.apache.atlas.accesscontrol.AccessControlUtil.getPolicyType;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getQualifiedName;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getTenantId;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getUUID;
@@ -273,7 +271,7 @@ public class AtlasPersonaService {
         context.setAllowPolicyUpdate();
 
         try {
-            validatePersonaPolicyUpdate(context);
+            PersonaServiceHelper.validatePersonaPolicy(context, entityRetriever, atlasRangerService);
 
             List<String> actions = getActions(personaPolicy);
 
@@ -314,19 +312,6 @@ public class AtlasPersonaService {
             }
         } finally {
             RequestContext.get().endMetricRecord(metricRecorder);
-        }
-    }
-
-
-    private void validatePersonaPolicyUpdate(PersonaContext context) throws AtlasBaseException {
-        PersonaServiceHelper.validatePersonaPolicy(context, entityRetriever, atlasRangerService);
-
-        if (!getPolicyType(context.getPersonaPolicy()).equals(getPolicyType(context.getExistingPersonaPolicy()))) {
-            throw new AtlasBaseException(OPERATION_NOT_SUPPORTED, "Policy type change not Allowed");
-        }
-
-        if (!AtlasEntity.Status.ACTIVE.equals(context.getExistingPersonaPolicy().getStatus())) {
-            throw new AtlasBaseException(OPERATION_NOT_SUPPORTED, "Entity not Active");
         }
     }
 

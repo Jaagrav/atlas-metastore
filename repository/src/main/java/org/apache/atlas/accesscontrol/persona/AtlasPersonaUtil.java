@@ -3,13 +3,10 @@ package org.apache.atlas.accesscontrol.persona;
 import org.apache.atlas.accesscontrol.AccessControlUtil;
 import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.model.instance.AtlasEntity;
-import org.apache.atlas.model.instance.AtlasObjectId;
 import org.apache.ranger.plugin.model.RangerRole;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.apache.atlas.repository.Constants.ATLAS_GLOSSARY_CATEGORY_ENTITY_TYPE;
@@ -100,17 +97,6 @@ public class AtlasPersonaUtil extends AccessControlUtil {
 
     public static List<String> getPersonaUsers(AtlasEntity entity) {
         return (List<String>) entity.getAttribute(ATTR_PERSONA_USERS);
-    }
-
-    public static String getPersonaGuid(AtlasEntity personaPolicyEntity) {
-        Object persona = personaPolicyEntity.getRelationshipAttribute(REL_ATTR_ACCESS_CONTROL);
-        if (persona instanceof AtlasObjectId) {
-            return ((AtlasObjectId) persona).getGuid();
-        } else if (persona instanceof Map) {
-            return (String) ((HashMap) persona).get("guid");
-        }
-
-        return null;
     }
 
     public static List<AtlasEntity> getGlossaryPolicies(AtlasEntity.AtlasEntityWithExtInfo entityWithExtInfo) {

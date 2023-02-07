@@ -20,6 +20,7 @@ package org.apache.atlas.accesscontrol.purpose;
 import org.apache.atlas.RequestContext;
 import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.model.instance.AtlasEntity;
+import org.apache.atlas.model.instance.AtlasObjectId;
 import org.apache.atlas.repository.graphdb.AtlasGraph;
 import org.apache.atlas.utils.AtlasPerfMetrics;
 import org.apache.commons.collections.CollectionUtils;
@@ -46,14 +47,17 @@ import static org.apache.atlas.accesscontrol.AccessControlUtil.ACCESS_REMOVE_REL
 import static org.apache.atlas.accesscontrol.AccessControlUtil.ACCESS_UPDATE_REL;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.ATTR_DATA_MASKING;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.ATTR_POLICY_ACTIONS;
-import static org.apache.atlas.accesscontrol.AccessControlUtil.ATTR_PURPOSE_TAGS;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.LINK_ASSET_ACTION;
+import static org.apache.atlas.accesscontrol.AccessControlUtil.RANGER_MASK_NONE;
+import static org.apache.atlas.accesscontrol.AccessControlUtil.REL_ATTR_ACCESS_CONTROL;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getActions;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getDataPolicyMaskType;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getIsAllow;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getName;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getPolicies;
+import static org.apache.atlas.accesscontrol.AccessControlUtil.getPolicyCategory;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getPolicyGroups;
+import static org.apache.atlas.accesscontrol.AccessControlUtil.getPolicyType;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getPolicyUsers;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.isDataMaskPolicy;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.isDataPolicy;
@@ -68,6 +72,7 @@ import static org.apache.atlas.accesscontrol.purpose.AtlasPurposeUtil.getPurpose
 import static org.apache.atlas.accesscontrol.purpose.AtlasPurposeUtil.getTags;
 import static org.apache.atlas.accesscontrol.purpose.AtlasPurposeUtil.validateUniquenessByTags;
 import static org.apache.atlas.repository.Constants.PURPOSE_ENTITY_TYPE;
+import static org.apache.ranger.plugin.model.RangerPolicy.MASK_TYPE_NONE;
 import static org.apache.ranger.plugin.model.RangerPolicy.POLICY_TYPE_ACCESS;
 import static org.apache.ranger.plugin.model.RangerPolicy.POLICY_TYPE_DATAMASK;
 
@@ -92,24 +97,55 @@ public class PurposeServiceHelper {
     }
 
     private static void validatePurposePolicyRequest(PurposeContext context) throws AtlasBaseException {
-        if (!AtlasEntity.Status.ACTIVE.equals(context.getPurpose().getStatus())) {
-            throw new AtlasBaseException(OPERATION_NOT_SUPPORTED, "Purpose not Active");
-        }
+        AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("validatePurposePolicyRequest");
+        AtlasEntity purposePolicy = context.getPurposePolicy();
 
-        List<String> actions = getActions(context.getPurposePolicy());
+        try {
+            if (context.isCreateNewPurposePolicy()) {
+                if (!AtlasEntity.Status.ACTIVE.equals(context.getPurpose().getStatus())) {
+                    throw new AtlasBaseException(OPERATION_NOT_SUPPORTED, "Purpose not Active");
+                }
 
-        if (CollectionUtils.isEmpty(actions)) {
-            if (context.isCreateNewPurposePolicy() || context.getPurposePolicy().hasAttribute(ATTR_POLICY_ACTIONS)) {
-                throw new AtlasBaseException(BAD_REQUEST, "Please provide actions for policy");
+                if (isDataPolicy(purposePolicy) && !purposePolicy.hasAttribute(ATTR_DATA_MASKING)) {
+                    purposePolicy.setAttribute(ATTR_DATA_MASKING, RANGER_MASK_NONE);
+                }
+            } else {
+                if (!getPolicyType(purposePolicy).equals(getPolicyType(context.getExistingPurposePolicy()))) {
+                    throw new AtlasBaseException(OPERATION_NOT_SUPPORTED, "Policy type change not Allowed");
+                }
+
+                if (!getPolicyCategory(purposePolicy).equals(getPolicyCategory(context.getExistingPurposePolicy()))) {
+                    throw new AtlasBaseException(OPERATION_NOT_SUPPORTED, "Policy category change not Allowed");
+                }
+
+                AtlasObjectId existingPersona = (AtlasObjectId) context.getExistingPurposePolicy().getRelationshipAttribute(REL_ATTR_ACCESS_CONTROL);
+                String existingPersonaGuid = existingPersona.getGuid();
+                if (!context.getPurpose().getGuid().equals(existingPersonaGuid)) {
+                    throw new AtlasBaseException(OPERATION_NOT_SUPPORTED, "Policy parent (accesscontrol) change is not Allowed");
+                }
+
+                if (!AtlasEntity.Status.ACTIVE.equals(context.getExistingPurposePolicy().getStatus())) {
+                    throw new AtlasBaseException(OPERATION_NOT_SUPPORTED, "Policy is not Active");
+                }
             }
-        }
 
-        validatePurposePolicyActions(actions);
+            List<String> actions = getActions(purposePolicy);
 
-        if (CollectionUtils.isEmpty(getPolicyUsers(context.getPurposePolicy())) &&
-                CollectionUtils.isEmpty(getPolicyGroups(context.getPurposePolicy())) && !getIsAllUsers(context.getPurposePolicy())) {
+            if (CollectionUtils.isEmpty(actions)) {
+                if (context.isCreateNewPurposePolicy() || purposePolicy.hasAttribute(ATTR_POLICY_ACTIONS)) {
+                    throw new AtlasBaseException(BAD_REQUEST, "Please provide actions for policy");
+                }
+            }
 
-            throw new AtlasBaseException(BAD_REQUEST, "Please provide users/groups OR select All users for policy");
+            validatePurposePolicyActions(actions);
+
+            if (CollectionUtils.isEmpty(getPolicyUsers(purposePolicy)) && CollectionUtils.isEmpty(getPolicyGroups(purposePolicy))
+                    && !getIsAllUsers(purposePolicy)) {
+
+                throw new AtlasBaseException(BAD_REQUEST, "Please provide users/groups OR select All users for policy");
+            }
+        } finally {
+            RequestContext.get().endMetricRecord(metricRecorder);
         }
     }
 

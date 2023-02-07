@@ -21,6 +21,7 @@ import org.apache.atlas.RequestContext;
 import org.apache.atlas.authorize.AtlasAuthorizationUtils;
 import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.model.instance.AtlasEntity;
+import org.apache.atlas.model.instance.AtlasObjectId;
 import org.apache.atlas.ranger.AtlasRangerService;
 import org.apache.atlas.ranger.RangerRoleList;
 import org.apache.atlas.repository.store.graph.v2.EntityGraphRetriever;
@@ -53,8 +54,11 @@ import static org.apache.atlas.accesscontrol.AccessControlUtil.ACCESS_ADD_REL;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.ACCESS_ENTITY_CREATE;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.ACCESS_REMOVE_REL;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.ACCESS_UPDATE_REL;
+import static org.apache.atlas.accesscontrol.AccessControlUtil.ATTR_DATA_MASKING;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.ATTR_POLICY_ACTIONS;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.LINK_ASSET_ACTION;
+import static org.apache.atlas.accesscontrol.AccessControlUtil.RANGER_MASK_NONE;
+import static org.apache.atlas.accesscontrol.AccessControlUtil.REL_ATTR_ACCESS_CONTROL;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getActions;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getAssets;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getConnectionId;
@@ -63,6 +67,8 @@ import static org.apache.atlas.accesscontrol.AccessControlUtil.getDataPolicyMask
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getMetadataPolicies;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getName;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getPolicies;
+import static org.apache.atlas.accesscontrol.AccessControlUtil.getPolicyCategory;
+import static org.apache.atlas.accesscontrol.AccessControlUtil.getPolicyType;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getQualifiedName;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.isDataMaskPolicy;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.isDataPolicy;
@@ -133,8 +139,32 @@ public class PersonaServiceHelper {
         AtlasEntity personaPolicy = context.getPersonaPolicy();
 
         try {
-            if (!AtlasEntity.Status.ACTIVE.equals(context.getPersonaExtInfo().getEntity().getStatus())) {
-                throw new AtlasBaseException(OPERATION_NOT_SUPPORTED, "Persona is not Active");
+            if (context.isCreateNewPersonaPolicy()) {
+                if (!AtlasEntity.Status.ACTIVE.equals(context.getPersonaExtInfo().getEntity().getStatus())) {
+                    throw new AtlasBaseException(OPERATION_NOT_SUPPORTED, "Persona is not Active");
+                }
+
+                if (isDataPolicy(personaPolicy) && !personaPolicy.hasAttribute(ATTR_DATA_MASKING)) {
+                    personaPolicy.setAttribute(ATTR_DATA_MASKING, RANGER_MASK_NONE);
+                }
+            } else {
+                if (!getPolicyType(context.getPersonaPolicy()).equals(getPolicyType(context.getExistingPersonaPolicy()))) {
+                    throw new AtlasBaseException(OPERATION_NOT_SUPPORTED, "Policy type change not Allowed");
+                }
+
+                if (!getPolicyCategory(context.getPersonaPolicy()).equals(getPolicyCategory(context.getExistingPersonaPolicy()))) {
+                    throw new AtlasBaseException(OPERATION_NOT_SUPPORTED, "Policy category change not Allowed");
+                }
+
+                AtlasObjectId existingPersona  = (AtlasObjectId) context.getExistingPersonaPolicy().getRelationshipAttribute(REL_ATTR_ACCESS_CONTROL);
+                String existingPersonaGuid = existingPersona.getGuid();
+                if (!context.getPersona().getGuid().equals(existingPersonaGuid)) {
+                    throw new AtlasBaseException(OPERATION_NOT_SUPPORTED, "Policy parent (accesscontrol) change is not Allowed");
+                }
+
+                if (!AtlasEntity.Status.ACTIVE.equals(context.getExistingPersonaPolicy().getStatus())) {
+                    throw new AtlasBaseException(OPERATION_NOT_SUPPORTED, "Policy is not Active");
+                }
             }
 
             if (CollectionUtils.isEmpty(getActions(personaPolicy))) {

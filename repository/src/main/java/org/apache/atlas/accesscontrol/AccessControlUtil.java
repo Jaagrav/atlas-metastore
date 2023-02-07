@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 
 import static org.apache.atlas.AtlasErrorCode.ACCESS_CONTROL_ALREADY_EXISTS;
 import static org.apache.atlas.AtlasErrorCode.OPERATION_NOT_SUPPORTED;
-import static org.apache.atlas.accesscontrol.purpose.AtlasPurposeUtil.getTags;
 import static org.apache.atlas.repository.Constants.ACCESS_CONTROL_ENTITY_TYPES;
 import static org.apache.atlas.repository.Constants.ACCESS_CONTROL_RELATION_TYPE;
 import static org.apache.atlas.repository.Constants.NAME;
@@ -413,16 +412,21 @@ public class AccessControlUtil {
     }
 
     public static boolean isDataPolicyTypeUpdate(AtlasEntity newPolicy, AtlasEntity existingPolicy) {
-        if (existingPolicy == null || !isDataPolicy(newPolicy)) {
+        String newMask = getDataPolicyMaskType(newPolicy);
+        if (existingPolicy == null || StringUtils.isEmpty(newMask)) {
             return false;
         }
+        boolean ret = false;
 
-        String existingMask = getDataPolicyMaskType(existingPolicy);
-        existingMask = existingMask == null ? "" : existingMask;
+        if (isDataPolicy(newPolicy)) {
+            String existingMask = getDataPolicyMaskType(existingPolicy);
 
-        String newMask = getDataPolicyMaskType(newPolicy);
+            ret = !existingMask.equals(newMask) && (RANGER_MASK_NONE.equals(existingMask) || RANGER_MASK_NONE.equals(newMask));
 
-        return !existingMask.equals(newMask) && (StringUtils.isEmpty(existingMask) || StringUtils.isEmpty(newMask));
+            LOG.info("isDataPolicyTypeUpdate: {}", ret);
+        }
+
+        return ret;
     }
 
     private static boolean isExactResourceMatch(RangerPolicy resourceMatchedPolicy, String provisionalPolicyResourcesSignature,

@@ -44,7 +44,6 @@ import static org.apache.atlas.AtlasErrorCode.BAD_REQUEST;
 import static org.apache.atlas.AtlasErrorCode.OPERATION_NOT_SUPPORTED;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.ATTR_ACCESS_CONTROL_ENABLED;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.ATTR_POLICY_ACTIONS;
-import static org.apache.atlas.accesscontrol.AccessControlUtil.ATTR_PURPOSE_TAGS;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.fetchRangerPoliciesByLabel;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.fetchRangerPolicyByResources;
 import static org.apache.atlas.accesscontrol.AccessControlUtil.getESAliasName;
@@ -58,7 +57,6 @@ import static org.apache.atlas.accesscontrol.purpose.AtlasPurposeUtil.RESOURCE_T
 import static org.apache.atlas.accesscontrol.purpose.AtlasPurposeUtil.fetchRangerPoliciesByResourcesForPurposeDelete;
 import static org.apache.atlas.accesscontrol.purpose.AtlasPurposeUtil.getActions;
 import static org.apache.atlas.accesscontrol.purpose.AtlasPurposeUtil.getIsAllow;
-import static org.apache.atlas.accesscontrol.purpose.AtlasPurposeUtil.getPolicies;
 import static org.apache.atlas.accesscontrol.purpose.AtlasPurposeUtil.getPurposeLabel;
 import static org.apache.atlas.accesscontrol.purpose.AtlasPurposeUtil.getPurposePolicyLabel;
 import static org.apache.atlas.accesscontrol.purpose.AtlasPurposeUtil.getQualifiedName;
@@ -72,8 +70,6 @@ import static org.apache.atlas.repository.Constants.DEFAULT_TENANT_ID;
 import static org.apache.atlas.repository.Constants.POLICY_ENTITY_TYPE;
 import static org.apache.atlas.repository.Constants.PURPOSE_ENTITY_TYPE;
 import static org.apache.atlas.repository.Constants.QUALIFIED_NAME;
-import static org.apache.ranger.plugin.model.RangerPolicy.POLICY_TYPE_ACCESS;
-import static org.apache.ranger.plugin.model.RangerPolicy.POLICY_TYPE_DATAMASK;
 
 
 public class AtlasPurposeService {
@@ -349,7 +345,6 @@ public class AtlasPurposeService {
                     rangerPolicyToUpdate.setDenyPolicyItems(provisionalPolicy.getDenyPolicyItems());
                     rangerPolicyToUpdate.setDataMaskPolicyItems(provisionalPolicy.getDataMaskPolicyItems());
 
-                    //if (context.isDeletePurposePolicy() || isDataPolicyTypeUpdate(context.getPurposePolicy(), context.getExistingPurposePolicy())) {
                     if (context.isDeletePurposePolicy()) {
                         rangerPolicyToUpdate.getPolicyLabels().remove(getPurposePolicyLabel(context.getPurposePolicy().getGuid()));
                     } else {

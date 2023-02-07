@@ -26,6 +26,8 @@ import org.apache.ranger.plugin.model.RangerPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.atlas.accesscontrol.AccessControlUtil.RANGER_MASK_NONE;
+
 public class PersonaContext {
 
 
@@ -170,7 +172,7 @@ public class PersonaContext {
     }
 
     private void setDataMaskPolicyType() {
-        if (StringUtils.isNotEmpty(AccessControlUtil.getDataPolicyMaskType(personaPolicy))) {
+        if (!RANGER_MASK_NONE.equals(AccessControlUtil.getDataPolicyMaskType(personaPolicy))) {
             isDataMaskPolicy = true;
         }
     }
