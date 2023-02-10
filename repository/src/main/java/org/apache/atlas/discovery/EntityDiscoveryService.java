@@ -1012,15 +1012,21 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
 
             while (iterator.hasNext()) {
                 Result result = iterator.next();
-                AtlasVertex vertex = result.getVertex();
-
-                if (vertex == null) {
-                    LOG.warn("vertex in null");
-                    continue;
+                AtlasEntityHeader header = result.getEntity();
+                Set<String> relationAttributes = RequestContext.get().getRelationAttrsForSearch();
+                for(String attribute: relationAttributes) {
+                    Set<String> relatedGuids = getRelatedGuids(header.getGuid(), attribute);
+                    setRelatedEntities(relatedGuids, attribute, header);
                 }
+//                AtlasVertex vertex = result.getVertex();
+//                if (vertex == null) {
+//                    LOG.warn("vertex in null");
+//                    continue;
+//                }
 
-                AtlasEntityHeader header = entityRetriever.toAtlasEntityHeader(vertex, resultAttributes);
-                header.setClassifications(entityRetriever.getAllClassifications(vertex));
+//                AtlasEntityHeader header = entityRetriever.toAtlasEntityHeader(vertex, resultAttributes);
+//                header.setClassifications(entityRetriever.getAllClassifications(vertex));
+
                 if (showSearchScore) {
                     ret.addEntityScore(header.getGuid(), result.getScore());
                 }
@@ -1061,12 +1067,20 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
         } catch (Exception e) {
                 throw e;
         }
-        scrubSearchResults(ret, searchParams.getSuppressLogs());
+//        scrubSearchResults(ret, searchParams.getSuppressLogs());
     }
 
     private Map<String, Object> getMap(String key, Object value) {
         Map<String, Object> map = new HashMap<>();
         map.put(key, value);
+        return map;
+    }
+
+    private Map<String, Object> getMap(String key, List<Object> values) {
+        Map<String, Object> map = new HashMap<>();
+        for (Object value : values) {
+            map.put(key, value);
+        }
         return map;
     }
 
@@ -1085,4 +1099,66 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
         List<AtlasEntityHeader> entityHeaders = searchResult.getEntities();
         return  entityHeaders;
     }
+
+    public Set<String> getRelatedGuids(String guid, String attribute) throws AtlasBaseException {
+        IndexSearchParams indexSearchParams = new IndexSearchParams();
+        Map<String, Object> dsl1 = getMap("term", getMap("__guid", guid));
+
+        Map<String, Object> map1 = new HashMap<>();
+        map1.put("path", "relationshipList");
+        map1.put("query", getMap("term", getMap("relationshipList.endName", attribute)));
+        map1.put("inner_hits", new HashMap<>());
+        Map<String, Object> dsl2 = getMap("nested", map1);
+
+        List<Object> must_list = new ArrayList<>();
+        must_list.add(dsl1);
+        must_list.add(dsl2);
+
+        Map<String, Object> dsl = new HashMap<>();
+
+        dsl.put("query", getMap("bool", getMap("must", must_list)));
+
+        indexSearchParams.setDsl(dsl);
+        AtlasIndexQuery indexQuery = null;
+        indexQuery = graph.elasticsearchQuery(Constants.VERTEX_INDEX, indexSearchParams);
+        DirectIndexQueryResult indexQueryResult = indexQuery.vertices(indexSearchParams);
+        Iterator<Result> iterator = indexQueryResult.getIterator();
+        Set<String> ret = new HashSet<>();
+        while (iterator.hasNext()) {
+            Result result = iterator.next();
+            DirectIndexQueryResult indexQueryResult1 = result.getEndGuids("relationshipList");
+            Iterator<Result> iterator1 = indexQueryResult1.getIterator();
+            while (iterator1.hasNext()) {
+                Result result1 = iterator1.next();
+                ret.add(result1.getGuid());
+            }
+        }
+        return ret;
+    }
+
+    public void setRelatedEntities(Set<String> guids, String attribute, AtlasEntityHeader entityHeader) throws AtlasBaseException {
+        IndexSearchParams indexSearchParams = new IndexSearchParams();
+
+        List<Object> must_list = new ArrayList<>();
+         for (String guid: guids) {
+             Map<String, Object> dsl1 = getMap("term", getMap("__guid", guid));
+             must_list.add(dsl1);
+         }
+        Map<String, Object> dsl = new HashMap<>();
+        dsl.put("query", getMap("bool", getMap("must", must_list)));
+
+        indexSearchParams.setDsl(dsl);
+        AtlasIndexQuery indexQuery = null;
+        indexQuery = graph.elasticsearchQuery(Constants.VERTEX_INDEX, indexSearchParams);
+        DirectIndexQueryResult indexQueryResult = indexQuery.vertices(indexSearchParams);
+        Iterator<Result> iterator = indexQueryResult.getIterator();
+        Set<String> ret = new HashSet<>();
+        while (iterator.hasNext()) {
+            Result result = iterator.next();
+            AtlasObjectId objectId = entityRetriever.toAtlasObjectId(result.getEntity());
+            entityHeader.setAttribute(attribute, objectId);
+        }
+    }
+
+
 }

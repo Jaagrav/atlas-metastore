@@ -360,6 +360,42 @@ public class EntityGraphRetriever {
         return ret;
     }
 
+    public AtlasObjectId toAtlasObjectId(AtlasEntityHeader entity) {
+        AtlasObjectId   ret        = null;
+        AtlasEntityType entityType = typeRegistry.getEntityTypeByName(entity.getTypeName());
+
+        if (entityType != null) {
+            Map<String, Object> uniqueAttributes = new HashMap<>();
+
+            for (String attributeName : entityType.getUniqAttributes().keySet()) {
+                Object attrValue = entity.getAttribute(attributeName);
+
+                if (attrValue != null) {
+                    uniqueAttributes.put(attributeName, attrValue);
+                }
+            }
+
+            Map<String, Object> attributes = new HashMap<>();
+            Set<String> relationAttributes = RequestContext.get().getRelationAttrsForSearch();
+            if (CollectionUtils.isNotEmpty(relationAttributes)) {
+                for (String attributeName : relationAttributes) {
+                    AtlasAttribute attribute = entityType.getAttribute(attributeName);
+                    if (attribute != null
+                            && !uniqueAttributes.containsKey(attributeName)) {
+                        Object attrValue = entity.getAttribute(attributeName);
+                        if (attrValue != null) {
+                            attributes.put(attribute.getName(), attrValue);
+                        }
+                    }
+                }
+            }
+
+            ret = new AtlasObjectId(entity.getGuid(), entity.getTypeName(), uniqueAttributes, attributes);
+        }
+
+        return ret;
+    }
+
     public AtlasObjectId toAtlasObjectIdWithoutGuid(AtlasEntity entity) {
         AtlasObjectId objectId = toAtlasObjectId(entity);
         objectId.setGuid(null);

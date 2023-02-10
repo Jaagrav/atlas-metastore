@@ -20,6 +20,7 @@ package org.apache.atlas.repository.graphdb.janus;
 import org.apache.atlas.AtlasErrorCode;
 import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.model.discovery.SearchParams;
+import org.apache.atlas.model.instance.AtlasEntityHeader;
 import org.apache.atlas.repository.graphdb.AtlasIndexQuery;
 import org.apache.atlas.repository.graphdb.AtlasVertex;
 import org.apache.atlas.repository.graphdb.DirectIndexQueryResult;
@@ -130,7 +131,7 @@ public class AtlasElasticsearchQuery implements AtlasIndexQuery<AtlasJanusVertex
     private String performDirectIndexQuery(String query) throws IOException {
         HttpEntity entity = new NStringEntity(query, ContentType.APPLICATION_JSON);
 
-        String endPoint = index + "/_search?_source=false";
+        String endPoint = index + "/_search?_source=true";
 
         Request request = new Request("GET", endPoint);
         request.setEntity(entity);
@@ -208,6 +209,21 @@ public class AtlasElasticsearchQuery implements AtlasIndexQuery<AtlasJanusVertex
         }
 
         @Override
+        public AtlasEntityHeader getEntity() {
+            return null;
+        }
+
+        @Override
+        public String getGuid() {
+            return null;
+        }
+
+        @Override
+        public DirectIndexQueryResult getEndGuids(String key) {
+            return null;
+        }
+
+        @Override
         public double getScore() {
             return hit.getScore();
         }
@@ -242,6 +258,24 @@ public class AtlasElasticsearchQuery implements AtlasIndexQuery<AtlasJanusVertex
         }
 
         @Override
+        public String getGuid() {
+            Map<String, Object> hit_response = AtlasType.fromJson(AtlasType.toJson(hit.get("_source")), Map.class);
+            return (String) hit_response.get("endGuid");
+        }
+
+        @Override
+        public AtlasEntityHeader getEntity() {
+            long vertexId = LongEncoding.decode(String.valueOf(hit.get("_id")));
+            Map<String, Object> hit_response = AtlasType.fromJson(AtlasType.toJson(hit.get("_source")), Map.class);
+            AtlasEntityHeader entity = new AtlasEntityHeader();
+            entity.setAttribute("name", hit_response.get("name"));
+            entity.setGuid((String) hit_response.get("__guid"));
+            entity.setTypeName((String) hit_response.get("__typeName"));
+            entity.setAttribute("qualifiedName", hit_response.get("qualifiedName"));
+            return entity;
+        }
+
+        @Override
         public Set<String> getCollapseKeys() {
             Set<String> collapseKeys = new HashSet<>();
             if (innerHitsMap != null) {
@@ -252,6 +286,25 @@ public class AtlasElasticsearchQuery implements AtlasIndexQuery<AtlasJanusVertex
 
         @Override
         public DirectIndexQueryResult getCollapseVertices(String key) {
+            DirectIndexQueryResult result = new DirectIndexQueryResult();
+            if (innerHitsMap != null) {
+                Map<String, LinkedHashMap> responseMap = AtlasType.fromJson(AtlasType.toJson(innerHitsMap.get(key)), Map.class);
+                Map<String, LinkedHashMap> hits_0 = AtlasType.fromJson(AtlasType.toJson(responseMap.get("hits")), Map.class);
+
+                Integer approximateCount = (Integer) hits_0.get("total").get("value");
+                result.setApproximateCount(approximateCount);
+
+                List<LinkedHashMap> hits_1 = AtlasType.fromJson(AtlasType.toJson(hits_0.get("hits")), List.class);
+                Stream<Result<AtlasJanusVertex, AtlasJanusEdge>> resultStream = hits_1.stream().map(ResultImplDirect::new);
+                result.setIterator(resultStream.iterator());
+
+                return result;
+            }
+            return null;
+        }
+
+        @Override
+        public DirectIndexQueryResult getEndGuids(String key) {
             DirectIndexQueryResult result = new DirectIndexQueryResult();
             if (innerHitsMap != null) {
                 Map<String, LinkedHashMap> responseMap = AtlasType.fromJson(AtlasType.toJson(innerHitsMap.get(key)), Map.class);

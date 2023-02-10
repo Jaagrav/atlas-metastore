@@ -20,6 +20,8 @@ package org.apache.atlas.repository.graphdb;
 
 import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.model.discovery.SearchParams;
+import org.apache.atlas.model.instance.AtlasEntity;
+import org.apache.atlas.model.instance.AtlasEntityHeader;
 import org.apache.tinkerpop.gremlin.process.traversal.Order;
 
 import java.util.Iterator;
@@ -82,6 +84,15 @@ public interface AtlasIndexQuery<V, E> {
          * Gets the vertex for this result.
          */
         AtlasVertex<V, E> getVertex();
+
+        /**
+         * Gets the vertex for this result.
+         */
+        AtlasEntityHeader getEntity();
+
+        public String getGuid();
+
+        public DirectIndexQueryResult getEndGuids(String key);
 
         /**
          * Gets the score for this result.

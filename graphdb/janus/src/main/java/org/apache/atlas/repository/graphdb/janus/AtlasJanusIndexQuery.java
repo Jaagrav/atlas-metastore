@@ -23,6 +23,7 @@ import java.util.Set;
 import com.google.common.base.Preconditions;
 import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.model.discovery.SearchParams;
+import org.apache.atlas.model.instance.AtlasEntityHeader;
 import org.apache.atlas.repository.graphdb.AtlasIndexQuery;
 import org.apache.atlas.repository.graphdb.AtlasVertex;
 
@@ -128,6 +129,21 @@ public class AtlasJanusIndexQuery implements AtlasIndexQuery<AtlasJanusVertex, A
         @Override
         public AtlasVertex<AtlasJanusVertex, AtlasJanusEdge> getVertex() {
             return GraphDbObjectFactory.createVertex(graph, source.getElement());
+        }
+
+        @Override
+        public AtlasEntityHeader getEntity() {
+            return null;
+        }
+
+        @Override
+        public String getGuid() {
+            return null;
+        }
+
+        @Override
+        public DirectIndexQueryResult getEndGuids(String key) {
+            return null;
         }
 
         @Override
