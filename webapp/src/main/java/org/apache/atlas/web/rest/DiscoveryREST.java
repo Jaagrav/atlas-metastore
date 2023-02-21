@@ -17,11 +17,7 @@
  */
 package org.apache.atlas.web.rest;
 
-import org.apache.atlas.AtlasConfiguration;
-import org.apache.atlas.AtlasClient;
-import org.apache.atlas.AtlasErrorCode;
-import org.apache.atlas.RequestContext;
-import org.apache.atlas.SortOrder;
+import org.apache.atlas.*;
 import org.apache.atlas.annotation.Timed;
 import org.apache.atlas.authorize.AtlasAuthorizationUtils;
 import org.apache.atlas.discovery.AtlasDiscoveryService;
@@ -30,8 +26,9 @@ import org.apache.atlas.discovery.searchlog.SearchLoggingManagement;
 import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.model.discovery.*;
 import org.apache.atlas.model.discovery.SearchParameters.FilterCriteria;
-import org.apache.atlas.model.discovery.searchlog.SearchLogSearchResult;
 import org.apache.atlas.model.discovery.searchlog.SearchLogSearchParams;
+import org.apache.atlas.model.discovery.searchlog.SearchLogSearchResult;
+import org.apache.atlas.model.discovery.searchlog.SearchRequestLogData.SearchRequestLogDataBuilder;
 import org.apache.atlas.model.profile.AtlasUserSavedSearch;
 import org.apache.atlas.repository.Constants;
 import org.apache.atlas.type.AtlasEntityType;
@@ -46,8 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
-
-import org.apache.atlas.model.discovery.searchlog.SearchRequestLogData.SearchRequestLogDataBuilder;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -380,6 +375,9 @@ public class DiscoveryREST {
         AtlasPerfTracer perf = null;
 
         long startTime = System.currentTimeMillis();
+        String uuid = UUID.randomUUID().toString();
+        RequestContext.get().setTraceId(uuid);
+        MDC.put("trace_id", uuid);
         try {
             if (AtlasPerfTracer.isPerfTraceEnabled(PERF_LOG)) {
                 perf = AtlasPerfTracer.getPerfTracer(PERF_LOG, "DiscoveryREST.indexSearch(" + parameters + ")");
@@ -404,7 +402,7 @@ public class DiscoveryREST {
                 logSearchLog(parameters, result, servletRequest, endTime - startTime);
             }
 
-            if(LOG.isDebugEnabled()){
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Performing indexsearch for the params ({})", parameters);
             }
 
@@ -425,6 +423,7 @@ public class DiscoveryREST {
 
         } finally {
             AtlasPerfTracer.log(perf);
+            RequestContext.clear();
         }
     }
 

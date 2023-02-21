@@ -18,6 +18,7 @@
 package org.apache.atlas.discovery;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import org.apache.atlas.*;
 import org.apache.atlas.annotation.GraphTransaction;
 import org.apache.atlas.authorize.AtlasAuthorizationUtils;
@@ -68,7 +69,9 @@ import javax.inject.Inject;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.apache.atlas.AtlasErrorCode.*;
 import static org.apache.atlas.SortOrder.ASCENDING;
@@ -1011,14 +1014,25 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
     private void prepareSearchResult(AtlasSearchResult ret, DirectIndexQueryResult indexQueryResult, Set<String> resultAttributes, boolean fetchCollapsedResults) throws AtlasBaseException {
         SearchParams searchParams = ret.getSearchParameters();
         try {
-            if(LOG.isDebugEnabled()){
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Preparing search results for ({})", ret.getSearchParameters());
             }
+            List<Result> indexResults = Lists.newArrayList(indexQueryResult.getIterator());
             Iterator<Result> iterator = indexQueryResult.getIterator();
             boolean showSearchScore = searchParams.getShowSearchScore();
 
+            Map<String, AtlasVertex> verticesMap = Collections.EMPTY_MAP;
             while (iterator.hasNext()) {
-                Result result = iterator.next();
+                Set<String> vertexIds = StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), true)
+                        .map(r -> r.getVertexId()).collect(Collectors.toSet());
+                LOG.info("List of vertices: {}", vertexIds);
+                verticesMap = (Map<String, AtlasVertex>) graph.getVertices(vertexIds).stream().collect(Collectors.toMap(v -> ((AtlasVertex) v).getId(), Function.identity()));
+                LOG.info("Map of vertices: {}", verticesMap);
+            }
+
+            Iterator<Result> indexResultsIterator = indexResults.iterator();
+            while (indexResultsIterator.hasNext()) {
+                Result result = indexResultsIterator.next();
                 AtlasVertex vertex = result.getVertex();
 
                 if (vertex == null) {
