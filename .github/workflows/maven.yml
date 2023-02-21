@@ -26,6 +26,7 @@ on:
       - development
       - master
       - staging
+      - metastore_slowness
 
 jobs:
   build:

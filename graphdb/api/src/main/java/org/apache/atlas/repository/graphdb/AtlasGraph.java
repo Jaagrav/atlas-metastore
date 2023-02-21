@@ -30,6 +30,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -118,6 +119,9 @@ public interface AtlasGraph<V, E> {
      * @return
      */
     AtlasVertex<V, E> getVertex(String vertexId);
+
+
+    List<AtlasVertex<V, E>> getVertices(Set<String> vertexIds);
 
     /**
      * Gets the names of the indexes on edges

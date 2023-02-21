@@ -86,12 +86,9 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.apache.atlas.AtlasErrorCode.INDEX_SEARCH_FAILED;
 import static org.apache.atlas.AtlasErrorCode.RELATIONSHIP_CREATE_INVALID_PARAMS;
@@ -413,6 +410,13 @@ public class AtlasJanusGraph implements AtlasGraph<AtlasJanusVertex, AtlasJanusE
     }
 
     @Override
+    public List<AtlasVertex<AtlasJanusVertex, AtlasJanusEdge>> getVertices(Set<String> vertexIds) {
+        Iterator<Vertex> it     = getGraph().vertices(vertexIds);
+        List<Vertex> vertices = getElements(it);
+        return GraphDbObjectFactory.createVertices(this, vertices);
+    }
+
+    @Override
     public Iterable<AtlasVertex<AtlasJanusVertex, AtlasJanusEdge>> getVertices(String key, Object value) {
         AtlasGraphQuery<AtlasJanusVertex, AtlasJanusEdge> query = query();
 
@@ -592,6 +596,13 @@ public class AtlasJanusGraph implements AtlasGraph<AtlasJanusVertex, AtlasJanusE
         }
 
         return element;
+    }
+
+    private static <T> List<T> getElements(Iterator<T> it) {
+        if (!it.hasNext()) {
+            return Collections.EMPTY_LIST;
+        }
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(it, Spliterator.ORDERED), true).collect(Collectors.toList());
     }
 
     private Object convertGremlinValue(Object rawValue) {

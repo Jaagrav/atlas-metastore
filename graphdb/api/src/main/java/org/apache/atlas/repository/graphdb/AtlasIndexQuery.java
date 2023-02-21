@@ -93,8 +93,14 @@ public interface AtlasIndexQuery<V, E> {
         AtlasVertex<V, E> getVertex();
 
         /**
-         * Gets the score for this result.
+         * Get vertex id
          *
+         * @return
+         */
+        String getVertexId();
+
+        /**
+         * Gets the score for this result.
          */
         double getScore();
 

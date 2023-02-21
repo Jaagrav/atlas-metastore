@@ -28,6 +28,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.*;
 
@@ -119,6 +120,7 @@ public class RequestContext {
         }
 
         CURRENT_CONTEXT.remove();
+        MDC.clear();
     }
 
     public void clearCache() {

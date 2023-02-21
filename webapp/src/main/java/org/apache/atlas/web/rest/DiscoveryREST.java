@@ -44,6 +44,7 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 
 import org.apache.atlas.model.discovery.searchlog.SearchRequestLogData.SearchRequestLogDataBuilder;
@@ -51,21 +52,14 @@ import org.apache.atlas.model.discovery.searchlog.SearchRequestLogData.SearchReq
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.apache.atlas.repository.Constants.*;
 
@@ -399,7 +393,7 @@ public class DiscoveryREST {
                 throw abe;
             }
 
-            if(LOG.isDebugEnabled()){
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Performing indexsearch for the params ({})", parameters);
             }
 
@@ -461,6 +455,7 @@ public class DiscoveryREST {
             throw e;
         } finally {
             AtlasPerfTracer.log(perf);
+            RequestContext.clear();
         }
 
         return result;
@@ -595,7 +590,9 @@ public class DiscoveryREST {
         Servlets.validateQueryParamLength("sortBy", sortByAttribute);
 
         AtlasPerfTracer perf = null;
-
+        String uuid = UUID.randomUUID().toString();
+        RequestContext.get().setTraceId(uuid);
+        MDC.put("trace_id", uuid);
         try {
             if (AtlasPerfTracer.isPerfTraceEnabled(PERF_LOG)) {
                 perf = AtlasPerfTracer.getPerfTracer(PERF_LOG, "DiscoveryREST.relatedEntitiesSearch(" + guid +

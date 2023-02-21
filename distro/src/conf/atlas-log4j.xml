@@ -72,7 +72,7 @@
         <param name="Append" value="true"/>
         <param name="maxFileSize" value="100MB" />
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d %x %m%n"/>
+            <param name="ConversionPattern" value="%d %x trace_id: %X{trace_id} %m%n"/>
         </layout>
     </appender>
 
