@@ -1022,6 +1022,9 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
             boolean showSearchScore = searchParams.getShowSearchScore();
 
             Map<String, AtlasVertex> verticesMap = Collections.EMPTY_MAP;
+            if (iterator.hasNext()) {
+                LOG.info("Results exists: {}", indexResults.size());
+            }
             while (iterator.hasNext()) {
                 Set<String> vertexIds = StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), true)
                         .map(r -> r.getVertexId()).collect(Collectors.toSet());
