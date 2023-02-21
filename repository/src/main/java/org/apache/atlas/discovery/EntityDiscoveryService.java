@@ -54,7 +54,6 @@ import org.apache.atlas.util.AtlasGremlinQueryProvider;
 import org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery;
 import org.apache.atlas.util.SearchPredicateUtil;
 import org.apache.atlas.util.SearchTracker;
-import org.apache.atlas.utils.AtlasPerfTracer;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.collections4.IteratorUtils;
@@ -85,7 +84,6 @@ import static org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery.
 @Component
 public class EntityDiscoveryService implements AtlasDiscoveryService {
     private static final Logger LOG = LoggerFactory.getLogger(EntityDiscoveryService.class);
-    private static final Logger PERF_LOG = AtlasPerfTracer.getPerfLogger("service.EntityDiscovery");
     private static final String DEFAULT_SORT_ATTRIBUTE_NAME = "name";
 
     private final AtlasGraph                      graph;
@@ -1014,10 +1012,6 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
     }
 
     private void prepareSearchResult(AtlasSearchResult ret, DirectIndexQueryResult indexQueryResult, Set<String> resultAttributes, boolean fetchCollapsedResults) throws AtlasBaseException {
-        AtlasPerfTracer perf = null;
-        if (AtlasPerfTracer.isPerfTraceEnabled(PERF_LOG)) {
-            perf = AtlasPerfTracer.getPerfTracer(PERF_LOG, "EntityDiscoveryService.prepareSearchResult");
-        }
         SearchParams searchParams = ret.getSearchParameters();
         try {
             if (LOG.isDebugEnabled()) {
@@ -1087,8 +1081,6 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
             }
         } catch (Exception e) {
             throw e;
-        } finally {
-            AtlasPerfTracer.log(perf);
         }
         scrubSearchResults(ret, searchParams.getSuppressLogs());
     }
