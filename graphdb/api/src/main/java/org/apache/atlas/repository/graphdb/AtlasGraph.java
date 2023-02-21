@@ -23,7 +23,6 @@ import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.groovy.GroovyExpression;
 import org.apache.atlas.model.discovery.SearchParams;
 import org.apache.atlas.type.AtlasType;
-import org.codehaus.jettison.json.JSONException;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import javax.script.ScriptEngine;
@@ -121,7 +120,7 @@ public interface AtlasGraph<V, E> {
     AtlasVertex<V, E> getVertex(String vertexId);
 
 
-    List<AtlasVertex<V, E>> getVertices(Set<String> vertexIds);
+    List<AtlasVertex<V, E>> getVertices(String... vertexIds);
 
     /**
      * Gets the names of the indexes on edges

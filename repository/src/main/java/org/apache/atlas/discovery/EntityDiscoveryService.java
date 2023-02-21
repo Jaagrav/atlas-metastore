@@ -54,6 +54,7 @@ import org.apache.atlas.util.AtlasGremlinQueryProvider;
 import org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery;
 import org.apache.atlas.util.SearchPredicateUtil;
 import org.apache.atlas.util.SearchTracker;
+import org.apache.atlas.utils.AtlasPerfTracer;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.collections4.IteratorUtils;
@@ -84,6 +85,7 @@ import static org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery.
 @Component
 public class EntityDiscoveryService implements AtlasDiscoveryService {
     private static final Logger LOG = LoggerFactory.getLogger(EntityDiscoveryService.class);
+    private static final Logger PERF_LOG = AtlasPerfTracer.getPerfLogger("service.EntityDiscovery");
     private static final String DEFAULT_SORT_ATTRIBUTE_NAME = "name";
 
     private final AtlasGraph                      graph;
@@ -1012,6 +1014,10 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
     }
 
     private void prepareSearchResult(AtlasSearchResult ret, DirectIndexQueryResult indexQueryResult, Set<String> resultAttributes, boolean fetchCollapsedResults) throws AtlasBaseException {
+        AtlasPerfTracer perf = null;
+        if (AtlasPerfTracer.isPerfTraceEnabled(PERF_LOG)) {
+            perf = AtlasPerfTracer.getPerfTracer(PERF_LOG, "EntityDiscoveryService.prepareSearchResult");
+        }
         SearchParams searchParams = ret.getSearchParameters();
         try {
             if (LOG.isDebugEnabled()) {
@@ -1022,10 +1028,9 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
             boolean showSearchScore = searchParams.getShowSearchScore();
 
             Map<String, AtlasVertex> verticesMap = Collections.EMPTY_MAP;
-            LOG.info("Results exists: {}", indexResults.size());
             while (iterator.hasNext()) {
-                Set<String> vertexIds = StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), true)
-                        .map(r -> r.getVertexId()).collect(Collectors.toSet());
+                String[] vertexIds = StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), true)
+                        .map(r -> r.getVertexId()).collect(Collectors.toList()).toArray(new String[0]);
                 LOG.info("List of vertices: {}", vertexIds);
                 verticesMap = (Map<String, AtlasVertex>) graph.getVertices(vertexIds).stream().collect(Collectors.toMap(v -> ((AtlasVertex) v).getId(), Function.identity()));
                 LOG.info("Map of vertices: {}", verticesMap);
@@ -1034,7 +1039,7 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
             Iterator<Result> indexResultsIterator = indexResults.iterator();
             while (indexResultsIterator.hasNext()) {
                 Result result = indexResultsIterator.next();
-                AtlasVertex vertex = result.getVertex();
+                AtlasVertex vertex = result.getVertex();//verticesMap.getOrDefault(result.getVertexId(), result.getVertex());
 
                 if (vertex == null) {
                     LOG.warn("vertex is null");
@@ -1081,7 +1086,9 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
                 ret.addEntity(header);
             }
         } catch (Exception e) {
-                throw e;
+            throw e;
+        } finally {
+            AtlasPerfTracer.log(perf);
         }
         scrubSearchResults(ret, searchParams.getSuppressLogs());
     }
