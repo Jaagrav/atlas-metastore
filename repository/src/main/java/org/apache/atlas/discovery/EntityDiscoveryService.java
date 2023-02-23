@@ -71,7 +71,6 @@ import javax.script.ScriptException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static org.apache.atlas.AtlasErrorCode.*;
 import static org.apache.atlas.SortOrder.ASCENDING;
@@ -1018,22 +1017,14 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
                 LOG.debug("Preparing search results for ({})", ret.getSearchParameters());
             }
             List<Result> indexResults = Lists.newArrayList(indexQueryResult.getIterator());
-            Iterator<Result> iterator = new ArrayList<>(indexResults).iterator();
             boolean showSearchScore = searchParams.getShowSearchScore();
 
-            Map<String, AtlasVertex> verticesMap = Collections.EMPTY_MAP;
-            while (iterator.hasNext()) {
-                String[] vertexIds = StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), true)
-                        .map(r -> r.getVertexId()).collect(Collectors.toList()).toArray(new String[0]);
-                LOG.info("List of vertices: {}", vertexIds);
-                verticesMap = (Map<String, AtlasVertex>) graph.getVertices(vertexIds).stream().collect(Collectors.toMap(v -> ((AtlasVertex) v).getId(), Function.identity()));
-                LOG.info("Map of vertices: {}", verticesMap);
-            }
-
+            Map<String, AtlasVertex> verticesMap = getVerticesMap(indexResults);
             Iterator<Result> indexResultsIterator = indexResults.iterator();
+
             while (indexResultsIterator.hasNext()) {
                 Result result = indexResultsIterator.next();
-                AtlasVertex vertex = result.getVertex();//verticesMap.getOrDefault(result.getVertexId(), result.getVertex());
+                AtlasVertex vertex = verticesMap.getOrDefault(result.getVertexId(), result.getVertex());
 
                 if (vertex == null) {
                     LOG.warn("vertex is null");
@@ -1083,6 +1074,11 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
             throw e;
         }
         scrubSearchResults(ret, searchParams.getSuppressLogs());
+    }
+
+    private Map<String, AtlasVertex> getVerticesMap(List<Result> results) {
+        String[] vertexIds = results.stream().map(r -> r.getVertexId()).collect(Collectors.toList()).toArray(new String[0]);
+        return (Map<String, AtlasVertex>) graph.getVertices(vertexIds).stream().collect(Collectors.toMap(v -> ((AtlasVertex) v).getId(), Function.identity()));
     }
 
     @Override
