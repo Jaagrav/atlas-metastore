@@ -27,12 +27,12 @@ import org.apache.commons.lang.StringUtils;
 public enum AtlasConfiguration {
     //web server configuration
     WEBSERVER_MIN_THREADS("atlas.webserver.minthreads", 10),
-    WEBSERVER_MAX_THREADS("atlas.webserver.maxthreads", 100),
+    WEBSERVER_MAX_THREADS("atlas.webserver.maxthreads", 200),
     WEBSERVER_KEEPALIVE_SECONDS("atlas.webserver.keepalivetimesecs", 60),
-    WEBSERVER_QUEUE_SIZE("atlas.webserver.queuesize", 100),
+    WEBSERVER_QUEUE_SIZE("atlas.webserver.queuesize", 200),
     WEBSERVER_REQUEST_BUFFER_SIZE("atlas.jetty.request.buffer.size", 16192),
 
-    QUERY_PARAM_MAX_LENGTH("atlas.query.param.max.length", 4*1024),
+    QUERY_PARAM_MAX_LENGTH("atlas.query.param.max.length", 4 * 1024),
 
     REST_API_ENABLE_DELETE_TYPE_OVERRIDE("atlas.rest.enable.delete.type.override", false),
     NOTIFICATION_RELATIONSHIPS_ENABLED("atlas.notification.relationships.enabled", true),
