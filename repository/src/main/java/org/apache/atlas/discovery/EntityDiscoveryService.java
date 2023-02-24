@@ -1019,7 +1019,7 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
             List<Result> indexResults = Lists.newArrayList(indexQueryResult.getIterator());
             boolean showSearchScore = searchParams.getShowSearchScore();
 
-            Map<String, AtlasVertex> verticesMap = getVerticesMap(indexResults);
+            Map<String, AtlasVertex> verticesMap = Collections.EMPTY_MAP;
             Iterator<Result> indexResultsIterator = indexResults.iterator();
 
             while (indexResultsIterator.hasNext()) {
