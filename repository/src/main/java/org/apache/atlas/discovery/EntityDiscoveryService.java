@@ -1128,6 +1128,9 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
     }
 
     private Map<String, AtlasVertex> getVerticesMap(List<Result> results) {
+        if (results.isEmpty()) {
+            return Collections.EMPTY_MAP;
+        }
         String[] vertexIds = results.stream().map(r -> r.getVertexId()).collect(Collectors.toList()).toArray(new String[0]);
         return (Map<String, AtlasVertex>) graph.getVertices(vertexIds).stream().collect(Collectors.toMap(v -> ((AtlasVertex) v).getId(), Function.identity()));
     }
