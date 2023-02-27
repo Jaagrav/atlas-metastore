@@ -974,13 +974,13 @@ public class EntityGraphRetriever {
         String typeName = entityVertex.getProperty(Constants.TYPE_NAME_PROPERTY_KEY, String.class);
         String guid = entityVertex.getProperty(Constants.GUID_PROPERTY_KEY, String.class);
         Boolean isIncomplete = isEntityIncomplete(entityVertex);
-        LOG.info("##3.1Completed mapVertexToAtlasEntityHeader type,guid call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
+        LOG.info("##Completed##3.1##mapVertexToAtlasEntityHeader type,guid call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
         ret.setTypeName(typeName);
         ret.setGuid(guid);
         ret.setStatus(GraphHelper.getStatus(entityVertex));
         d1 = new Date();
         ret.setClassificationNames(getAllTraitNames(entityVertex));
-        LOG.info("##3.2Completed mapVertexToAtlasEntityHeader  alltraits call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
+        LOG.info("##Completed##3.2##mapVertexToAtlasEntityHeader  alltraits call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
         ret.setIsIncomplete(isIncomplete);
         ret.setLabels(getLabels(entityVertex));
 
@@ -993,7 +993,7 @@ public class EntityGraphRetriever {
         List<AtlasTermAssignmentHeader> termAssignmentHeaders = mapAssignedTerms(entityVertex);
         ret.setMeanings(termAssignmentHeaders);
         ret.setMeaningNames(termAssignmentHeaders.stream().map(AtlasTermAssignmentHeader::getDisplayText).collect(Collectors.toList()));
-        LOG.info("##3.3Completed mapVertexToAtlasEntityHeader  mapAssignedTerms call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
+        LOG.info("##Completed##3.3##mapVertexToAtlasEntityHeader  mapAssignedTerms call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
 
         d1 = new Date();
         AtlasEntityType entityType = typeRegistry.getEntityTypeByName(typeName);
@@ -1039,7 +1039,7 @@ public class EntityGraphRetriever {
                 }
             }
         }
-        LOG.info("##3.4Completed rest of attribute mapping call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
+        LOG.info("##Completed##3.4##rest of attribute mapping call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
         RequestContext.get().endMetricRecord(metricRecorder);
         return ret;
     }

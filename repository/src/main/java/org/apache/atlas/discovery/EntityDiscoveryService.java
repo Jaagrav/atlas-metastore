@@ -959,7 +959,7 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
     private void scrubSearchResults(AtlasSearchResult result, boolean suppressLogs) throws AtlasBaseException {
         Date d1 = new Date();
         AtlasAuthorizationUtils.scrubSearchResults(new AtlasSearchResultScrubRequest(typeRegistry, result), suppressLogs);
-        LOG.info("Completed scrubSearchResults call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
+        LOG.info("##Completed##5.1##scrubSearchResults call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
     }
 
     private Set<String> getAggregationFields() {
@@ -1023,10 +1023,10 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
 
             Date d1 = new Date();
             DirectIndexQueryResult indexQueryResult = indexQuery.vertices(searchParams);
-            LOG.info("##Completed 1.elasticsearch query call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
+            LOG.info("##Completed##1##elasticsearch query call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
             d1 = new Date();
             prepareSearchResult(ret, indexQueryResult, resultAttributes, true);
-            LOG.info("##Completed 6.prepareSearchResult query call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
+            LOG.info("##Completed##6##prepareSearchResult query call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
             ret.setAggregations(indexQueryResult.getAggregationMap());
             ret.setApproximateCount(indexQuery.vertexTotals());
         } catch (Exception e) {
@@ -1050,17 +1050,17 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
                 Result result = iterator.next();
                 d1 = new Date();
                 AtlasVertex vertex = result.getVertex();
-                LOG.info("##Completed 2.get vertex call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
+                LOG.info("##Completed##2##get vertex call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
                 if (vertex == null) {
                     LOG.warn("vertex is null");
                     continue;
                 }
                 d1 = new Date();
                 AtlasEntityHeader header = entityRetriever.toAtlasEntityHeader(vertex, resultAttributes);
-                LOG.info("##Completed 3.toAtlasEntityHeader call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
+                LOG.info("##Completed##3##toAtlasEntityHeader call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
                 d1 = new Date();
                 header.setClassifications(entityRetriever.getAllClassifications(vertex));
-                LOG.info("##Completed 4.getAllClassifications call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
+                LOG.info("##Completed##4##getAllClassifications call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
                 if (showSearchScore) {
                     ret.addEntityScore(header.getGuid(), result.getScore());
                 }
@@ -1102,7 +1102,7 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
         } catch (Exception e) {
             throw e;
         } finally {
-            LOG.info("##Completed 5.prepare search call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
+            LOG.info("##Completed##5##prepare search call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
         }
         scrubSearchResults(ret, searchParams.getSuppressLogs());
 
