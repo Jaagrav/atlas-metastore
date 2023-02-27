@@ -97,8 +97,9 @@ public enum AtlasConfiguration {
     ENABLE_SEARCH_LOGGING("atlas.enable.search.logging", true),
     RANGER_ATLAS_SERVICE_TYPE("atlas.ranger.service.type.atlas", "atlas"),
     RANGER_HEKA_SERVICE_TYPE("atlas.ranger.service.type.heka", "heka"),
+    SUPPORTED_RELATIONSHIP_EVENTS("atlas.notification.relationships.filter", "asset_readme"),
+    REST_API_XSS_FILTER_MASK_STRING("atlas.rest.xss.filter.mask.string", "map<[a-zA-Z _,:<>0-9\\x60]*>|struct<[a-zA-Z _,:<>0-9\\x60]*>|array<[a-zA-Z _,:<>0-9\\x60]*>");
 
-    SUPPORTED_RELATIONSHIP_EVENTS("atlas.notification.relationships.filter", "asset_readme");
 
 
     private static final Configuration APPLICATION_PROPERTIES;
