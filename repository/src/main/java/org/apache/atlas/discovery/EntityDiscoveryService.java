@@ -18,6 +18,7 @@
 package org.apache.atlas.discovery;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import org.apache.atlas.ApplicationProperties;
 import org.apache.atlas.AtlasConfiguration;
 import org.apache.atlas.AtlasErrorCode;
@@ -90,6 +91,7 @@ import javax.inject.Inject;
 import javax.script.ScriptEngine;
 import java.util.*;
 import javax.script.ScriptException;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -100,6 +102,8 @@ import static org.apache.atlas.model.instance.AtlasEntity.Status.DELETED;
 import static org.apache.atlas.repository.Constants.ASSET_ENTITY_TYPE;
 import static org.apache.atlas.repository.Constants.OWNER_ATTRIBUTE;
 import static org.apache.atlas.repository.Constants.VERTEX_INDEX_NAME;
+import static org.apache.atlas.type.Constants.GUID_PROPERTY_KEY;
+import static org.apache.atlas.type.Constants.TYPE_NAME_PROPERTY_KEY;
 import static org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery.BASIC_SEARCH_STATE_FILTER;
 import static org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery.TO_RANGE_LIST;
 
@@ -107,6 +111,7 @@ import static org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery.
 public class EntityDiscoveryService implements AtlasDiscoveryService {
     private static final Logger LOG = LoggerFactory.getLogger(EntityDiscoveryService.class);
     private static final String DEFAULT_SORT_ATTRIBUTE_NAME = "name";
+    private static List<Object> mandatoryFields = Lists.newArrayList(TYPE_NAME_PROPERTY_KEY, GUID_PROPERTY_KEY);
 
     private final AtlasGraph                      graph;
     private final EntityGraphRetriever            entityRetriever;
@@ -1012,7 +1017,7 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
         }
 
         try {
-            if(LOG.isDebugEnabled()){
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Performing ES search for the params ({})", searchParams);
             }
 
@@ -1020,6 +1025,14 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
             LOG.info("directIndexSearch.indexName {}", indexName);
 
             indexQuery = graph.elasticsearchQuery(indexName);
+
+            Map dsl = ((IndexSearchParams) searchParams).getDsl();
+            List<Object> sourceFields = dsl.get("_source") == null ? Lists.newArrayList() : Arrays.asList(dsl.get("_source"));
+            List<Object> updatedSourceFields = new ArrayList<>();
+            updatedSourceFields.addAll(mandatoryFields);
+            updatedSourceFields.addAll(sourceFields);
+            dsl.put("_source", updatedSourceFields);
+            ((IndexSearchParams) searchParams).setDsl(dsl);
 
             Date d1 = new Date();
             DirectIndexQueryResult indexQueryResult = indexQuery.vertices(searchParams);
@@ -1040,23 +1053,29 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
         Date d1 = new Date();
         SearchParams searchParams = ret.getSearchParameters();
         try {
-            if(LOG.isDebugEnabled()){
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Preparing search results for ({})", ret.getSearchParameters());
             }
-            Iterator<Result> iterator = indexQueryResult.getIterator();
+            List<Result> indexResults = Lists.newArrayList(indexQueryResult.getIterator());
             boolean showSearchScore = searchParams.getShowSearchScore();
 
-            while (iterator.hasNext()) {
-                Result result = iterator.next();
+
+            d1 = new Date();
+            Map<String, AtlasVertex> verticesMap = getVerticesMap(indexResults);
+            LOG.info("##Completed##2.1##get getVerticesMap call in: {} for: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()), verticesMap.size());
+            Iterator<Result> indexResultsIterator = indexResults.iterator();
+
+            while (indexResultsIterator.hasNext()) {
+                Result result = indexResultsIterator.next();
                 d1 = new Date();
-                AtlasVertex vertex = result.getVertex();
-                LOG.info("##Completed##2##get vertex call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
+                AtlasVertex vertex = verticesMap.getOrDefault(result.getVertexId(), result.getVertex());
+                LOG.info("##Completed##2.2##get vertex call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
                 if (vertex == null) {
                     LOG.warn("vertex is null");
                     continue;
                 }
                 d1 = new Date();
-                AtlasEntityHeader header = entityRetriever.toAtlasEntityHeader(vertex, resultAttributes);
+                AtlasEntityHeader header = entityRetriever.toAtlasEntityHeader(vertex, resultAttributes, result);
                 LOG.info("##Completed##3##toAtlasEntityHeader call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
                 d1 = new Date();
                 header.setClassifications(entityRetriever.getAllClassifications(vertex));
@@ -1106,6 +1125,11 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
         }
         scrubSearchResults(ret, searchParams.getSuppressLogs());
 
+    }
+
+    private Map<String, AtlasVertex> getVerticesMap(List<Result> results) {
+        String[] vertexIds = results.stream().map(r -> r.getVertexId()).collect(Collectors.toList()).toArray(new String[0]);
+        return (Map<String, AtlasVertex>) graph.getVertices(vertexIds).stream().collect(Collectors.toMap(v -> ((AtlasVertex) v).getId(), Function.identity()));
     }
 
     @Override

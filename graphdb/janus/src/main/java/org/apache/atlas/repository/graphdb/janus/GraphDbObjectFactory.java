@@ -18,6 +18,8 @@
 
 package org.apache.atlas.repository.graphdb.janus;
 
+import org.apache.atlas.repository.graphdb.AtlasVertex;
+import org.apache.commons.collections.CollectionUtils;
 import org.janusgraph.core.EdgeLabel;
 import org.apache.atlas.repository.graphdb.AtlasCardinality;
 import org.apache.atlas.repository.graphdb.AtlasGraphIndex;
@@ -28,6 +30,10 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.core.Cardinality;
 import org.janusgraph.core.PropertyKey;
 import org.janusgraph.core.schema.JanusGraphIndex;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -127,4 +133,17 @@ public final class GraphDbObjectFactory {
         return AtlasCardinality.SET;
     }
 
+    /**
+     * Creates an AtlasJanusVertex that corresponds for each Gremlin Vertex.
+     *
+     * @param graph   The graph that contains all the vertices
+     * @param sources the Gremlin vertices
+     * @return
+     */
+    public static List<AtlasVertex<AtlasJanusVertex, AtlasJanusEdge>> createVertices(AtlasJanusGraph graph, List<Vertex> sources) {
+        if (CollectionUtils.isEmpty(sources)) {
+            return Collections.EMPTY_LIST;
+        }
+        return sources.stream().map(v -> new AtlasJanusVertex(graph, v)).collect(Collectors.toList());
+    }
 }

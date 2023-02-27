@@ -94,7 +94,6 @@ public interface AtlasIndexQuery<V, E> {
 
         /**
          * Gets the score for this result.
-         *
          */
         double getScore();
 
@@ -102,6 +101,9 @@ public interface AtlasIndexQuery<V, E> {
 
         DirectIndexQueryResult<V, E> getCollapseVertices(String key);
 
+        String getVertexId();
+
+        Object getProperty(String key);
     }
 
 }

@@ -150,5 +150,16 @@ public class AtlasJanusIndexQuery implements AtlasIndexQuery<AtlasJanusVertex, A
         public DirectIndexQueryResult<AtlasJanusVertex, AtlasJanusEdge> getCollapseVertices(String key) {
             return null;
         }
+
+        @Override
+        public String getVertexId() {
+            return String.valueOf(source.getElement().id());
+        }
+
+        @Override
+        public Object getProperty(String key) {
+            return null;
+        }
+
     }
 }

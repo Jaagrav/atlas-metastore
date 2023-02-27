@@ -30,6 +30,8 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -379,8 +381,12 @@ public interface AtlasGraph<V, E> {
 
     /**
      * Implementors should return graph index client.
+     *
      * @return the graph index client
      * @throws AtlasException when error encountered in creating the client.
      */
-    AtlasGraphIndexClient getGraphIndexClient()throws AtlasException;
+    AtlasGraphIndexClient getGraphIndexClient() throws AtlasException;
+
+    List<AtlasVertex<V, E>> getVertices(String... vertexIds);
+
 }

@@ -17,6 +17,7 @@
  */
 package org.apache.atlas.repository.graphdb.janus;
 
+import com.google.common.collect.Maps;
 import org.apache.atlas.AtlasErrorCode;
 import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.model.discovery.SearchParams;
@@ -47,14 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import java.util.stream.Stream;
 
@@ -125,7 +119,7 @@ public class AtlasElasticsearchQuery implements AtlasIndexQuery<AtlasJanusVertex
 
         try {
 
-            String responseString =  performDirectIndexQuery(searchParams.getQuery(), false);
+            String responseString = performDirectIndexQuery(searchParams.getQuery(), true);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("runQueryWithLowLevelClient.response : {}", responseString);
             }
@@ -277,6 +271,16 @@ public class AtlasElasticsearchQuery implements AtlasIndexQuery<AtlasJanusVertex
         public DirectIndexQueryResult<AtlasJanusVertex, AtlasJanusEdge> getCollapseVertices(String key) {
             return null;
         }
+
+        @Override
+        public String getVertexId() {
+            return String.valueOf(LongEncoding.decode(hit.getId()));
+        }
+
+        @Override
+        public Object getProperty(String key) {
+            return hit.getSourceAsMap().get(key);
+        }
     }
 
 
@@ -326,9 +330,19 @@ public class AtlasElasticsearchQuery implements AtlasIndexQuery<AtlasJanusVertex
         }
 
         @Override
+        public String getVertexId() {
+            return String.valueOf(LongEncoding.decode(String.valueOf(hit.get("_id"))));
+        }
+
+        @Override
+        public Object getProperty(String key) {
+            return AtlasType.fromJson(AtlasType.toJson(hit.getOrDefault("_source", Collections.EMPTY_MAP)), Map.class).get(key);
+        }
+
+        @Override
         public double getScore() {
             Object _score = hit.get("_score");
-            if (_score == null){
+            if (_score == null) {
                 return -1;
             }
             return Double.parseDouble(String.valueOf(hit.get("_score")));

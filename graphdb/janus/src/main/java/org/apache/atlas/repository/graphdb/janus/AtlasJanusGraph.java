@@ -86,12 +86,9 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.apache.atlas.AtlasErrorCode.INDEX_SEARCH_FAILED;
 import static org.apache.atlas.AtlasErrorCode.RELATIONSHIP_CREATE_INVALID_PARAMS;
@@ -266,6 +263,13 @@ public class AtlasJanusGraph implements AtlasGraph<AtlasJanusVertex, AtlasJanusE
             LOG.error("Error encountered in creating Graph Index Client.", e);
             throw new AtlasException(e);
         }
+    }
+
+    @Override
+    public List<AtlasVertex<AtlasJanusVertex, AtlasJanusEdge>> getVertices(String... vertexIds) {
+        Iterator<Vertex> it = getGraph().vertices(vertexIds);
+        List<Vertex> vertices = getElements(it);
+        return GraphDbObjectFactory.createVertices(this, vertices);
     }
 
     @Override
@@ -551,12 +555,19 @@ public class AtlasJanusGraph implements AtlasGraph<AtlasJanusVertex, AtlasJanusE
     }
 
 
-    String getIndexFieldName(AtlasPropertyKey propertyKey, JanusGraphIndex graphIndex, Parameter ... parameters) {
+    String getIndexFieldName(AtlasPropertyKey propertyKey, JanusGraphIndex graphIndex, Parameter... parameters) {
         PropertyKey janusKey = AtlasJanusObjectFactory.createPropertyKey(propertyKey);
-        if(parameters == null) {
+        if (parameters == null) {
             parameters = EMPTY_PARAMETER_ARRAY;
         }
         return janusGraph.getIndexSerializer().getDefaultFieldName(janusKey, parameters, graphIndex.getBackingIndex());
+    }
+
+    private static <T> List<T> getElements(Iterator<T> it) {
+        if (!it.hasNext()) {
+            return Collections.EMPTY_LIST;
+        }
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(it, Spliterator.ORDERED), true).collect(Collectors.toList());
     }
 
 
