@@ -110,7 +110,7 @@ import static org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery.
 public class EntityDiscoveryService implements AtlasDiscoveryService {
     private static final Logger LOG = LoggerFactory.getLogger(EntityDiscoveryService.class);
     private static final String DEFAULT_SORT_ATTRIBUTE_NAME = "name";
-    private static List<Object> mandatoryFields = Lists.newArrayList(TYPE_NAME_PROPERTY_KEY, GUID_PROPERTY_KEY, IS_INCOMPLETE_PROPERTY_KEY);
+    private static List<Object> mandatoryFields = Lists.newArrayList(TYPE_NAME_PROPERTY_KEY, GUID_PROPERTY_KEY);
 
     private final AtlasGraph                      graph;
     private final EntityGraphRetriever            entityRetriever;

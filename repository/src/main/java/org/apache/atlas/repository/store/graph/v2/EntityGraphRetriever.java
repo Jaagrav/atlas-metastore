@@ -117,7 +117,6 @@ import static org.apache.atlas.repository.Constants.*;
 import static org.apache.atlas.repository.graph.GraphHelper.*;
 import static org.apache.atlas.repository.store.graph.v2.AtlasGraphUtilsV2.getIdFromVertex;
 import static org.apache.atlas.repository.store.graph.v2.AtlasGraphUtilsV2.isReference;
-import static org.apache.atlas.repository.store.graph.v2.tasks.ClassificationPropagateTaskFactory.CLASSIFICATION_ONLY_PROPAGATION_DELETE;
 import static org.apache.atlas.type.AtlasStructType.AtlasAttribute.AtlasRelationshipEdgeDirection;
 import static org.apache.atlas.type.AtlasStructType.AtlasAttribute.AtlasRelationshipEdgeDirection.BOTH;
 import static org.apache.atlas.type.AtlasStructType.AtlasAttribute.AtlasRelationshipEdgeDirection.IN;
@@ -974,7 +973,7 @@ public class EntityGraphRetriever {
         Date d1 = new Date();
         String typeName = String.valueOf(result.getProperty(Constants.TYPE_NAME_PROPERTY_KEY));
         String guid = String.valueOf(result.getProperty(Constants.GUID_PROPERTY_KEY));
-        Boolean isIncomplete = isEntityIncomplete(result.getProperty(IS_INCOMPLETE_PROPERTY_KEY));
+        Boolean isIncomplete = isEntityIncomplete(entityVertex);
         LOG.info("##Completed##3.1##mapVertexToAtlasEntityHeader type,guid call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
         ret.setTypeName(typeName);
         ret.setGuid(guid);
@@ -1013,38 +1012,34 @@ public class EntityGraphRetriever {
             if (displayText != null) {
                 ret.setDisplayText(displayText.toString());
             }
-
-            if (CollectionUtils.isNotEmpty(attributes)) {
-                for (String attrName : attributes) {
-                    d1 = new Date();
-                    AtlasAttribute attribute = entityType.getAttribute(attrName);
-
-                    if (attribute == null) {
-                        attrName = toNonQualifiedName(attrName);
-
-                        if (ret.hasAttribute(attrName)) {
-                            continue;
-                        }
-
-                        attribute = entityType.getAttribute(attrName);
-
-                        if (attribute == null) {
-                            attribute = entityType.getRelationshipAttribute(attrName, null);
-                        }
-                    }
-
-                    Object attrValue = result.getProperty(attrName) != null ? result.getProperty(attrName) : getVertexAttribute(entityVertex, attribute);
-
-                    if (attrValue != null) {
-                        ret.setAttribute(attrName, attrValue);
-                    }
+            attributes.stream().parallel().forEach(attrName -> {
+                try {
+                    enrichEntityHeaderWithAttributes(entityType, attrName, ret, entityVertex);
+                } catch (AtlasBaseException e) {
+                    throw new RuntimeException(e);
                 }
-            }
+            });
         }
         LOG.info("##Completed##3.4##rest of attribute mapping call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
         RequestContext.get().endMetricRecord(metricRecorder);
         return ret;
+    }
 
+    private void enrichEntityHeaderWithAttributes(AtlasEntityType entityType, String attrName, AtlasEntityHeader ret, AtlasVertex entityVertex) throws AtlasBaseException {
+        AtlasAttribute attribute = entityType.getAttribute(attrName);
+        if (attribute == null) {
+            attrName = toNonQualifiedName(attrName);
+            if (!ret.hasAttribute(attrName)) {
+                attribute = entityType.getAttribute(attrName);
+                if (attribute == null) {
+                    attribute = entityType.getRelationshipAttribute(attrName, null);
+                }
+            }
+        }
+        Object attrValue = getVertexAttribute(entityVertex, attribute);
+        if (attrValue != null) {
+            ret.setAttribute(attrName, attrValue);
+        }
     }
 
     private AtlasEntityHeader mapVertexToAtlasEntityHeader(AtlasVertex entityVertex, Set<String> attributes) throws AtlasBaseException {
