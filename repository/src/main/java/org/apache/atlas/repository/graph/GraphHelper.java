@@ -981,9 +981,13 @@ public final class GraphHelper {
         return element.getProperty(Constants.IS_PROXY_KEY, Boolean.class);
     }
 
+    public static Boolean isEntityIncomplete(Object value) {
+        return value != null && value.equals(INCOMPLETE_ENTITY_VALUE) ? Boolean.TRUE : Boolean.FALSE;
+    }
+
     public static Boolean isEntityIncomplete(AtlasElement element) {
         Integer value = element.getProperty(Constants.IS_INCOMPLETE_PROPERTY_KEY, Integer.class);
-        Boolean ret   = value != null && value.equals(INCOMPLETE_ENTITY_VALUE) ? Boolean.TRUE : Boolean.FALSE;
+        Boolean ret = value != null && value.equals(INCOMPLETE_ENTITY_VALUE) ? Boolean.TRUE : Boolean.FALSE;
 
         return ret;
     }

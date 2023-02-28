@@ -969,12 +969,12 @@ public class EntityGraphRetriever {
 
     private AtlasEntityHeader mapVertexToAtlasEntityHeader(AtlasVertex entityVertex, Set<String> attributes, AtlasIndexQuery.Result result) throws AtlasBaseException {
         if (Objects.isNull(entityVertex)) return null;
-        Date d1 = new Date();
         AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("mapVertexToAtlasEntityHeader");
         AtlasEntityHeader ret = new AtlasEntityHeader();
+        Date d1 = new Date();
         String typeName = String.valueOf(result.getProperty(Constants.TYPE_NAME_PROPERTY_KEY));
         String guid = String.valueOf(result.getProperty(Constants.GUID_PROPERTY_KEY));
-        Boolean isIncomplete = isEntityIncomplete(entityVertex);
+        Boolean isIncomplete = isEntityIncomplete(result.getProperty(IS_INCOMPLETE_PROPERTY_KEY));
         LOG.info("##Completed##3.1##mapVertexToAtlasEntityHeader type,guid call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
         ret.setTypeName(typeName);
         ret.setGuid(guid);
@@ -1016,6 +1016,7 @@ public class EntityGraphRetriever {
 
             if (CollectionUtils.isNotEmpty(attributes)) {
                 for (String attrName : attributes) {
+                    d1 = new Date();
                     AtlasAttribute attribute = entityType.getAttribute(attrName);
 
                     if (attribute == null) {
@@ -1032,11 +1033,12 @@ public class EntityGraphRetriever {
                         }
                     }
 
-                    Object attrValue = getVertexAttribute(entityVertex, attribute);
+                    Object attrValue = result.getProperty(attrName) != null ? result.getProperty(attrName) : getVertexAttribute(entityVertex, attribute);
 
                     if (attrValue != null) {
                         ret.setAttribute(attrName, attrValue);
                     }
+                    LOG.info("##Completed##3.4.1##getAttributes call in: {} for {}", System.currentTimeMillis() - d1.getTime(), attrName);
                 }
             }
         }

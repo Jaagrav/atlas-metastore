@@ -102,8 +102,7 @@ import static org.apache.atlas.model.instance.AtlasEntity.Status.DELETED;
 import static org.apache.atlas.repository.Constants.ASSET_ENTITY_TYPE;
 import static org.apache.atlas.repository.Constants.OWNER_ATTRIBUTE;
 import static org.apache.atlas.repository.Constants.VERTEX_INDEX_NAME;
-import static org.apache.atlas.type.Constants.GUID_PROPERTY_KEY;
-import static org.apache.atlas.type.Constants.TYPE_NAME_PROPERTY_KEY;
+import static org.apache.atlas.type.Constants.*;
 import static org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery.BASIC_SEARCH_STATE_FILTER;
 import static org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery.TO_RANGE_LIST;
 
@@ -111,7 +110,7 @@ import static org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery.
 public class EntityDiscoveryService implements AtlasDiscoveryService {
     private static final Logger LOG = LoggerFactory.getLogger(EntityDiscoveryService.class);
     private static final String DEFAULT_SORT_ATTRIBUTE_NAME = "name";
-    private static List<Object> mandatoryFields = Lists.newArrayList(TYPE_NAME_PROPERTY_KEY, GUID_PROPERTY_KEY);
+    private static List<Object> mandatoryFields = Lists.newArrayList(TYPE_NAME_PROPERTY_KEY, GUID_PROPERTY_KEY, IS_INCOMPLETE_PROPERTY_KEY);
 
     private final AtlasGraph                      graph;
     private final EntityGraphRetriever            entityRetriever;
@@ -1058,7 +1057,6 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
             }
             List<Result> indexResults = Lists.newArrayList(indexQueryResult.getIterator());
             boolean showSearchScore = searchParams.getShowSearchScore();
-
 
             d1 = new Date();
             Map<String, AtlasVertex> verticesMap = getVerticesMap(indexResults);
