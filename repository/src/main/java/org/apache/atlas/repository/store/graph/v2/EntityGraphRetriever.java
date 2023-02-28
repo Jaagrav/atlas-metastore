@@ -1038,7 +1038,6 @@ public class EntityGraphRetriever {
                     if (attrValue != null) {
                         ret.setAttribute(attrName, attrValue);
                     }
-                    LOG.info("##Completed##3.4.1##getAttributes call in: {} for {}", System.currentTimeMillis() - d1.getTime(), attrName);
                 }
             }
         }
