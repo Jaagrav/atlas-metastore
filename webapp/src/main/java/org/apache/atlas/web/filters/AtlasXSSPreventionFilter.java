@@ -18,6 +18,8 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 @Component
@@ -52,8 +54,18 @@ public class AtlasXSSPreventionFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         HttpServletRequest request = (HttpServletRequest) servletRequest;
 
-
         response.setHeader("Content-Type", CONTENT_TYPE_JSON);
+
+        Map<String, Object> logContext = new HashMap<String , Object>(){{
+            put("remoteHost", request.getRemoteHost());
+            put("remoteAddr", request.getRemoteAddr());
+            put("remotePort", request.getRemotePort());
+            put("requestURI", request.getRequestURI());
+            put("requestURL", request.getRequestURL().toString());
+            put("serverName", request.getServerName());
+            put("contentType", request.getContentType());
+        }};
+        LOG.info("XSS Filter: Request metadata received: {}", logContext);
 
         String method = request.getMethod();
         if(!method.equals("POST") && !method.equals("PUT")) {
