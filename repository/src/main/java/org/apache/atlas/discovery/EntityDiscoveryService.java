@@ -110,6 +110,7 @@ import static org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery.
 public class EntityDiscoveryService implements AtlasDiscoveryService {
     private static final Logger LOG = LoggerFactory.getLogger(EntityDiscoveryService.class);
     private static final String DEFAULT_SORT_ATTRIBUTE_NAME = "name";
+    private static List<Object> mandatoryFields = Lists.newArrayList(TYPE_NAME_PROPERTY_KEY, GUID_PROPERTY_KEY);
 
     private final AtlasGraph                      graph;
     private final EntityGraphRetriever            entityRetriever;
@@ -1023,7 +1024,15 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
             LOG.info("directIndexSearch.indexName {}", indexName);
 
             indexQuery = graph.elasticsearchQuery(indexName);
-            
+
+            Map dsl = ((IndexSearchParams) searchParams).getDsl();
+            List<Object> sourceFields = dsl.get("_source") == null ? Lists.newArrayList() : Arrays.asList(dsl.get("_source"));
+            List<Object> updatedSourceFields = new ArrayList<>();
+            updatedSourceFields.addAll(mandatoryFields);
+            updatedSourceFields.addAll(sourceFields);
+            dsl.put("_source", updatedSourceFields);
+            ((IndexSearchParams) searchParams).setDsl(dsl);
+
             Date d1 = new Date();
             DirectIndexQueryResult indexQueryResult = indexQuery.vertices(searchParams);
             LOG.info("##Completed##1##elasticsearch query call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
