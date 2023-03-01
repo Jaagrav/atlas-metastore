@@ -64,6 +64,8 @@ public class AtlasXSSPreventionFilter implements Filter {
             put("requestURL", request.getRequestURL().toString());
             put("serverName", request.getServerName());
             put("contentType", request.getContentType());
+            put("user", RequestContext.get().get());
+            put("userGroups", RequestContext.get().getUserGroups());
         }};
         LOG.info("XSS Filter: Request metadata received: {}", logContext);
 
