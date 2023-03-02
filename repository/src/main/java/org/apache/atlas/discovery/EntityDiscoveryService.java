@@ -1025,14 +1025,6 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
 
             indexQuery = graph.elasticsearchQuery(indexName);
 
-            Map dsl = ((IndexSearchParams) searchParams).getDsl();
-            List<Object> sourceFields = dsl.get("_source") == null ? Lists.newArrayList() : Arrays.asList(dsl.get("_source"));
-            List<Object> updatedSourceFields = new ArrayList<>();
-            updatedSourceFields.addAll(mandatoryFields);
-            updatedSourceFields.addAll(sourceFields);
-            dsl.put("_source", updatedSourceFields);
-            ((IndexSearchParams) searchParams).setDsl(dsl);
-
             Date d1 = new Date();
             DirectIndexQueryResult indexQueryResult = indexQuery.vertices(searchParams);
             LOG.info("##Completed##1##elasticsearch query call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
@@ -1073,7 +1065,7 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
                     continue;
                 }
                 d1 = new Date();
-                AtlasEntityHeader header = entityRetriever.toAtlasEntityHeader(vertex, resultAttributes, result);
+                AtlasEntityHeader header = entityRetriever.toAtlasEntityHeader(vertex, resultAttributes);
                 LOG.info("##Completed##3##toAtlasEntityHeader call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
                 d1 = new Date();
                 header.setClassifications(entityRetriever.getAllClassifications(vertex));
