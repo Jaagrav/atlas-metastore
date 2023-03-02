@@ -55,7 +55,7 @@ public class AtlasXSSPreventionFilter implements Filter {
 
         String serverName = request.getServerName();
         if (AtlasConfiguration.REST_API_XSS_FILTER_EXLUDE_SERVER_NAME.getString().equals(serverName)) {
-            LOG.debug("AtlasXSSPreventionFilter: skipping filter for serverName: {}", serverName);
+            LOG.info("AtlasXSSPreventionFilter: skipping filter for serverName: {}", serverName);
             filterChain.doFilter(request, response);
             return;
         }
