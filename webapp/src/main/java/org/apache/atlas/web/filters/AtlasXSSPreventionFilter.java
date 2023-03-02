@@ -1,6 +1,8 @@
 package org.apache.atlas.web.filters;
 
 import org.apache.atlas.AtlasConfiguration;
+import org.apache.atlas.RequestContext;
+import org.apache.atlas.utils.AtlasPerfMetrics;
 import org.apache.atlas.web.util.CachedBodyHttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -61,6 +63,7 @@ public class AtlasXSSPreventionFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         HttpServletRequest request = (HttpServletRequest) servletRequest;
+        AtlasPerfMetrics.MetricRecorder metric = AtlasPerfMetrics.getMetricRecorder("XSSFilter");
 
         String serverName = request.getServerName();
         if (AtlasConfiguration.REST_API_XSS_FILTER_EXLUDE_SERVER_NAME.getString().equals(serverName)) {
@@ -103,7 +106,7 @@ public class AtlasXSSPreventionFilter implements Filter {
             response.getWriter().write(getErrorMessages(ERROR_INVALID_CHARACTERS));
             return;
         }
-
+        RequestContext.get().endMetricRecord(metric);
         filterChain.doFilter(cachedBodyHttpServletRequest, response);
 
     }
