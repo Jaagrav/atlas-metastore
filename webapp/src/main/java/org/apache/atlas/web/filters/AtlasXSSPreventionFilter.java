@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 public class AtlasXSSPreventionFilter implements Filter {
 
     private static final Logger LOG = LoggerFactory.getLogger(AtlasCSRFPreventionFilter.class);
-    private static Pattern pattern;
+    private static Pattern maskPattern;
     private static final String MASK_STRING = "##ATLAN##";
     private static final String CONTENT_TYPE_JSON = "application/json";
     private static final String ERROR_INVALID_CHARACTERS = "invalid characters in the request body (XSS Filter)";
@@ -44,17 +44,21 @@ public class AtlasXSSPreventionFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        pattern     = Pattern.compile(AtlasConfiguration.REST_API_XSS_FILTER_MASK_STRING.getString());
+        maskPattern     = Pattern.compile(AtlasConfiguration.REST_API_XSS_FILTER_MASK_STRING.getString());
 
     }
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        AtlasPerfMetrics.MetricRecorder metric = AtlasPerfMetrics.getMetricRecorder("XSSFilter");
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         HttpServletRequest request = (HttpServletRequest) servletRequest;
 
-        response.setHeader("Content-Type", CONTENT_TYPE_JSON);
+        String serverName = request.getServerName();
+        if (AtlasConfiguration.REST_API_XSS_FILTER_EXLUDE_SERVER_NAME.getString().equals(serverName)) {
+            LOG.debug("AtlasXSSPreventionFilter: skipping filter for serverName: {}", serverName);
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         Map<String, Object> logContext = new HashMap<String , Object>(){{
             put("remoteHost", request.getRemoteHost());
@@ -64,8 +68,6 @@ public class AtlasXSSPreventionFilter implements Filter {
             put("requestURL", request.getRequestURL().toString());
             put("serverName", request.getServerName());
             put("contentType", request.getContentType());
-            put("user", RequestContext.get().get());
-            put("userGroups", RequestContext.get().getUserGroups());
         }};
         LOG.info("XSS Filter: Request metadata received: {}", logContext);
 
@@ -83,16 +85,16 @@ public class AtlasXSSPreventionFilter implements Filter {
 
         CachedBodyHttpServletRequest cachedBodyHttpServletRequest = new CachedBodyHttpServletRequest(request);
         String body = IOUtils.toString(cachedBodyHttpServletRequest.getInputStream(), "UTF-8");
-        String reqBodyStr = pattern.matcher(body).replaceAll(MASK_STRING);
-        Safelist safelist = Safelist.relaxed();
+        String reqBodyStr = maskPattern.matcher(body).replaceAll(MASK_STRING);
+        Safelist safelist = Safelist.basicWithImages();
 
         if(!Jsoup.isValid(reqBodyStr, safelist)) {
+            response.setHeader("Content-Type", "application/json");
             response.setStatus(400);
             response.getWriter().write(getErrorMessages(ERROR_INVALID_CHARACTERS));
             return;
         }
 
-        RequestContext.get().endMetricRecord(metric);
         filterChain.doFilter(cachedBodyHttpServletRequest, response);
 
     }
