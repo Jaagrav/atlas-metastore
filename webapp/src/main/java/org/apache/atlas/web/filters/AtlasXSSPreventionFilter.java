@@ -3,6 +3,7 @@ package org.apache.atlas.web.filters;
 import org.apache.atlas.AtlasConfiguration;
 import org.apache.atlas.RequestContext;
 import org.apache.atlas.utils.AtlasPerfMetrics;
+import org.apache.atlas.utils.AtlasPerfTracer;
 import org.apache.atlas.web.util.CachedBodyHttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -37,6 +38,7 @@ public class AtlasXSSPreventionFilter implements Filter {
     private static final String MASK_STRING = "##ATLAN##";
     private static final String CONTENT_TYPE_JSON = "application/json";
     private static final String ERROR_INVALID_CHARACTERS = "invalid characters in the request body (XSS Filter)";
+    private static final Logger PERF_LOG = AtlasPerfTracer.getPerfLogger("web.AtlasXSSPreventionFilter");
     private static final Pattern REGEX_NUMBER                   = Pattern.compile("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$");
     public  static final Pattern REGEX_INTEGER                  = Pattern.compile("^[0-9]+$");
     public static final  Pattern REGEX_ISO8601                  = Pattern.compile("^^[0-9]{4}(-[0-9]{2}(-[0-9]{2}([ T][0-9]{2}(:[0-9]{2}){1,2}(.[0-9]{1,6})"
@@ -177,7 +179,7 @@ public class AtlasXSSPreventionFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         HttpServletRequest request = (HttpServletRequest) servletRequest;
-        AtlasPerfMetrics.MetricRecorder metric = AtlasPerfMetrics.getMetricRecorder("XSSFilter");
+        AtlasPerfTracer perf = AtlasPerfTracer.getPerfTracer(PERF_LOG, "XSSFilter.doFilter(" + request.getRequestURI() + ")");
 
         String serverName = request.getServerName();
         if (AtlasConfiguration.REST_API_XSS_FILTER_EXLUDE_SERVER_NAME.getString().equals(serverName)) {
@@ -220,7 +222,7 @@ public class AtlasXSSPreventionFilter implements Filter {
             response.getWriter().write(getErrorMessages(ERROR_INVALID_CHARACTERS));
             return;
         }
-        RequestContext.get().endMetricRecord(metric);
+        AtlasPerfTracer.log(perf);
         filterChain.doFilter(cachedBodyHttpServletRequest, response);
     }
 
