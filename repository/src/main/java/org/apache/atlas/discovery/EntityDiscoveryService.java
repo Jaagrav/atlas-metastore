@@ -1051,7 +1051,7 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
             boolean showSearchScore = searchParams.getShowSearchScore();
 
             d1 = new Date();
-            Map<String, AtlasVertex> verticesMap = getVerticesMap(indexResults);
+            Map<String, AtlasVertex> verticesMap = Collections.EMPTY_MAP;//getVerticesMap(indexResults);
             LOG.info("##Completed##2.1##get getVerticesMap call in: {} for: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()), verticesMap.size());
             Iterator<Result> indexResultsIterator = indexResults.iterator();
 
