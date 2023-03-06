@@ -979,7 +979,7 @@ public class EntityGraphRetriever {
             }
         }
         Object attrValue;
-        if(result!=null){
+        if(result!=null && attribute!=null){
              attrValue = result.getProperty(attribute.getName());
         }else{
              attrValue=getVertexAttribute(entityVertex, attribute);
