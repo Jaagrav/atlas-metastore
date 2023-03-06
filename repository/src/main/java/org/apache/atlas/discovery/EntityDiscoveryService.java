@@ -1065,7 +1065,7 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
                     continue;
                 }
                 d1 = new Date();
-                AtlasEntityHeader header = entityRetriever.toAtlasEntityHeader(vertex, resultAttributes);
+                AtlasEntityHeader header = entityRetriever.toAtlasEntityHeader(vertex, resultAttributes, result);
                 LOG.info("##Completed##3##toAtlasEntityHeader call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
                 d1 = new Date();
                 header.setClassifications(entityRetriever.getAllClassifications(vertex));

@@ -988,6 +988,10 @@ public final class GraphHelper {
         return ret;
     }
 
+    public static Boolean isEntityIncomplete(Object value) {
+        return value != null && value.equals(INCOMPLETE_ENTITY_VALUE) ? Boolean.TRUE : Boolean.FALSE;
+    }
+
     public static Boolean getEntityHasLineage(AtlasElement element) {
         if (element.getPropertyKeys().contains(HAS_LINEAGE)) {
             return element.getProperty(HAS_LINEAGE, Boolean.class);
