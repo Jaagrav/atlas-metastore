@@ -66,25 +66,6 @@ public class AtlasXSSPreventionFilter implements Filter {
     public static final  Predicate<String> REGEX_ON_OFFSITE_URL = matchesEither(REGEX_ONSITE_URL, REGEX_OFFSITE_URL);
 
 
-    //Init the regex map with default values
-    private static final HashMap<String, Pattern> REGEX_MAPS = new HashMap<String, Pattern> () {{
-        put("NUMBER",                   Pattern.compile("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$"));
-        put("INTEGER",                  Pattern.compile("^[0-9]+$"));
-        put("ISO8601",                  Pattern.compile("^[0-9]{4}(-[0-9]{2}(-[0-9]{2}([ T][0-9]{2}(:[0-9]{2}){1,2}(.[0-9]{1,6})"+
-                "?Z?([\\+-][0-9]{2}:[0-9]{2})?)?)?)?$"));
-        put("PARAGRAPH",                Pattern.compile("^[\\p{L}\\p{N}\\s\\-_',\\[\\]!\\./\\\\\\(\\)]*$"));
-        put("SPACE_SEPARATED_TOKENS",   Pattern.compile("^([\\s\\p{L}\\p{N}_-]+)$"));
-        put("DIRECTION",                Pattern.compile("\"(?i)^(rtl|ltr)$\""));
-        put("IMAGE_ALIGNMENT",          Pattern.compile("(?i)^(left|right|top|texttop|middle|absmiddle|baseline|bottom|absbottom)$"));
-        put("NUMBER_OR_PERCENT",        Pattern.compile("^[0-9]+[%]?$"));
-        put("LIST_TYPE",                Pattern.compile("(?i)^(circle|disc|square|a|A|i|I|1)$"));
-        put("CELL_ALIGN",               Pattern.compile("(?i)^(center|justify|left|right|char)$"));
-        put("CELL_VERTICAL_ALIGN",              Pattern.compile("(?i)^(top|middle|bottom|baseline)$"));
-        put("SHAPE",                    Pattern.compile("(?i)^(rect|circle|poly|default)$"));
-
-
-    }};
-
     @Inject
     public AtlasXSSPreventionFilter() throws ServletException {
         LOG.info("AtlasXSSPreventionFilter initialized");
@@ -182,11 +163,12 @@ public class AtlasXSSPreventionFilter implements Filter {
         AtlasPerfTracer perf = AtlasPerfTracer.getPerfTracer(PERF_LOG, "XSSFilter.doFilter(" + request.getRequestURI() + ")");
 
         String serverName = request.getServerName();
-        if (AtlasConfiguration.REST_API_XSS_FILTER_EXLUDE_SERVER_NAME.getString().equals(serverName)) {
+        if (StringUtils.isNotEmpty(serverName) && serverName.contains(AtlasConfiguration.REST_API_XSS_FILTER_EXLUDE_SERVER_NAME.getString())) {
             LOG.info("AtlasXSSPreventionFilter: skipping filter for serverName: {}", serverName);
             filterChain.doFilter(request, response);
             return;
         }
+
         response.setHeader("Content-Type", CONTENT_TYPE_JSON);
 
         Map<String, Object> logContext = new HashMap<String , Object>(){{
@@ -231,11 +213,6 @@ public class AtlasXSSPreventionFilter implements Filter {
         return new Predicate<String>() {
             public boolean apply(String s) {
                 return a.matcher(s).matches() || b.matcher(s).matches();
-            }
-
-            @SuppressWarnings("all")
-            public boolean test(String s) {
-                return apply(s);
             }
         };
     }
