@@ -963,6 +963,7 @@ public class EntityGraphRetriever {
     }
 
     private void enrichEntityHeaderWithAttributes(AtlasEntityType entityType, String attrName, AtlasEntityHeader ret, AtlasVertex entityVertex) throws AtlasBaseException {
+        AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("enrichEntityHeaderWithAttributes");
         AtlasAttribute attribute = entityType.getAttribute(attrName);
         if (attribute == null) {
             attrName = toNonQualifiedName(attrName);
@@ -977,6 +978,7 @@ public class EntityGraphRetriever {
         if (attrValue != null) {
             ret.setAttribute(attrName, attrValue);
         }
+        RequestContext.get().endMetricRecord(metricRecorder);
     }
 
     private AtlasEntityHeader mapVertexToAtlasEntityHeader(AtlasVertex entityVertex, Set<String> attributes) throws AtlasBaseException {
