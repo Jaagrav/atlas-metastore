@@ -288,7 +288,10 @@ public class AtlasGraphUtilsV2 {
     }
 
     public static <T extends AtlasElement, O> O getEncodedProperty(T element, String propertyName, Class<O> returnType) {
-        return getProperty(element, propertyName, returnType, true);
+        AtlasPerfMetrics.MetricRecorder metric = RequestContext.get().startMetricRecord("getEncodedProperty");
+        O response = getProperty(element, propertyName, returnType, true);
+        RequestContext.get().endMetricRecord(metric);
+        return response;
     }
 
     public static <T extends AtlasElement, O> O getProperty(T element, String propertyName, Class<O> returnType, boolean isEncoded) {

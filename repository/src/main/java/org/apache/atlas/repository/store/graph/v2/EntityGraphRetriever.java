@@ -1626,7 +1626,13 @@ public class EntityGraphRetriever {
     }
 
     public Object getVertexAttribute(AtlasVertex vertex, AtlasAttribute attribute) throws AtlasBaseException {
-        return vertex != null && attribute != null ? mapVertexToAttribute(vertex, attribute, null, false) : null;
+        AtlasPerfMetrics.MetricRecorder metric = RequestContext.get().startMetricRecord("getVertexAttribute");
+        Object response = null;
+        if(!Objects.isNull(vertex) && !Objects.isNull(attribute)){
+            response = mapVertexToAttribute(vertex, attribute, null, false);
+        }
+        RequestContext.get().endMetricRecord(metric);
+        return response;
     }
 
     private Object getVertexAttributeIgnoreInactive(AtlasVertex vertex, AtlasAttribute attribute) throws AtlasBaseException {
