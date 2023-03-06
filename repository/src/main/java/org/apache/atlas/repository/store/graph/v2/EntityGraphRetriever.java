@@ -1003,7 +1003,6 @@ public class EntityGraphRetriever {
         ret.setCreateTime(new Date(GraphHelper.getCreatedTime(entityVertex)));
         ret.setUpdateTime(new Date(GraphHelper.getModifiedTime(entityVertex)));
 
-        if(false) {
         d1 = new Date();
         List<AtlasTermAssignmentHeader> termAssignmentHeaders = mapAssignedTerms(entityVertex);
         ret.setMeanings(termAssignmentHeaders);
@@ -1034,7 +1033,6 @@ public class EntityGraphRetriever {
                     throw new RuntimeException(e);
                 }
             });
-        }
         }
         LOG.info("##Completed##3.4##rest of attribute mapping call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
         RequestContext.get().endMetricRecord(metricRecorder);

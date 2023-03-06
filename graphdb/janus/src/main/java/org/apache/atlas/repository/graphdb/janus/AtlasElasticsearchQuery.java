@@ -119,7 +119,7 @@ public class AtlasElasticsearchQuery implements AtlasIndexQuery<AtlasJanusVertex
 
         try {
 
-            String responseString = performDirectIndexQuery(searchParams.getQuery(), true);
+            String responseString = performDirectIndexQuery(searchParams.getQuery(), false);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("runQueryWithLowLevelClient.response : {}", responseString);
             }

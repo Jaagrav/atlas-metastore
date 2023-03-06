@@ -1055,7 +1055,7 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
             LOG.info("##Completed##2.1##get getVerticesMap call in: {} for: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()), verticesMap.size());
             Iterator<Result> indexResultsIterator = indexResults.iterator();
 
-            while (indexResultsIterator.hasNext()) {
+            while (false && indexResultsIterator.hasNext()) {
                 Result result = indexResultsIterator.next();
                 d1 = new Date();
                 AtlasVertex vertex = verticesMap.getOrDefault(result.getVertexId(), result.getVertex());
@@ -1065,6 +1065,7 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
                     continue;
                 }
                 d1 = new Date();
+
                 AtlasEntityHeader header = entityRetriever.toAtlasEntityHeader(vertex, resultAttributes);
                 LOG.info("##Completed##3##toAtlasEntityHeader call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
                 d1 = new Date();
