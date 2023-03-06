@@ -431,6 +431,7 @@ public class DiscoveryREST {
             if (enableSearchLogging) {
                 logSearchLog(parameters, servletRequest, abe, System.currentTimeMillis() - startTime);
             }
+            LOG.error("{}",e.getStackTrace());
             throw abe;
 
         } finally {
