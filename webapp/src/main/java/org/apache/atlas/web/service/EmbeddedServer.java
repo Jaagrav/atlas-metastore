@@ -18,29 +18,29 @@
 
 package org.apache.atlas.web.service;
 
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.util.Date;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.atlas.AtlasConfiguration;
 import org.apache.atlas.AtlasErrorCode;
-import org.apache.atlas.util.BeanUtil;
 import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.model.audit.AtlasAuditEntry;
 import org.apache.atlas.repository.audit.AtlasAuditService;
+import org.apache.atlas.util.BeanUtil;
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.thread.ExecutorThreadPool;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Date;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This class embeds a Jetty server and a connector.
@@ -74,6 +74,7 @@ public class EmbeddedServer {
         MBeanContainer mbContainer=new MBeanContainer(ManagementFactory.getPlatformMBeanServer());
         server.addEventListener(mbContainer);
         server.addBean(mbContainer);
+        server.addBean(Log.getLog());
 
         WebAppContext application = getWebAppContext(path);
         server.setHandler(application);
