@@ -76,6 +76,7 @@ import org.apache.atlas.util.AtlasGremlinQueryProvider;
 import org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery;
 import org.apache.atlas.util.SearchPredicateUtil;
 import org.apache.atlas.util.SearchTracker;
+import org.apache.atlas.utils.AtlasPerfMetrics;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.collections4.IteratorUtils;
@@ -1005,6 +1006,9 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
         RequestContext.get().setAllowDeletedRelationsIndexsearch(params.isAllowDeletedRelations());
 
         AtlasSearchResult ret = new AtlasSearchResult();
+        if(RequestContext.get().isNoEsCalls()){
+            return ret;
+        }
         AtlasIndexQuery indexQuery = null;
 
         ret.setSearchParameters(searchParams);
@@ -1026,9 +1030,14 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
             indexQuery = graph.elasticsearchQuery(indexName);
 
             Date d1 = new Date();
+            AtlasPerfMetrics.MetricRecorder metric = RequestContext.get().startMetricRecord("esSearch");
             DirectIndexQueryResult indexQueryResult = indexQuery.vertices(searchParams);
-            LOG.info("##Completed##1##elasticsearch query call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
+            RequestContext.get().endMetricRecord(metric);
+            LOG.info("##Completed##1##elasticsearch query call in: {}", System.currentTimeMillis() - d1.getTime());
             d1 = new Date();
+            if(RequestContext.get().isNoCassandraCalls()){
+                return ret;
+            }
             prepareSearchResult(ret, indexQueryResult, resultAttributes, true);
             LOG.info("##Completed##6##prepareSearchResult query call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
             ret.setAggregations(indexQueryResult.getAggregationMap());
@@ -1055,7 +1064,7 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
             LOG.info("##Completed##2.1##get getVerticesMap call in: {} for: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()), verticesMap.size());
             Iterator<Result> indexResultsIterator = indexResults.iterator();
 
-            while (false && indexResultsIterator.hasNext()) {
+            while (indexResultsIterator.hasNext()) {
                 Result result = indexResultsIterator.next();
                 d1 = new Date();
                 AtlasVertex vertex = verticesMap.getOrDefault(result.getVertexId(), result.getVertex());

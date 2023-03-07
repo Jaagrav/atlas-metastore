@@ -86,6 +86,17 @@ public class RequestContext {
     private AtlasTask   currentTask;
     private String traceId;
     private final Map<AtlasObjectId, Object> relationshipEndToVertexIdMap = new HashMap<>();
+    private boolean noEsCalls = false;
+    private boolean noCassandraCalls = false;
+
+
+    public boolean isNoEsCalls() {
+        return noEsCalls;
+    }
+
+    public boolean isNoCassandraCalls() {
+        return noCassandraCalls;
+    }
 
     private RequestContext() {
     }
@@ -573,6 +584,14 @@ public class RequestContext {
 
     public void setTraceId(String traceId) {
         this.traceId = traceId;
+    }
+
+    public void setNoEsCalls(boolean noEsCalls) {
+        this.noEsCalls = noEsCalls;
+    }
+
+    public void setNoCassandraCalls(boolean cassandraCalls) {
+        this.noCassandraCalls = cassandraCalls;
     }
 
     public class EntityGuidPair {

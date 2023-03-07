@@ -18,12 +18,14 @@
 
 package org.apache.atlas.web.service;
 
+import java.lang.management.ManagementFactory;
 import org.apache.atlas.AtlasConfiguration;
 import org.apache.atlas.AtlasErrorCode;
 import org.apache.atlas.util.BeanUtil;
 import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.model.audit.AtlasAuditEntry;
 import org.apache.atlas.repository.audit.AtlasAuditService;
+import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -69,6 +71,9 @@ public class EmbeddedServer {
 
         Connector connector = getConnector(host, port);
         server.addConnector(connector);
+        MBeanContainer mbContainer=new MBeanContainer(ManagementFactory.getPlatformMBeanServer());
+        server.addEventListener(mbContainer);
+        server.addBean(mbContainer);
 
         WebAppContext application = getWebAppContext(path);
         server.setHandler(application);
