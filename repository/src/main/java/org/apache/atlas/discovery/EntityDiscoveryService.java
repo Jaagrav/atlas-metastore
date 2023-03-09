@@ -17,8 +17,39 @@
  */
 package org.apache.atlas.discovery;
 
+import static org.apache.atlas.AtlasErrorCode.CLASSIFICATION_NOT_FOUND;
+import static org.apache.atlas.AtlasErrorCode.DISCOVERY_QUERY_FAILED;
+import static org.apache.atlas.AtlasErrorCode.UNKNOWN_TYPENAME;
+import static org.apache.atlas.SortOrder.ASCENDING;
+import static org.apache.atlas.model.instance.AtlasEntity.Status.ACTIVE;
+import static org.apache.atlas.model.instance.AtlasEntity.Status.DELETED;
+import static org.apache.atlas.repository.Constants.ASSET_ENTITY_TYPE;
+import static org.apache.atlas.repository.Constants.OWNER_ATTRIBUTE;
+import static org.apache.atlas.repository.Constants.VERTEX_INDEX_NAME;
+import static org.apache.atlas.type.Constants.GUID_PROPERTY_KEY;
+import static org.apache.atlas.type.Constants.TYPE_NAME_PROPERTY_KEY;
+import static org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery.BASIC_SEARCH_STATE_FILTER;
+import static org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery.TO_RANGE_LIST;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 import org.apache.atlas.ApplicationProperties;
 import org.apache.atlas.AtlasConfiguration;
 import org.apache.atlas.AtlasErrorCode;
@@ -35,13 +66,13 @@ import org.apache.atlas.model.discovery.AtlasQuickSearchResult;
 import org.apache.atlas.model.discovery.AtlasSearchResult;
 import org.apache.atlas.model.discovery.AtlasSearchResult.AtlasFullTextResult;
 import org.apache.atlas.model.discovery.AtlasSearchResult.AtlasQueryType;
-import org.apache.atlas.model.discovery.searchlog.SearchLogSearchParams;
-import org.apache.atlas.model.discovery.searchlog.SearchLogSearchResult;
 import org.apache.atlas.model.discovery.AtlasSuggestionsResult;
 import org.apache.atlas.model.discovery.IndexSearchParams;
-import org.apache.atlas.model.discovery.SearchParams;
-import org.apache.atlas.model.discovery.SearchParameters;
 import org.apache.atlas.model.discovery.QuickSearchParameters;
+import org.apache.atlas.model.discovery.SearchParameters;
+import org.apache.atlas.model.discovery.SearchParams;
+import org.apache.atlas.model.discovery.searchlog.SearchLogSearchParams;
+import org.apache.atlas.model.discovery.searchlog.SearchLogSearchResult;
 import org.apache.atlas.model.instance.AtlasEntity;
 import org.apache.atlas.model.instance.AtlasEntityHeader;
 import org.apache.atlas.model.instance.AtlasObjectId;
@@ -68,10 +99,10 @@ import org.apache.atlas.type.AtlasArrayType;
 import org.apache.atlas.type.AtlasBuiltInTypes.AtlasObjectIdType;
 import org.apache.atlas.type.AtlasClassificationType;
 import org.apache.atlas.type.AtlasEntityType;
+import org.apache.atlas.type.AtlasStructType;
 import org.apache.atlas.type.AtlasStructType.AtlasAttribute;
 import org.apache.atlas.type.AtlasType;
 import org.apache.atlas.type.AtlasTypeRegistry;
-import org.apache.atlas.type.AtlasStructType;
 import org.apache.atlas.util.AtlasGremlinQueryProvider;
 import org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery;
 import org.apache.atlas.util.SearchPredicateUtil;
@@ -87,25 +118,6 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import javax.script.ScriptEngine;
-import java.util.*;
-import javax.script.ScriptException;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-
-import static org.apache.atlas.AtlasErrorCode.*;
-import static org.apache.atlas.SortOrder.ASCENDING;
-import static org.apache.atlas.model.instance.AtlasEntity.Status.ACTIVE;
-import static org.apache.atlas.model.instance.AtlasEntity.Status.DELETED;
-import static org.apache.atlas.repository.Constants.ASSET_ENTITY_TYPE;
-import static org.apache.atlas.repository.Constants.OWNER_ATTRIBUTE;
-import static org.apache.atlas.repository.Constants.VERTEX_INDEX_NAME;
-import static org.apache.atlas.type.Constants.*;
-import static org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery.BASIC_SEARCH_STATE_FILTER;
-import static org.apache.atlas.util.AtlasGremlinQueryProvider.AtlasGremlinQuery.TO_RANGE_LIST;
 
 @Component
 public class EntityDiscoveryService implements AtlasDiscoveryService {
@@ -1035,9 +1047,6 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
             RequestContext.get().endMetricRecord(metric);
             LOG.info("##Completed##1##elasticsearch query call in: {}", System.currentTimeMillis() - d1.getTime());
             d1 = new Date();
-            if(RequestContext.get().isNoCassandraCalls()){
-                return ret;
-            }
             prepareSearchResult(ret, indexQueryResult, resultAttributes, true);
             LOG.info("##Completed##6##prepareSearchResult query call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
             ret.setAggregations(indexQueryResult.getAggregationMap());
@@ -1050,6 +1059,7 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
     }
 
     private void prepareSearchResult(AtlasSearchResult ret, DirectIndexQueryResult indexQueryResult, Set<String> resultAttributes, boolean fetchCollapsedResults) throws AtlasBaseException {
+        AtlasPerfMetrics.MetricRecorder metric = RequestContext.get().startMetricRecord("prepareSearchResult");
         Date d1 = new Date();
         SearchParams searchParams = ret.getSearchParameters();
         try {
@@ -1060,10 +1070,12 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
             boolean showSearchScore = searchParams.getShowSearchScore();
 
             d1 = new Date();
-            Map<String, AtlasVertex> verticesMap = Collections.EMPTY_MAP;//getVerticesMap(indexResults);
+            Map<String, AtlasVertex> verticesMap = getVerticesMap(indexResults);
             LOG.info("##Completed##2.1##get getVerticesMap call in: {} for: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()), verticesMap.size());
             Iterator<Result> indexResultsIterator = indexResults.iterator();
-
+            if(RequestContext.get().isNoCassandraCalls()){
+                return;
+            }
             while (indexResultsIterator.hasNext()) {
                 Result result = indexResultsIterator.next();
                 d1 = new Date();
@@ -1121,6 +1133,7 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
         } catch (Exception e) {
             throw e;
         } finally {
+            RequestContext.get().endMetricRecord(metric);
             LOG.info("##Completed##5##prepare search call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
         }
         scrubSearchResults(ret, searchParams.getSuppressLogs());
