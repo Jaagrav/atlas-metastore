@@ -89,6 +89,7 @@ public class RequestContext {
     private boolean noEsCalls = false;
     private boolean noCassandraCalls = false;
     private boolean noCollapse = false;
+    private boolean vertexBatchFetch;
 
 
     public boolean isNoEsCalls() {
@@ -603,7 +604,12 @@ public class RequestContext {
         this.noCollapse = noCollapse;
   }
 
-  public class EntityGuidPair {
+    public void setVertexBatchFetch(boolean vertexBatchFetch) {
+        this.vertexBatchFetch = vertexBatchFetch;
+    }
+    public  boolean isVertexBatchFetch(){return this.vertexBatchFetch;}
+
+    public class EntityGuidPair {
         private final Object entity;
         private final String guid;
 

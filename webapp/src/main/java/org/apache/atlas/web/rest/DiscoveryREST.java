@@ -386,7 +386,7 @@ public class DiscoveryREST {
     @Timed
     public AtlasSearchResult indexSearch(@Context HttpServletRequest servletRequest, IndexSearchParams parameters,
         @QueryParam("noEsCalls") boolean noEsCalls, @QueryParam("noCassandraCalls") boolean noCassandraCalls,
-        @QueryParam("noCollapse") boolean noCollapse) throws AtlasBaseException {
+        @QueryParam("noCollapse") boolean noCollapse, @QueryParam("vertexBatchFetch") boolean vertexBatchFetch) throws AtlasBaseException {
         AtlasPerfTracer perf = null;
         String uuid = UUID.randomUUID().toString();
         RequestContext.get().setTraceId(uuid);
@@ -394,6 +394,7 @@ public class DiscoveryREST {
         RequestContext.get().setNoEsCalls(noEsCalls);
         RequestContext.get().setNoCassandraCalls(noCassandraCalls);
         RequestContext.get().setNoCollapse(noCollapse);
+        RequestContext.get().setVertexBatchFetch(vertexBatchFetch);
         long startTime = System.currentTimeMillis();
         try {
             if (AtlasPerfTracer.isPerfTraceEnabled(PERF_LOG)) {
