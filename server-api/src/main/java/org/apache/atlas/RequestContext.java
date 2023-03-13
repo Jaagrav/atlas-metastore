@@ -88,6 +88,7 @@ public class RequestContext {
     private final Map<AtlasObjectId, Object> relationshipEndToVertexIdMap = new HashMap<>();
     private boolean noEsCalls = false;
     private boolean noCassandraCalls = false;
+    private boolean noCollapse = false;
 
 
     public boolean isNoEsCalls() {
@@ -96,6 +97,10 @@ public class RequestContext {
 
     public boolean isNoCassandraCalls() {
         return noCassandraCalls;
+    }
+
+    public boolean isNoCollapse() {
+        return noCollapse;
     }
 
     private RequestContext() {
@@ -594,7 +599,11 @@ public class RequestContext {
         this.noCassandraCalls = cassandraCalls;
     }
 
-    public class EntityGuidPair {
+  public void setNoCollapse(boolean noCollapse) {
+        this.noCollapse = noCollapse;
+  }
+
+  public class EntityGuidPair {
         private final Object entity;
         private final String guid;
 

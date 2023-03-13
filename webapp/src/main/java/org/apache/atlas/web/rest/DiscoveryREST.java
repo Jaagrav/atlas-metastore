@@ -385,13 +385,15 @@ public class DiscoveryREST {
     @POST
     @Timed
     public AtlasSearchResult indexSearch(@Context HttpServletRequest servletRequest, IndexSearchParams parameters,
-        @QueryParam("noEsCalls") boolean noEsCalls, @QueryParam("noCassandraCalls") boolean noCassandraCalls) throws AtlasBaseException {
+        @QueryParam("noEsCalls") boolean noEsCalls, @QueryParam("noCassandraCalls") boolean noCassandraCalls,
+        @QueryParam("noCollapse") boolean noCollapse) throws AtlasBaseException {
         AtlasPerfTracer perf = null;
         String uuid = UUID.randomUUID().toString();
         RequestContext.get().setTraceId(uuid);
         MDC.put("trace_id", uuid);
         RequestContext.get().setNoEsCalls(noEsCalls);
         RequestContext.get().setNoCassandraCalls(noCassandraCalls);
+        RequestContext.get().setNoCollapse(noCollapse);
         long startTime = System.currentTimeMillis();
         try {
             if (AtlasPerfTracer.isPerfTraceEnabled(PERF_LOG)) {

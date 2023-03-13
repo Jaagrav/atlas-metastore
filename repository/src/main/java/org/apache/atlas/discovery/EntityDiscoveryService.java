@@ -1047,7 +1047,7 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
             RequestContext.get().endMetricRecord(metric);
             LOG.info("##Completed##1##elasticsearch query call in: {}", System.currentTimeMillis() - d1.getTime());
             d1 = new Date();
-            prepareSearchResult(ret, indexQueryResult, resultAttributes, true);
+            prepareSearchResult(ret, indexQueryResult, resultAttributes, RequestContext.get().isNoCollapse()?false:true);
             LOG.info("##Completed##6##prepareSearchResult query call in: {}", String.valueOf(System.currentTimeMillis() - d1.getTime()));
             ret.setAggregations(indexQueryResult.getAggregationMap());
             ret.setApproximateCount(indexQuery.vertexTotals());
