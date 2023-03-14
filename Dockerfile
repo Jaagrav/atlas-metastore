@@ -50,6 +50,8 @@ RUN cd / \
     && mv /atlas-index-repair-tool-${VERSION}.jar /opt/apache-atlas/libext/ \
     && rm -rf /atlas-index-repair-tool-${VERSION}.tar.gz
 
+RUN ln -s /usr/bin/python2 /usr/bin/python
+
 COPY atlas-hub/repair_index.py /opt/apache-atlas/bin/
 
 RUN chmod +x /opt/apache-atlas/bin/repair_index.py
@@ -73,7 +75,5 @@ RUN cd /opt/apache-atlas/bin \
 
 RUN cd /opt/apache-atlas/bin \
     && ./atlas_start.py -setup || true
-
-
 
 VOLUME ["/opt/apache-atlas/conf", "/opt/apache-atlas/logs"]
