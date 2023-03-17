@@ -102,6 +102,7 @@ public class KeycloakClient {
 
                 REALM_ID = object.getString("realm");
                 AUTH_SERVER_URL = "http://keycloak-http.keycloak.svc.cluster.local/auth";
+                AUTH_SERVER_URL = object.getString("auth-server-url");
                 CLIENT_ID = object.getString("resource");
                 GRANT_TYPE = "client_credentials";
                 CLIENT_SECRET = object.getJSONObject("credentials").getString("secret");
