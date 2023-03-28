@@ -44,7 +44,6 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 
 import org.apache.atlas.model.discovery.searchlog.SearchRequestLogData.SearchRequestLogDataBuilder;
@@ -67,7 +66,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import static org.apache.atlas.repository.Constants.*;
 
@@ -384,18 +382,11 @@ public class DiscoveryREST {
     @Path("indexsearch")
     @POST
     @Timed
-    public AtlasSearchResult indexSearch(@Context HttpServletRequest servletRequest, IndexSearchParams parameters,
-        @QueryParam("noEsCalls") boolean noEsCalls, @QueryParam("noCassandraCalls") boolean noCassandraCalls,
-        @QueryParam("noCollapse") boolean noCollapse, @QueryParam("vertexBatchFetch") boolean vertexBatchFetch) throws AtlasBaseException {
+    public AtlasSearchResult indexSearch(@Context HttpServletRequest servletRequest, IndexSearchParams parameters) throws AtlasBaseException {
         AtlasPerfTracer perf = null;
-        String uuid = UUID.randomUUID().toString();
-        RequestContext.get().setTraceId(uuid);
-        MDC.put("trace_id", uuid);
-        RequestContext.get().setNoEsCalls(noEsCalls);
-        RequestContext.get().setNoCassandraCalls(noCassandraCalls);
-        RequestContext.get().setNoCollapse(noCollapse);
-        RequestContext.get().setVertexBatchFetch(vertexBatchFetch);
         long startTime = System.currentTimeMillis();
+        RequestContext.get().setIncludeMeanings(!parameters.isExcludeMeanings());
+        RequestContext.get().setIncludeClassifications(!parameters.isExcludeClassifications());
         try {
             if (AtlasPerfTracer.isPerfTraceEnabled(PERF_LOG)) {
                 perf = AtlasPerfTracer.getPerfTracer(PERF_LOG, "DiscoveryREST.indexSearch(" + parameters + ")");
@@ -437,13 +428,10 @@ public class DiscoveryREST {
             if (enableSearchLogging) {
                 logSearchLog(parameters, servletRequest, abe, System.currentTimeMillis() - startTime);
             }
-            LOG.error("{}",e.getStackTrace());
             throw abe;
 
         } finally {
             AtlasPerfTracer.log(perf);
-            RequestContext.clear();
-            MDC.clear();
         }
     }
 
@@ -600,6 +588,7 @@ public class DiscoveryREST {
                                                    @QueryParam("sortOrder")                       SortOrder   sortOrder,
                                                    @QueryParam("excludeDeletedEntities")          boolean     excludeDeletedEntities,
                                                    @QueryParam("includeClassificationAttributes") boolean     includeClassificationAttributes,
+                                                   @QueryParam("excludeMeaningsAttributes")       boolean     excludeMeaningsAttributes,
                                                    @QueryParam("getApproximateCount")             boolean     getApproximateCount,
                                                    @QueryParam("limit")                           int         limit,
                                                    @QueryParam("offset")                          int         offset) throws AtlasBaseException {
@@ -623,6 +612,10 @@ public class DiscoveryREST {
             parameters.setLimit(limit);
             parameters.setOffset(offset);
             parameters.setIncludeClassificationAttributes(includeClassificationAttributes);
+            parameters.setExcludeClassifications(!includeClassificationAttributes);
+            parameters.setExcludeMeanings(excludeMeaningsAttributes);
+            RequestContext.get().setIncludeClassifications(includeClassificationAttributes);
+            RequestContext.get().setIncludeMeanings(!excludeMeaningsAttributes);
             return discoveryService.searchRelatedEntities(guid, relation, getApproximateCount, parameters);
 
         } finally {

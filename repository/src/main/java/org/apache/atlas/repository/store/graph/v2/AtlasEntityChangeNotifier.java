@@ -125,7 +125,7 @@ public class AtlasEntityChangeNotifier implements IAtlasEntityChangeNotifier {
         if (CollectionUtils.isEmpty(entityChangeListeners)) {
             return;
         }
-        relationships = relationships.stream().filter(r -> ALLOWED_RELATIONSHIP_TYPES.contains(r.getTypeName())).collect(Collectors.toList());
+        //relationships = relationships.stream().filter(r -> ALLOWED_RELATIONSHIP_TYPES.contains(r.getTypeName())).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(relationships))
             return;
         switch (operationType) {

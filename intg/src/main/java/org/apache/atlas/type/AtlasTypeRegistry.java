@@ -19,6 +19,7 @@ package org.apache.atlas.type;
 
 import org.apache.atlas.AtlasErrorCode;
 import org.apache.atlas.exception.AtlasBaseException;
+import org.apache.atlas.model.TypeCategory;
 import org.apache.atlas.model.typedef.*;
 import org.apache.atlas.type.AtlasStructType.AtlasAttribute;
 import org.apache.commons.collections.CollectionUtils;
@@ -756,13 +757,13 @@ public class AtlasTypeRegistry {
 
         public List<AtlasBaseTypeDef> getDeleteedTypes() { return deletedTypes; }
 
-
         private void addTypeWithNoRefResolve(AtlasBaseTypeDef typeDef) throws AtlasBaseException{
             if (LOG.isDebugEnabled()) {
                 LOG.debug("==> AtlasTypeRegistry.addTypeWithNoRefResolve({})", typeDef);
             }
 
             if (typeDef != null) {
+
                 if (typeDef.getClass().equals(AtlasEnumDef.class)) {
                     AtlasEnumDef enumDef = (AtlasEnumDef) typeDef;
 
@@ -815,7 +816,7 @@ public class AtlasTypeRegistry {
             }
         }
 
-        private void updateTypeWithNoRefResolve(AtlasBaseTypeDef typeDef) {
+        private void updateTypeWithNoRefResolve(AtlasBaseTypeDef typeDef) throws AtlasBaseException{
             if (LOG.isDebugEnabled()) {
                 LOG.debug("==> AtlasTypeRegistry.updateType({})", typeDef);
             }
@@ -833,12 +834,13 @@ public class AtlasTypeRegistry {
             }
         }
 
-        private void updateTypeByGuidWithNoRefResolve(String guid, AtlasBaseTypeDef typeDef) {
+        private void updateTypeByGuidWithNoRefResolve(String guid, AtlasBaseTypeDef typeDef) throws AtlasBaseException{
             if (LOG.isDebugEnabled()) {
                 LOG.debug("==> AtlasTypeRegistry.updateTypeByGuidWithNoRefResolve({})", guid);
             }
 
             if (guid != null && typeDef != null) {
+
                 // ignore
                 if (typeDef.getClass().equals(AtlasEnumDef.class)) {
                     AtlasEnumDef enumDef = (AtlasEnumDef) typeDef;
@@ -881,12 +883,13 @@ public class AtlasTypeRegistry {
             }
         }
 
-        private void updateTypeByNameWithNoRefResolve(String name, AtlasBaseTypeDef typeDef) {
+        private void updateTypeByNameWithNoRefResolve(String name, AtlasBaseTypeDef typeDef) throws AtlasBaseException{
             if (LOG.isDebugEnabled()) {
                 LOG.debug("==> AtlasTypeRegistry.updateTypeByNameWithNoRefResolve({})", name);
             }
 
             if (name != null && typeDef != null) {
+
                 if (typeDef.getClass().equals(AtlasEnumDef.class)) {
                     AtlasEnumDef enumDef = (AtlasEnumDef) typeDef;
 
@@ -928,7 +931,7 @@ public class AtlasTypeRegistry {
             }
         }
 
-        private void updateTypesWithNoRefResolve(Collection<? extends AtlasBaseTypeDef> typeDefs) {
+        private void updateTypesWithNoRefResolve(Collection<? extends AtlasBaseTypeDef> typeDefs) throws AtlasBaseException {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("==> AtlasTypeRegistry.updateTypesWithNoRefResolve(length={})",
                         (typeDefs == null ? 0 : typeDefs.size()));

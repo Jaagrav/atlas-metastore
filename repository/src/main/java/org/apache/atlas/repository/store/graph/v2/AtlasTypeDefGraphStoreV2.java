@@ -495,11 +495,6 @@ public class AtlasTypeDefGraphStoreV2 extends AtlasTypeDefGraphStore {
         return getTypeNamesFromEdges(vertex, AtlasGraphUtilsV2.ENTITYTYPE_EDGE_LABEL);
     }
 
-    boolean getSkipDisplayNameUniquenessCheckProperty(AtlasVertex vertex) {
-        Boolean skipDisplayNameUniquenessCheckProperty =  vertex.getProperty(Constants.TYPE_SKIP_DISPLAYNAME_UNIQUENESS_CHECK, Boolean.class);
-        return skipDisplayNameUniquenessCheckProperty != null ? skipDisplayNameUniquenessCheckProperty : false;
-    }
-
     /**
      * Get the typename properties from the edges, that are associated with the vertex and have the supplied edge label.
      * @param vertex

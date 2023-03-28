@@ -69,10 +69,6 @@ public class AtlasStructDefStoreV2 extends AtlasAbstractDefStoreV2<AtlasStructDe
 
         validateType(structDef);
 
-        if(AtlasAbstractDefStoreV2.KEYWORDS_INVALID_FOR_TYPE_CREATION.contains(structDef.getName())){
-            throw new AtlasBaseException(AtlasErrorCode.UNKNOWN_TYPENAME, structDef.getName());
-        }
-
         AtlasType type = typeRegistry.getType(structDef.getName());
 
         if (type.getTypeCategory() != org.apache.atlas.model.TypeCategory.STRUCT) {
@@ -471,7 +467,6 @@ public class AtlasStructDefStoreV2 extends AtlasAbstractDefStoreV2<AtlasStructDe
                 AtlasGraphUtilsV2.setProperty(vertex, propertyKey, toJsonFromAttribute(structType.getAttribute(attributeDef.getName())));
             }
         }
-
         AtlasGraphUtilsV2.setEncodedProperty(vertex, encodedStructDefPropertyKey, attrNames);
     }
 

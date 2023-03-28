@@ -82,27 +82,13 @@ public class RequestContext {
     private boolean     createShellEntityForNonExistingReference = false;
     private boolean     skipFailedEntities = false;
     private boolean     allowDeletedRelationsIndexsearch = false;
+    private boolean     includeMeanings = true;
+    private boolean     includeClassifications = true;
     private String      currentTypePatchAction = "";
     private AtlasTask   currentTask;
     private String traceId;
     private final Map<AtlasObjectId, Object> relationshipEndToVertexIdMap = new HashMap<>();
-    private boolean noEsCalls = false;
-    private boolean noCassandraCalls = false;
-    private boolean noCollapse = false;
-    private boolean vertexBatchFetch;
-
-
-    public boolean isNoEsCalls() {
-        return noEsCalls;
-    }
-
-    public boolean isNoCassandraCalls() {
-        return noCassandraCalls;
-    }
-
-    public boolean isNoCollapse() {
-        return noCollapse;
-    }
+    private boolean     allowDuplicateDisplayName;
 
     private RequestContext() {
     }
@@ -310,6 +296,13 @@ public class RequestContext {
 
     public void setAllowDeletedRelationsIndexsearch(boolean allowDeletedRelationsIndexsearch) {
         this.allowDeletedRelationsIndexsearch = allowDeletedRelationsIndexsearch;
+    }
+
+    public void setAllowDuplicateDisplayName(boolean allowDuplicateDisplayName){
+        this.allowDuplicateDisplayName = allowDuplicateDisplayName;
+    }
+    public boolean getAllowDuplicateDisplayName(){
+        return allowDuplicateDisplayName;
     }
 
     public String getCurrentTypePatchAction() {
@@ -592,22 +585,21 @@ public class RequestContext {
         this.traceId = traceId;
     }
 
-    public void setNoEsCalls(boolean noEsCalls) {
-        this.noEsCalls = noEsCalls;
+    public void setIncludeMeanings(boolean includeMeanings) {
+        this.includeMeanings = includeMeanings;
     }
 
-    public void setNoCassandraCalls(boolean cassandraCalls) {
-        this.noCassandraCalls = cassandraCalls;
+    public boolean includeMeanings() {
+        return this.includeMeanings;
     }
 
-  public void setNoCollapse(boolean noCollapse) {
-        this.noCollapse = noCollapse;
-  }
-
-    public void setVertexBatchFetch(boolean vertexBatchFetch) {
-        this.vertexBatchFetch = vertexBatchFetch;
+    public void setIncludeClassifications(boolean includeClassifications) {
+        this.includeClassifications = includeClassifications;
     }
-    public  boolean isVertexBatchFetch(){return this.vertexBatchFetch;}
+
+    public boolean includeClassifications() {
+        return this.includeClassifications;
+    }
 
     public class EntityGuidPair {
         private final Object entity;

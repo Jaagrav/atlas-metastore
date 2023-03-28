@@ -71,6 +71,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.apache.atlas.AtlasConstants.ATLAS_MIGRATION_MODE_FILENAME;
 import static org.apache.atlas.web.filters.HeadersUtil.SERVER_KEY;
@@ -94,6 +95,8 @@ public class AtlasSecurityConfig extends WebSecurityConfigurerAdapter {
     private final Configuration configuration;
     private final StaleTransactionCleanupFilter staleTransactionCleanupFilter;
     private final ActiveServerFilter activeServerFilter;
+    private final boolean isAlbEnabled = Boolean.valueOf(System.getenv("ALB_ENABLED")).booleanValue();
+
 
     public static final RequestMatcher KEYCLOAK_REQUEST_MATCHER = new OrRequestMatcher(new RequestMatcher[]{new AntPathRequestMatcher("/login.jsp"), new RequestHeaderRequestMatcher("Authorization"), new QueryParamPresenceRequestMatcher("access_token")});
 
@@ -234,7 +237,12 @@ public class AtlasSecurityConfig extends WebSecurityConfigurerAdapter {
         }
 
         //XSS filter at first
-        httpSecurity.addFilterAfter(atlasXSSPreventionFilter, BasicAuthenticationFilter.class);
+        if(isAlbEnabled) {
+            httpSecurity.addFilterBefore(atlasXSSPreventionFilter, BasicAuthenticationFilter.class);
+            LOG.info("XSS filter is enabled from Atlas");
+        } else {
+            LOG.info("XSS filter is disabled from Atlas");
+        }
         //Enable activeServerFilter regardless of HA or HS
         httpSecurity.addFilterAfter(activeServerFilter, BasicAuthenticationFilter.class);
 

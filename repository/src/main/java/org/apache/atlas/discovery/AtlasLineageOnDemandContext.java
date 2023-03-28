@@ -1,11 +1,14 @@
 package org.apache.atlas.discovery;
 
+import org.apache.atlas.RequestContext;
 import org.apache.atlas.model.discovery.SearchParameters;
 import org.apache.atlas.model.lineage.LineageOnDemandBaseParams;
 import org.apache.atlas.model.lineage.LineageOnDemandConstraints;
 import org.apache.atlas.model.lineage.LineageOnDemandRequest;
+import org.apache.atlas.repository.graphdb.AtlasEdge;
 import org.apache.atlas.repository.graphdb.AtlasVertex;
 import org.apache.atlas.type.AtlasTypeRegistry;
+import org.apache.atlas.utils.AtlasPerfMetrics;
 import org.apache.commons.collections.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,17 +20,19 @@ public class AtlasLineageOnDemandContext {
     private static final Logger LOG = LoggerFactory.getLogger(AtlasLineageContext.class);
 
     private Map<String, LineageOnDemandConstraints> constraints;
-    private Predicate                               predicate;
+    private Predicate                               vertexPredicate;
+    private Predicate                               edgePredicate;
     private Set<String>                             attributes;
     private Set<String>                             relationAttributes;
     private LineageOnDemandBaseParams               defaultParams;
 
     public AtlasLineageOnDemandContext(LineageOnDemandRequest lineageOnDemandRequest, AtlasTypeRegistry typeRegistry) {
-        this.constraints = lineageOnDemandRequest.getConstraints();
-        this.attributes = lineageOnDemandRequest.getAttributes();
+        this.constraints        = lineageOnDemandRequest.getConstraints();
+        this.attributes         = lineageOnDemandRequest.getAttributes();
         this.relationAttributes = lineageOnDemandRequest.getRelationAttributes();
-        this.defaultParams = lineageOnDemandRequest.getDefaultParams();
-        this.predicate = constructInMemoryPredicate(typeRegistry, lineageOnDemandRequest.getTraversalFilters());
+        this.defaultParams      = lineageOnDemandRequest.getDefaultParams();
+        this.vertexPredicate    = constructInMemoryPredicate(typeRegistry, lineageOnDemandRequest.getEntityTraversalFilters());
+        this.edgePredicate      = constructInMemoryPredicate(typeRegistry, lineageOnDemandRequest.getRelationshipTraversalFilters());
     }
 
     public Map<String, LineageOnDemandConstraints> getConstraints() {
@@ -38,12 +43,20 @@ public class AtlasLineageOnDemandContext {
         this.constraints = constraints;
     }
 
-    public Predicate getPredicate() {
-        return predicate;
+    public Predicate getVertexPredicate() {
+        return vertexPredicate;
     }
 
-    public void setPredicate(Predicate predicate) {
-        this.predicate = predicate;
+    public void setVertexPredicate(Predicate vertexPredicate) {
+        this.vertexPredicate = vertexPredicate;
+    }
+
+    public Predicate getEdgePredicate() {
+        return edgePredicate;
+    }
+
+    public void setEdgePredicate(Predicate edgePredicate) {
+        this.edgePredicate = edgePredicate;
     }
 
     public Set<String> getAttributes() {
@@ -75,10 +88,12 @@ public class AtlasLineageOnDemandContext {
         return lineageSearchProcessor.constructInMemoryPredicate(typeRegistry, filterCriteria);
     }
 
-    protected boolean evaluate(AtlasVertex vertex) {
-        if (predicate != null) {
-            return predicate.evaluate(vertex);
+    protected boolean evaluate(Object object) {
+        AtlasPerfMetrics.MetricRecorder evaluateFilterCriteria = RequestContext.get().startMetricRecord("evaluateFilterCriteria");
+        if (vertexPredicate != null) {
+            return vertexPredicate.evaluate(object);
         }
+        RequestContext.get().endMetricRecord(evaluateFilterCriteria);
         return true;
     }
 }

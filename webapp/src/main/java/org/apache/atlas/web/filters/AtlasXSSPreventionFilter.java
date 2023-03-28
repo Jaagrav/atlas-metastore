@@ -1,19 +1,13 @@
 package org.apache.atlas.web.filters;
 
 import org.apache.atlas.AtlasConfiguration;
-import org.apache.atlas.RequestContext;
-import org.apache.atlas.utils.AtlasPerfMetrics;
-import org.apache.atlas.utils.AtlasPerfTracer;
 import org.apache.atlas.web.util.CachedBodyHttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.safety.Safelist;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
-import org.owasp.encoder.Encode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,21 +18,19 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import com.google.common.base.Predicate;
+
 import java.util.regex.Pattern;
 
 @Component
 public class AtlasXSSPreventionFilter implements Filter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AtlasCSRFPreventionFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AtlasXSSPreventionFilter.class);
     private static Pattern pattern;
     private PolicyFactory policy;
     private static final String MASK_STRING = "##ATLAN##";
     private static final String CONTENT_TYPE_JSON = "application/json";
     private static final String ERROR_INVALID_CHARACTERS = "invalid characters in the request body (XSS Filter)";
-    private static final Logger PERF_LOG = AtlasPerfTracer.getPerfLogger("web.AtlasXSSPreventionFilter");
     private static final Pattern REGEX_NUMBER                   = Pattern.compile("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$");
     public  static final Pattern REGEX_INTEGER                  = Pattern.compile("^[0-9]+$");
     public static final  Pattern REGEX_ISO8601                  = Pattern.compile("^^[0-9]{4}(-[0-9]{2}(-[0-9]{2}([ T][0-9]{2}(:[0-9]{2}){1,2}(.[0-9]{1,6})"
@@ -65,7 +57,6 @@ public class AtlasXSSPreventionFilter implements Filter {
             + "[\\p{L}\\p{N}\\p{Zs}\\.\\#@\\$%\\+&;:\\-_~,\\?=/!\\(\\)]*+\\s*");
     public static final  Predicate<String> REGEX_ON_OFFSITE_URL = matchesEither(REGEX_ONSITE_URL, REGEX_OFFSITE_URL);
 
-
     @Inject
     public AtlasXSSPreventionFilter() throws ServletException {
         LOG.info("AtlasXSSPreventionFilter initialized");
@@ -79,7 +70,7 @@ public class AtlasXSSPreventionFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        pattern     = Pattern.compile(AtlasConfiguration.REST_API_XSS_FILTER_MASK_STRING.getString());
+        pattern = Pattern.compile(AtlasConfiguration.REST_API_XSS_FILTER_MASK_STRING.getString());
 
         policy = new HtmlPolicyBuilder()
                 .allowStandardUrlProtocols()
@@ -160,27 +151,13 @@ public class AtlasXSSPreventionFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         HttpServletRequest request = (HttpServletRequest) servletRequest;
-        AtlasPerfTracer perf = AtlasPerfTracer.getPerfTracer(PERF_LOG, "XSSFilter.doFilter(" + request.getRequestURI() + ")");
 
         String serverName = request.getServerName();
         if (StringUtils.isNotEmpty(serverName) && serverName.contains(AtlasConfiguration.REST_API_XSS_FILTER_EXLUDE_SERVER_NAME.getString())) {
-            LOG.info("AtlasXSSPreventionFilter: skipping filter for serverName: {}", serverName);
+            LOG.debug("AtlasXSSPreventionFilter: skipping filter for serverName: {}", serverName);
             filterChain.doFilter(request, response);
             return;
         }
-
-        response.setHeader("Content-Type", CONTENT_TYPE_JSON);
-
-        Map<String, Object> logContext = new HashMap<String , Object>(){{
-            put("remoteHost", request.getRemoteHost());
-            put("remoteAddr", request.getRemoteAddr());
-            put("remotePort", request.getRemotePort());
-            put("requestURI", request.getRequestURI());
-            put("requestURL", request.getRequestURL().toString());
-            put("serverName", request.getServerName());
-            put("contentType", request.getContentType());
-        }};
-        LOG.info("XSS Filter: Request metadata received: {}", logContext);
 
         String method = request.getMethod();
         if(!method.equals("POST") && !method.equals("PUT")) {
@@ -195,16 +172,17 @@ public class AtlasXSSPreventionFilter implements Filter {
         }
 
         CachedBodyHttpServletRequest cachedBodyHttpServletRequest = new CachedBodyHttpServletRequest(request);
-        String body = IOUtils.toString(cachedBodyHttpServletRequest.getInputStream(), "UTF-8");
-        String reqBodyStr = pattern.matcher(body).replaceAll(MASK_STRING);
-        String sanitizedBody = policy.sanitize(StringEscapeUtils.unescapeJava(reqBodyStr));
+        String body             = IOUtils.toString(cachedBodyHttpServletRequest.getInputStream(), "UTF-8");
+        String reqBodyStr       = StringEscapeUtils.unescapeJava(pattern.matcher(body).replaceAll(MASK_STRING));
+        String sanitizedBody    = policy.sanitize(reqBodyStr);
 
         if(!StringUtils.equals(reqBodyStr, StringEscapeUtils.unescapeHtml4(sanitizedBody))) {
+            response.setHeader("Content-Type", CONTENT_TYPE_JSON);
             response.setStatus(400);
             response.getWriter().write(getErrorMessages(ERROR_INVALID_CHARACTERS));
             return;
         }
-        AtlasPerfTracer.log(perf);
+
         filterChain.doFilter(cachedBodyHttpServletRequest, response);
     }
 
@@ -219,7 +197,7 @@ public class AtlasXSSPreventionFilter implements Filter {
 
     @Override
     public void destroy() {
-        LOG.info("AtlasXSSPreventionFilter destroyed");
+        LOG.debug("AtlasXSSPreventionFilter destroyed");
     }
 
 

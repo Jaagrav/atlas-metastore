@@ -57,10 +57,6 @@ public class AtlasEntityDefStoreV2 extends AtlasAbstractDefStoreV2<AtlasEntityDe
 
         validateType(entityDef);
 
-        if(AtlasAbstractDefStoreV2.KEYWORDS_INVALID_FOR_TYPE_CREATION.contains(entityDef.getName())){
-            throw new AtlasBaseException(AtlasErrorCode.UNKNOWN_TYPENAME, entityDef.getName());
-        }
-
         AtlasType type = typeRegistry.getType(entityDef.getName());
 
         if (type.getTypeCategory() != org.apache.atlas.model.TypeCategory.ENTITY) {
