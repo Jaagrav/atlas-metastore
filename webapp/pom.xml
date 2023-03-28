@@ -667,7 +667,7 @@
                         </manifest>
                     </archive>
                     <packagingExcludes>
-                        WEB-INF/lib/dom4j-*.jar,${packages.to.exclude}
+                        WEB-INF/jsr311-api-*.jar,lib/WEB-INF/lib/dom4j-*.jar,${packages.to.exclude}
                     </packagingExcludes>
                 </configuration>
             </plugin>
