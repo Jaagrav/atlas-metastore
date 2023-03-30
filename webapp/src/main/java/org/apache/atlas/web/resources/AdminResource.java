@@ -20,6 +20,7 @@ package org.apache.atlas.web.resources;
 
 import com.sun.jersey.multipart.FormDataParam;
 import org.apache.atlas.ApplicationProperties;
+import org.apache.atlas.Atlas;
 import org.apache.atlas.AtlasClient;
 import org.apache.atlas.AtlasConfiguration;
 import org.apache.atlas.AtlasErrorCode;
@@ -492,6 +493,7 @@ public class AdminResource {
         }
 
         AtlasMetrics metrics = metricsService.getMetrics();
+        metrics.addMetric("system","jetty_threads", Atlas.getJettyMetrics());
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("<== AdminResource.getMetrics()");
@@ -508,7 +510,7 @@ public class AdminResource {
             LOG.debug("==> AdminResource.pushMetricsToStatsd()");
         }
 
-        metricsService.pushMetricsToStatsd();
+        metricsService.pushMetricsToStatsd(Atlas.getJettyMetrics());
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("<== AdminResource.pushMetricsToStatsd()");

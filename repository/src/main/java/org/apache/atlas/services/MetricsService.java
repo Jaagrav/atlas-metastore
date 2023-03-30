@@ -76,6 +76,7 @@ public class MetricsService {
     protected static final String METRIC_RUNTIME                    = "runtime";
     protected static final String METRIC_MEMORY                     = "memory";
     protected static final String METRIC_OS                         = "os";
+    protected static final String METRIC_THREADS                    = "threads";
     protected static final String METRIC_ENTITY_ACTIVE_INCL_SUBTYPES = ENTITY + "Active"+"-"+TYPE_SUBTYPES;
     protected static final String METRIC_ENTITY_DELETED_INCL_SUBTYPES = ENTITY + "Deleted"+"-"+TYPE_SUBTYPES;
     protected static final String METRIC_ENTITY_SHELL_INCL_SUBTYPES = ENTITY + "Shell"+"-"+TYPE_SUBTYPES;
@@ -197,12 +198,14 @@ public class MetricsService {
         metrics.addMetric(SYSTEM, METRIC_MEMORY, AtlasMetricJVMUtil.getMemoryDetails());
         metrics.addMetric(SYSTEM, METRIC_OS, AtlasMetricJVMUtil.getSystemInfo());
         metrics.addMetric(SYSTEM, METRIC_RUNTIME, AtlasMetricJVMUtil.getRuntimeInfo());
-
+        metrics.addMetric(SYSTEM, METRIC_THREADS, AtlasMetricJVMUtil.getThreadPoolInfo());
         return metrics;
     }
 
-    public void pushMetricsToStatsd() {
+    public void pushMetricsToStatsd(Map<String, Object> jettyMetrics) {
         AtlasMetrics metrics = this.getMetrics();
+        jettyMetrics.entrySet().stream().forEach(entry-> statsClient.count(SYSTEM+".jetty."+entry.getKey(), Integer.valueOf(entry.getKey())));
+
         statsClient.gauge(GENERAL + "." + METRIC_TYPE_COUNT ,
                 metrics.getNumericMetric(GENERAL, METRIC_TYPE_COUNT).longValue());
 

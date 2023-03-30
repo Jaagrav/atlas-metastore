@@ -285,4 +285,8 @@ public final class Atlas {
             }
         }
     }
+
+    public static Map<String, Object> getJettyMetrics() {
+        return server.getThreadPoolStats();
+    }
 }

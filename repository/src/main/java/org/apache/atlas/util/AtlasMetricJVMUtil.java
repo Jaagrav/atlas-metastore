@@ -18,6 +18,8 @@
  */
 package org.apache.atlas.util;
 
+import java.lang.management.ThreadMXBean;
+import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,11 +43,13 @@ public class AtlasMetricJVMUtil {
     private static final RuntimeMXBean RUNTIME;
     private static final OperatingSystemMXBean OS;
     private static final MemoryMXBean memBean;
+    private static final ThreadMXBean threadBean;
 
     static {
         RUNTIME = ManagementFactory.getRuntimeMXBean();
         OS = ManagementFactory.getOperatingSystemMXBean();
         memBean = ManagementFactory.getMemoryMXBean();
+        threadBean = ManagementFactory.getThreadMXBean();
     }
 
     /**
@@ -106,5 +110,18 @@ public class AtlasMetricJVMUtil {
         memory.put("nonHeapMax", String.valueOf(nonHeapUsage.getMax()));
         memory.put("nonHeapCommitted", String.valueOf(nonHeapUsage.getCommitted()));
         memory.put("nonHeapUsed", String.valueOf(nonHeapUsage.getUsed()));
+    }
+
+    /**
+     * Get default threads
+     * @return
+     */
+    public static Map<String, Object>  getThreadPoolInfo(){
+        Map<String, Object> threadMetrics = new HashMap<>();
+        threadMetrics.put("totalThreadCount", threadBean.getThreadCount());
+        threadMetrics.put("totalDaemonThreadCount", threadBean.getDaemonThreadCount());
+        threadMetrics.put("peakThreadCount", threadBean.getPeakThreadCount());
+        threadMetrics.put("totalThreadsStarted", threadBean.getTotalStartedThreadCount());
+        return threadMetrics;
     }
 }

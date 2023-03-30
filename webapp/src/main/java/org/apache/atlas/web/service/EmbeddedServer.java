@@ -21,6 +21,8 @@ package org.apache.atlas.web.service;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -146,5 +148,17 @@ public class EmbeddedServer {
                 LOG.error("Exception occurred during audit", e);
             }
         }
+    }
+
+    public Map<String, Object> getThreadPoolStats() {
+        Map<String, Object> threadStats = new HashMap<>();
+        ExecutorThreadPool threadpool = (ExecutorThreadPool)server.getThreadPool();
+        threadStats.put("jetty_total_threads",threadpool.getThreads());
+        threadStats.put("jetty_idle_threads", threadpool.getIdleThreads());
+        threadStats.put("jetty_max_threads", threadpool.getMaxThreads());
+        threadStats.put("jetty_min_threads", threadpool.getMinThreads());
+        threadStats.put("jetty_reserved_threads", threadpool.getReservedThreads());
+        threadStats.put("jetty_server_low_on_threads", threadpool.isLowOnThreads());
+        return threadStats;
     }
 }
