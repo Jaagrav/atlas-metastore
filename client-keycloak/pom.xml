@@ -44,6 +44,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-common</artifactId>
+            <version>15.0.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.atlas</groupId>
             <artifactId>atlas-common</artifactId>
         </dependency>

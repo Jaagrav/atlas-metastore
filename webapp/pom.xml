@@ -534,6 +534,10 @@
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-core</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.keycloak</groupId>
+                    <artifactId>keycloak-common</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 

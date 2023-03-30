@@ -41,6 +41,8 @@ public class AtlasKeycloakAuthenticationProvider extends AtlasAbstractAuthentica
   private final String groupsClaim;
   private static final Logger LOG = LoggerFactory.getLogger(AtlasKeycloakAuthenticationProvider.class);
   private static final Logger PERF_LOG = AtlasPerfTracer.getPerfLogger("auth.Keycloak");
+  private final boolean validateServiceToken;
+
 
   private final KeycloakAuthenticationProvider keycloakAuthenticationProvider;
 
@@ -49,6 +51,7 @@ public class AtlasKeycloakAuthenticationProvider extends AtlasAbstractAuthentica
     Configuration configuration = ApplicationProperties.get();
     this.groupsFromUGI = configuration.getBoolean("atlas.authentication.method.keycloak.ugi-groups", true);
     this.groupsClaim = configuration.getString("atlas.authentication.method.keycloak.groups_claim");
+    this.validateServiceToken = configuration.getBoolean("atlas.api.service.token.validation" ,true);
   }
 
   @Override
@@ -76,7 +79,7 @@ public class AtlasKeycloakAuthenticationProvider extends AtlasAbstractAuthentica
     AtlasPerfTracer perf = null;
     try {
 
-      if (authentication.getName().startsWith("service-account-apikey")) {
+      if (validateServiceToken && authentication.getName().startsWith("service-account-apikey")) {
         String serviceAccountUserName = authentication.getName();
         String apiKey = serviceAccountUserName.substring("service-account-".length());
 
