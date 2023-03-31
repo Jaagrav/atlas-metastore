@@ -1030,7 +1030,8 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
 
             DirectIndexQueryResult indexQueryResult = indexQuery.vertices(searchParams);
 
-            prepareSearchResult(ret, indexQueryResult, resultAttributes, true);
+            prepareSearchResult(ret, indexQueryResult, resultAttributes, RequestContext.get()
+                .isNoCollapse()?false:true);
 
             ret.setAggregations(indexQueryResult.getAggregationMap());
             ret.setApproximateCount(indexQuery.vertexTotals());

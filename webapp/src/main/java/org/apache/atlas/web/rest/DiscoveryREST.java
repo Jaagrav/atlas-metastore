@@ -382,9 +382,15 @@ public class DiscoveryREST {
     @Path("indexsearch")
     @POST
     @Timed
-    public AtlasSearchResult indexSearch(@Context HttpServletRequest servletRequest, IndexSearchParams parameters) throws AtlasBaseException {
+    public AtlasSearchResult indexSearch(@Context HttpServletRequest servletRequest, IndexSearchParams parameters,@QueryParam("noEsCalls") boolean noEsCalls, @QueryParam("noCassandraCalls") boolean noCassandraCalls,
+        @QueryParam("noCollapse") boolean noCollapse, @QueryParam("vertexBatchFetch") boolean vertexBatchFetch) throws AtlasBaseException {
         AtlasPerfTracer perf = null;
         long startTime = System.currentTimeMillis();
+        RequestContext.get().setNoEsCalls(noEsCalls);
+        RequestContext.get().setNoCassandraCalls(noCassandraCalls);
+        RequestContext.get().setNoCollapse(noCollapse);
+        RequestContext.get().setNoAttributeCall(vertexBatchFetch);
+
         RequestContext.get().setIncludeMeanings(!parameters.isExcludeMeanings());
         RequestContext.get().setIncludeClassifications(!parameters.isExcludeClassifications());
         try {

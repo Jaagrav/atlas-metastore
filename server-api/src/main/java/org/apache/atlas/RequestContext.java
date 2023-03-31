@@ -90,6 +90,41 @@ public class RequestContext {
     private final Map<AtlasObjectId, Object> relationshipEndToVertexIdMap = new HashMap<>();
     private boolean     allowDuplicateDisplayName;
 
+    public boolean isNoEsCalls() {
+        return noEsCalls;
+    }
+
+    private boolean noEsCalls = false;
+
+    public boolean isNoCassandraCalls() {
+        return noCassandraCalls;
+    }
+
+    public void setNoCassandraCalls(boolean noCassandraCalls) {
+        this.noCassandraCalls = noCassandraCalls;
+    }
+
+    private boolean noCassandraCalls = false;
+
+    public boolean isNoCollapse() {
+        return noCollapse;
+    }
+
+    public void setNoCollapse(boolean noCollapse) {
+        this.noCollapse = noCollapse;
+    }
+
+    private boolean noCollapse = false;
+
+    public boolean isNoAttributeCall() {
+        return noAttributeCall;
+    }
+
+    public void setNoAttributeCall(boolean noAttributeCall) {
+        this.noAttributeCall = noAttributeCall;
+    }
+
+    private boolean noAttributeCall = false;
     private RequestContext() {
     }
 
@@ -599,6 +634,10 @@ public class RequestContext {
 
     public boolean includeClassifications() {
         return this.includeClassifications;
+    }
+
+    public void setNoEsCalls(boolean noEsCalls) {
+        this.noEsCalls = noEsCalls;
     }
 
     public class EntityGuidPair {
