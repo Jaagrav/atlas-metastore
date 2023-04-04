@@ -25,7 +25,7 @@ on:
       - beta
       - development
       - master
-      - lineageondemand
+      - accessrelease
 
 jobs:
   build:
@@ -125,9 +125,9 @@ jobs:
       - name: Commit changes
         uses: EndBug/add-and-commit@v7
         with:
-          branch: main
+          branch: accessrelease
           author_name: atlan-ci
           author_email: it@atlan.com
           message: '${{ github.event.repository.name }}'
           default_author: user_info
-          push: origin main
+          push: origin accessrelease
