@@ -55,6 +55,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static org.apache.atlas.repository.Constants.KEYCLOAK_ROLE_ADMIN;
+
 
 public class KeycloakUserStore {
     private static final Logger PERF_LOG = AtlasPerfTracer.getPerfLogger("KeycloakUserStore");
@@ -63,7 +65,7 @@ public class KeycloakUserStore {
     private static int NUM_THREADS = 5;
 
     List<String> OPERATION_TYPES = Arrays.asList("CREATE", "UPDATE", "DELETE");
-    List<String> RESOURCE_TYPES = Arrays.asList("USER", "GROUP", "REALM_ROLE", "REALM_ROLE_MAPPING", "GROUP_MEMBERSHIP");
+    List<String> RESOURCE_TYPES = Arrays.asList("USER", "GROUP", "REALM_ROLE", "CLIENT", "REALM_ROLE_MAPPING", "GROUP_MEMBERSHIP", "CLIENT_ROLE_MAPPING");
 
     private final String serviceName;
 
@@ -327,8 +329,6 @@ public class KeycloakUserStore {
             try {
                 RoleResource roleResource = KeycloakClient.getKeycloakClient().getRealm().roles().get(kRole.getName());
 
-                LOG.info("RoleSubjectsFetcher: Processing {}", kRole.getName());
-
                 //get all groups for Roles
                 Thread groupsFetcher = new Thread(() -> {
                     int start = 0;
@@ -352,7 +352,6 @@ public class KeycloakUserStore {
                 });
                 groupsFetcher.start();
 
-                boolean isAdminRole = roleResource.toRepresentation().getName().equals("$admin");
                 //get all users for Roles
                 Thread usersFetcher = new Thread(() -> {
                     int start = 0;
@@ -370,11 +369,6 @@ public class KeycloakUserStore {
                         }
 
                     } while (found && ret.size() % size == 0);
-
-                    if (isAdminRole) {
-                        LOG.info(AtlasType.toJson(ret.stream().map(x -> x.getUsername()).collect(Collectors.toList())));
-                        LOG.info("total users {}",  ret.stream().map(x -> x.getUsername()).collect(Collectors.toSet()).size());
-                    }
 
                     rangerRole.setUsers(keycloakUsersToRangerRoleMember(ret));
                     userNamesList.addAll(ret);
@@ -396,8 +390,6 @@ public class KeycloakUserStore {
                     LOG.error("Failed to wait for threads to complete: {}", kRole.getName());
                     e.printStackTrace();
                 }
-
-                LOG.info("RoleSubjectsFetcher: Processed {}, {}", kRole.getName(), roleSet.size());
 
                 RequestContext.get().endMetricRecord(recorder);
                 roleSet.add(rangerRole);
@@ -425,14 +417,11 @@ public class KeycloakUserStore {
             AtlasPerfMetrics.MetricRecorder recorder = RequestContext.get().startMetricRecord("userGroupsFetcher");
 
             try {
-                LOG.info("UserGroupsFetcher: Processing {}", kUser.getUsername());
-
                 List<GroupRepresentation> kGroups = KeycloakClient.getKeycloakClient().getRealm().users().get(kUser.getId()).groups();
                 userGroupMapping.put(kUser.getUsername(),
                         kGroups.stream()
                                 .map(GroupRepresentation::getName)
                                 .collect(Collectors.toSet()));
-                LOG.info("UserGroupsFetcher: Processed {}, {}", kUser.getUsername(), userGroupMapping.size());
 
             } catch (Exception e) {
                 LOG.error("UserGroupsFetcher: Failed to process user {}: {}", kUser.getUsername(), e.getMessage());

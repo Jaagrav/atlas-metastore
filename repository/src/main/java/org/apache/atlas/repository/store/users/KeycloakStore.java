@@ -166,8 +166,6 @@ public class KeycloakStore {
         }
 
         return createdRole;
-
-        //return createRole(name, isComposite, users, groups, roles, null);
     }
 
     public RoleRepresentation createRole(String name, boolean isComposite,
@@ -310,6 +308,34 @@ public class KeycloakStore {
         return roleRepresentation;
     }
 
+    public void updateRoleAddUsers(String roleName, List<String> newUsers) throws AtlasBaseException {
+        RoleRepresentation roleRepresentation = getRole(roleName);
+
+        if (roleRepresentation == null) {
+            throw new AtlasBaseException("Keycloak role with name " + roleName + " not found");
+        }
+
+        UsersResource usersResource = KeycloakClient.getKeycloakClient().getRealm().users();
+
+        for (String userName : newUsers) {
+            addUserToRole(roleName, userName, usersResource, roleRepresentation);
+        }
+    }
+
+    public void updateRoleRemoveUsers(String roleName, List<String> removeUsers) throws AtlasBaseException {
+        RoleRepresentation roleRepresentation = getRole(roleName);
+
+        if (roleRepresentation == null) {
+            throw new AtlasBaseException("Keycloak role with name " + roleName + " not found");
+        }
+
+        UsersResource usersResource = KeycloakClient.getKeycloakClient().getRealm().users();
+
+        for (String userName : removeUsers) {
+            removeUserFromRole(roleName, userName, usersResource, roleRepresentation);
+        }
+    }
+
     public void updateRoleUsers(String roleName,
                                 List<String> existingUsers, List<String> newUsers,
                                 RoleRepresentation roleRepresentation) throws AtlasBaseException {
@@ -333,32 +359,12 @@ public class KeycloakStore {
 
         for (String userName : usersToAdd) {
             LOG.info("Adding user {} to role {}", userName, roleName);
-            List<UserRepresentation> matchedUsers = usersResource.search(userName);
-            Optional<UserRepresentation> keyUserOptional = matchedUsers.stream().filter(x -> userName.equals(x.getUsername())).findFirst();
-
-            if (keyUserOptional.isPresent()) {
-                final UserResource userResource = usersResource.get(keyUserOptional.get().getId());
-
-                userResource.roles().realmLevel().add(Collections.singletonList(roleRepresentation));
-                userResource.update(keyUserOptional.get());
-            } else {
-                throw new AtlasBaseException("Keycloak user not found with userName " + userName);
-            }
+            addUserToRole(roleName, userName, usersResource, roleRepresentation);
         }
 
         for (String userName : usersToRemove) {
             LOG.info("Removing user {} from role {}", userName, roleName);
-            List<UserRepresentation> matchedUsers = usersResource.search(userName);
-            Optional<UserRepresentation> keyUserOptional = matchedUsers.stream().filter(x -> userName.equals(x.getUsername())).findFirst();
-
-            if (keyUserOptional.isPresent()) {
-                final UserResource userResource = usersResource.get(keyUserOptional.get().getId());
-
-                userResource.roles().realmLevel().remove(Collections.singletonList(roleRepresentation));
-                userResource.update(keyUserOptional.get());
-            } else {
-                LOG.warn("Keycloak user not found with userName " + userName);
-            }
+            removeUserFromRole(roleName, userName, usersResource, roleRepresentation);
         }
     }
 
@@ -463,12 +469,59 @@ public class KeycloakStore {
             LOG.info("Removed keycloak role with id {}", roleId);
         }
     }
+
     public void removeRoleByName(String roleName) {
         if (StringUtils.isNotEmpty(roleName)) {
             RoleResource rolesResource = KeycloakClient.getKeycloakClient().getRealm().roles().get(roleName);
 
             rolesResource.remove();
             LOG.info("Removed keycloak role with name {}", roleName);
+        }
+    }
+
+    private void addUserToRole(String roleName, String newUser,
+                               UsersResource usersResource, RoleRepresentation roleRepresentation) throws AtlasBaseException {
+        if (usersResource == null) {
+            usersResource = KeycloakClient.getKeycloakClient().getRealm().users();
+        }
+
+        if (roleRepresentation == null) {
+            roleRepresentation = getRole(roleName);
+        }
+
+        List<UserRepresentation> matchedUsers = usersResource.search(newUser);
+        Optional<UserRepresentation> keyUserOptional = matchedUsers.stream().filter(x -> newUser.equals(x.getUsername())).findFirst();
+
+        if (keyUserOptional.isPresent()) {
+            final UserResource userResource = usersResource.get(keyUserOptional.get().getId());
+            userResource.roles().realmLevel().add(Collections.singletonList(roleRepresentation));
+
+            userResource.update(keyUserOptional.get());
+        } else {
+            throw new AtlasBaseException("Keycloak user not found with userName " + newUser);
+        }
+    }
+
+    private void removeUserFromRole(String roleName, String userToRemove,
+                                    UsersResource usersResource, RoleRepresentation roleRepresentation) {
+        if (usersResource == null) {
+            usersResource = KeycloakClient.getKeycloakClient().getRealm().users();
+        }
+
+        if (roleRepresentation == null) {
+            roleRepresentation = getRole(roleName);
+        }
+
+        List<UserRepresentation> matchedUsers = usersResource.search(userToRemove);
+        Optional<UserRepresentation> keyUserOptional = matchedUsers.stream().filter(x -> userToRemove.equals(x.getUsername())).findFirst();
+
+        if (keyUserOptional.isPresent()) {
+            final UserResource userResource = usersResource.get(keyUserOptional.get().getId());
+            userResource.roles().realmLevel().remove(Collections.singletonList(roleRepresentation));
+
+            userResource.update(keyUserOptional.get());
+        } else {
+            LOG.warn("Keycloak user not found with userName " + userToRemove);
         }
     }
 

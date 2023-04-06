@@ -20,6 +20,7 @@ import org.apache.atlas.ApplicationProperties;
 import org.apache.atlas.keycloak.client.KeycloakClient;
 import org.apache.atlas.utils.AtlasPerfTracer;
 import org.apache.commons.configuration.Configuration;
+import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.slf4j.Logger;

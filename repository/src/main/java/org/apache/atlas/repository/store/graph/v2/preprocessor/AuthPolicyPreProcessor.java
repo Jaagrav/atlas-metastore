@@ -57,6 +57,7 @@ import static org.apache.atlas.AtlasErrorCode.UNAUTHORIZED_CONNECTION_ADMIN;
 import static org.apache.atlas.authorize.AtlasAuthorizationUtils.getCurrentUserName;
 import static org.apache.atlas.model.instance.EntityMutations.EntityOperation.CREATE;
 import static org.apache.atlas.model.instance.EntityMutations.EntityOperation.UPDATE;
+import static org.apache.atlas.repository.Constants.KEYCLOAK_ROLE_ADMIN;
 import static org.apache.atlas.repository.Constants.PERSONA_ENTITY_TYPE;
 import static org.apache.atlas.repository.Constants.PURPOSE_ENTITY_TYPE;
 import static org.apache.atlas.repository.Constants.QUALIFIED_NAME;
@@ -276,7 +277,7 @@ public class AuthPolicyPreProcessor implements PreProcessor {
 
             Set<String> userRoles = AtlasAuthorizationUtils.getRolesForCurrentUser();
 
-            if (!userRoles.contains(connectionRoleName) || !userRoles.contains("$admin")) {
+            if (!userRoles.contains(connectionRoleName) || !userRoles.contains(KEYCLOAK_ROLE_ADMIN)) {
                 throw new AtlasBaseException(UNAUTHORIZED_CONNECTION_ADMIN, getCurrentUserName(), connection.getGuid());
             }
         }

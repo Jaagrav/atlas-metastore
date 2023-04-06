@@ -57,6 +57,7 @@ import org.apache.atlas.repository.store.graph.v1.RestoreHandlerV1;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.AuthPolicyPreProcessor;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.ConnectionPreProcessor;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.PreProcessor;
+import org.apache.atlas.repository.store.graph.v2.preprocessor.accesscontrol.APIKeyPreProcessor;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.accesscontrol.PersonaPreProcessor;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.accesscontrol.PurposePreProcessor;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.glossary.CategoryPreProcessor;
@@ -1709,6 +1710,10 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
 
             case README_ENTITY_TYPE:
                 preProcessor = new ReadmePreProcessor(typeRegistry, entityRetriever, graph);
+                break;
+
+            case API_KEY_ENTITY_TYPE:
+                preProcessor = new APIKeyPreProcessor(typeRegistry, entityRetriever, graph, this);
                 break;
         }
 

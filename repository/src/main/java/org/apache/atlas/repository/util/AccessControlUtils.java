@@ -35,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -155,9 +154,11 @@ public class AccessControlUtils {
 
     public static String getPersonaRoleName(AtlasEntity persona) {
         String qualifiedName = getStringAttribute(persona, QUALIFIED_NAME);
+        return getPersonaRoleName(qualifiedName);
+    }
 
-        String[] parts = qualifiedName.split("/");
-
+    public static String getPersonaRoleName(String personaQualifiedName) {
+        String[] parts = personaQualifiedName.split("/");
         return "persona_" + parts[parts.length - 1];
     }
 
@@ -198,6 +199,10 @@ public class AccessControlUtils {
 
     public static List<String> getPolicyResources(AtlasEntityHeader policyEntity) {
         return getListAttribute(policyEntity, ATTR_POLICY_RESOURCES);
+    }
+
+    public static List<String> getPolicyUsers(AtlasEntity policyEntity) {
+        return getListAttribute(policyEntity, ATTR_POLICY_USERS);
     }
 
     public static List<String> getPolicyRoles(AtlasEntity policyEntity) {

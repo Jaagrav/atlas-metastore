@@ -153,12 +153,13 @@ public final class Constants {
     public static final String POLICY_CATEGORY_PURPOSE = "purpose";
 
     /*
-     * Purpose / Persona
+     * Authz
      */
     public static final String ACCESS_CONTROL_ENTITY_TYPE = "AccessControl";
     public static final String PERSONA_ENTITY_TYPE = "Persona";
     public static final String PURPOSE_ENTITY_TYPE = "Purpose";
     public static final String POLICY_ENTITY_TYPE  = "AuthPolicy";
+    public static final String API_KEY_ENTITY_TYPE = "APIKey";
 
     public static final List<String> ACCESS_CONTROL_ENTITY_TYPES  = Arrays.asList(PERSONA_ENTITY_TYPE, PURPOSE_ENTITY_TYPE, POLICY_ENTITY_TYPE, ACCESS_CONTROL_ENTITY_TYPE);
 
@@ -231,8 +232,12 @@ public final class Constants {
 
     public static final String VERTEX_INDEX_NAME = INDEX_PREFIX + VERTEX_INDEX;
 
-    public static final String NAME                                    = "name";
-    public static final String QUALIFIED_NAME                          = "qualifiedName";
+    public static final String NAME            = "name";
+    public static final String QUALIFIED_NAME  = "qualifiedName";
+    public static final String DISPLAY_NAME    = "displayName";
+    public static final String DESCRIPTION     = "description";
+
+
     public static final String ASSET                                   = "asset";
     public static final String TYPE_NAME_PROPERTY_KEY                  = INTERNAL_PROPERTY_KEY_PREFIX + "typeName";
     public static final String INDEX_SEARCH_MAX_RESULT_SET_SIZE        = "atlas.graph.index.search.max-result-set-size";
@@ -392,6 +397,8 @@ public final class Constants {
 
     public static final String REQUEST_HEADER_USER_AGENT = "User-Agent";
     public static final String REQUEST_HEADER_HOST = "Host";
+
+    public static final String KEYCLOAK_ROLE_ADMIN = "$admin";
 
 
     private Constants() {

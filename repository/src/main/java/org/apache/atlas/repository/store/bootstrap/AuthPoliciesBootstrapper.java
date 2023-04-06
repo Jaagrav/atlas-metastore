@@ -22,11 +22,13 @@ import org.apache.atlas.ApplicationProperties;
 import org.apache.atlas.AtlasException;
 import org.apache.atlas.RequestContext;
 import org.apache.atlas.listener.ActiveStateChangeHandler;
+import org.apache.atlas.model.instance.AtlasEntity;
 import org.apache.atlas.model.instance.AtlasEntity.AtlasEntitiesWithExtInfo;
 import org.apache.atlas.repository.graphdb.AtlasGraph;
 import org.apache.atlas.repository.store.graph.AtlasEntityStore;
 import org.apache.atlas.repository.store.graph.v2.AtlasEntityStream;
 import org.apache.atlas.repository.store.graph.v2.EntityStream;
+import org.apache.atlas.repository.util.AccessControlUtils;
 import org.apache.atlas.service.Service;
 import org.apache.atlas.type.AtlasType;
 import org.apache.atlas.type.AtlasTypeRegistry;
@@ -40,9 +42,14 @@ import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
+import static org.apache.atlas.repository.Constants.KEYCLOAK_ROLE_ADMIN;
 
 @Component
 @Order(9)
@@ -53,6 +60,8 @@ public class AuthPoliciesBootstrapper implements ActiveStateChangeHandler, Servi
     private final AtlasTypeRegistry typeRegistry;
     private final AtlasEntityStore entityStore;
 
+    private static File POLICIES_DIR = null;
+
     @Inject
     public AuthPoliciesBootstrapper(AtlasGraph graph,
                                     AtlasEntityStore entityStore,
@@ -60,6 +69,30 @@ public class AuthPoliciesBootstrapper implements ActiveStateChangeHandler, Servi
         this.graph = graph;
         this.entityStore = entityStore;
         this.typeRegistry = typeRegistry;
+
+        if (POLICIES_DIR == null) {
+            String atlasHomeDir = System.getProperty("atlas.home");
+            String topPoliciesDir = (StringUtils.isEmpty(atlasHomeDir) ? "." : atlasHomeDir) + File.separator + "policies";
+            POLICIES_DIR = new File(topPoliciesDir);
+        }
+    }
+
+    public List<AtlasEntity> getAdminPolicies() throws IOException {
+        List<AtlasEntity> ret = new ArrayList<>();
+        List<File> policyFiles = getAllPolicyFiles(POLICIES_DIR);
+
+        for (File policyFile : policyFiles) {
+            AtlasEntitiesWithExtInfo policies = getPolicies(policyFile);
+
+            for (AtlasEntity policy : policies.getEntities()) {
+                List<String> roles = AccessControlUtils.getPolicyRoles(policy);
+
+                if (roles.contains(KEYCLOAK_ROLE_ADMIN)) {
+                    ret.add(policy);
+                }
+            }
+        }
+        return ret;
     }
 
     private void startInternal() {
@@ -83,44 +116,42 @@ public class AuthPoliciesBootstrapper implements ActiveStateChangeHandler, Servi
 
         RequestContext.get().setPoliciesBootstrappingInProgress(true);
 
-        String atlasHomeDir  = System.getProperty("atlas.home");
-        String policiesDirName = (StringUtils.isEmpty(atlasHomeDir) ? "." : atlasHomeDir) + File.separator + "policies";
+        List<File> policyFiles = getAllPolicyFiles(POLICIES_DIR);
 
-        File topPoliciesDir  = new File(policiesDirName);
-        loadPoliciesInFolder(topPoliciesDir);
+        for (File policyFile : policyFiles) {
+            loadPoliciesInFile(policyFile);
+        }
 
         LOG.info("<== AuthPoliciesBootstrapper.loadBootstrapAuthPolicies()");
     }
 
-    private void loadPoliciesInFolder (File folder) {
-        LOG.info("==> AuthPoliciesBootstrapper.loadPoliciesInFolder({})", folder);
+    private List<File> getAllPolicyFiles(File policiesDir) {
+        List<File> files = new ArrayList<>(0);
 
-        String policiesDirName = folder.getName();
-        File[] policyFiles = folder.exists() ? folder.listFiles() : null;
+        String policiesDirName = policiesDir.getName();
+        File[] policyFiles = policiesDir.exists() ? policiesDir.listFiles() : null;
 
         if (ArrayUtils.isNotEmpty(policyFiles)) {
-            Arrays.sort(policyFiles);
-
             for (File item : policyFiles) {
+
                 if (!item.isFile()) {
-                    loadPoliciesInFolder(item);
+                    files.addAll(getAllPolicyFiles(item));
                 } else {
-                    loadPoliciesInFile(item);
+                    files.add(item);
                 }
             }
         } else {
             LOG.warn("No policies for Bootstrapping in directory {}..", policiesDirName);
         }
 
-        LOG.info("<== AuthPoliciesBootstrapper.loadPoliciesInFolder({})", folder);
+        return files;
     }
 
     private void loadPoliciesInFile (File policyFile) {
         LOG.info("==> AuthPoliciesBootstrapper.loadPoliciesInFile({})", policyFile);
 
         try {
-            String                   jsonStr  = new String(Files.readAllBytes(policyFile.toPath()), StandardCharsets.UTF_8);
-            AtlasEntitiesWithExtInfo policies = AtlasType.fromJson(jsonStr, AtlasEntitiesWithExtInfo.class);
+            AtlasEntitiesWithExtInfo policies = getPolicies(policyFile);
 
             if (policies == null || CollectionUtils.isEmpty(policies.getEntities())) {
                 LOG.info("No policy in file {}", policyFile.getAbsolutePath());
@@ -138,6 +169,11 @@ public class AuthPoliciesBootstrapper implements ActiveStateChangeHandler, Servi
 
 
         LOG.info("<== AuthPoliciesBootstrapper.loadPoliciesInFile({})", policyFile);
+    }
+
+    private AtlasEntitiesWithExtInfo getPolicies(File policyFile) throws IOException {
+        String jsonStr  = new String(Files.readAllBytes(policyFile.toPath()), StandardCharsets.UTF_8);
+        return AtlasType.fromJson(jsonStr, AtlasEntitiesWithExtInfo.class);
     }
 
     @Override
