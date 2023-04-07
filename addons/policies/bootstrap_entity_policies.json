@@ -2320,6 +2320,40 @@
                     "entity-delete"
                 ]
             }
+        },
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "CRUD_API_KEY",
+                "qualifiedName": "CRUD_API_KEY",
+                "description": "Allows CRUD of entities of type APIKey",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "allow",
+                "policyUsers":
+                [],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [
+                    "$admin"
+                ],
+                "policyResourceCategory": "ENTITY",
+                "policyResources":
+                [
+                    "entity-type:APIKey",
+                    "entity-classification:*",
+                    "entity:*"
+                ],
+                "policyActions":
+                [
+                    "entity-read",
+                    "entity-create",
+                    "entity-update",
+                    "entity-delete"
+                ]
+            }
         }
     ]
 }

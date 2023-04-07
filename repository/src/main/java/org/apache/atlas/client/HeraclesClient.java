@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class HeraclesClient extends AbstractBaseClient {
@@ -54,6 +55,11 @@ public class HeraclesClient extends AbstractBaseClient {
                 BASE_URL = ApplicationProperties.get().getString(BASE_URL_PROPERTY, DEFAULT_BASE_URL);
 
                 httpClient = new OkHttpClient();
+                httpClient.newBuilder()
+                        .readTimeout(30000, TimeUnit.MILLISECONDS)
+                        .writeTimeout(30000, TimeUnit.MILLISECONDS)
+                        .connectTimeout(30000, TimeUnit.MILLISECONDS)
+                        .callTimeout(30000, TimeUnit.MILLISECONDS);
             }
 
         } catch (AtlasException e) {

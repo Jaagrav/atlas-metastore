@@ -1713,7 +1713,7 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
                 break;
 
             case API_KEY_ENTITY_TYPE:
-                preProcessor = new APIKeyPreProcessor(typeRegistry, entityRetriever, graph, this);
+                preProcessor = new APIKeyPreProcessor(graph, typeRegistry, entityRetriever, discovery, this);
                 break;
         }
 

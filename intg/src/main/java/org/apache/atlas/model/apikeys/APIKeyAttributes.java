@@ -20,6 +20,7 @@ package org.apache.atlas.model.apikeys;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.atlas.type.AtlasType;
 
 import java.util.List;
 
@@ -36,9 +37,12 @@ public class APIKeyAttributes {
     String createdBy;
     String description;
     String displayName;
+    String serviceUsername;
+
     String personas;
-    //List<String> personas;
+    //List<String> personasList;
     String workspacePermissions;
+    List<String> workspacePermissionsList;
 
     public long getLifespan() {
         return lifespan;
@@ -96,13 +100,13 @@ public class APIKeyAttributes {
         this.displayName = displayName;
     }
 
-    /*public List<String> getPersonas() {
-        return personas;
+    public String getServiceUsername() {
+        return serviceUsername;
     }
 
-    public void setPersonas(List<String> personas) {
-        this.personas = personas;
-    }*/
+    public void setServiceUsername(String serviceUsername) {
+        this.serviceUsername = serviceUsername;
+    }
 
     public String getPersonas() {
         return personas;
@@ -118,5 +122,14 @@ public class APIKeyAttributes {
 
     public void setWorkspacePermissions(String workspacePermissions) {
         this.workspacePermissions = workspacePermissions;
+        workspacePermissionsList = AtlasType.fromJson(workspacePermissions, List.class);
+    }
+
+    public List<String> getWorkspacePermissionsList() {
+        return workspacePermissionsList;
+    }
+
+    public void setWorkspacePermissionsList(List<String> workspacePermissionsList) {
+        this.workspacePermissionsList = workspacePermissionsList;
     }
 }

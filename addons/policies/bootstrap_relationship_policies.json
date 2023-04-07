@@ -567,7 +567,43 @@
                     "remove-relationship"
                 ]
             }
+        },
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "LINK_ACCESS_CONTROL_API_KEY",
+                "qualifiedName": "LINK_ACCESS_CONTROL_API_KEY",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "allow",
+                "policyUsers":
+                [],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [
+                    "$admin"
+                ],
+                "policyResourceCategory": "RELATIONSHIP",
+                "policyResources":
+                [
+                    "end-one-entity-classification:*",
+                    "end-two-entity-classification:*",
+                    "end-one-entity:*",
+                    "end-two-entity:*",
+                    "end-one-entity-type:APIKey",
+                    "end-two-entity-type:Persona",
+                    "end-two-entity-type:Purpose",
+                    "relationship-type:*"
+                ],
+                "policyActions":
+                [
+                    "add-relationship",
+                    "update-relationship",
+                    "remove-relationship"
+                ]
+            }
         }
-
     ]
 }
