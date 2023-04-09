@@ -193,7 +193,7 @@ public class GraphTransactionInterceptor implements MethodInterceptor {
     private void doRollback(boolean logRollback, final Throwable t) {
         if (logRollback) {
             if (logException(t)) {
-                LOG.error("graph rollback due to exception ", t);
+                LOG.error("graph rollback due to exception {}:{}", t.getClass().getSimpleName(), t.getMessage(), t);
             } else {
                 LOG.error("graph rollback due to exception {}:{}", t.getClass().getSimpleName(), t.getMessage());
             }

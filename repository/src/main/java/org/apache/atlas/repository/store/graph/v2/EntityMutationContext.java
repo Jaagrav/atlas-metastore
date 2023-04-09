@@ -56,6 +56,15 @@ public class EntityMutationContext {
             entityVsVertex.put(internalGuid, atlasVertex);
         }
     }
+    public void updateEntityReferences(String internalGuid, AtlasEntity entity, AtlasEntityType type, AtlasVertex atlasVertex) {
+        entityVsType.put(entity.getGuid(), type);
+        entityVsVertex.put(entity.getGuid(), atlasVertex);
+
+        if (!StringUtils.equals(internalGuid, entity.getGuid())) {
+            guidAssignments.put(internalGuid, entity.getGuid());
+            entityVsVertex.put(internalGuid, atlasVertex);
+        }
+    }
 
     public void addUpdated(String internalGuid, AtlasEntity entity, AtlasEntityType type, AtlasVertex atlasVertex) {
         if (!entityVsVertex.containsKey(internalGuid)) { // if the entity was already created/updated

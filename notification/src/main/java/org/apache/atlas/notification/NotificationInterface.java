@@ -49,6 +49,7 @@ public interface NotificationInterface {
         // Notifications to entity change consumers.
         ENTITIES(new EntityMessageDeserializer()),
 
+        // Notifications to relationship change consumers.
         RELATIONSHIPS(new EntityMessageDeserializer());
 
         private final AtlasNotificationMessageDeserializer deserializer;

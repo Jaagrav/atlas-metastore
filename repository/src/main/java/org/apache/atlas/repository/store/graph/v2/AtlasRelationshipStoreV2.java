@@ -368,6 +368,7 @@ public class AtlasRelationshipStoreV2 implements AtlasRelationshipStore {
         if (getState(edge) == DELETED) {
             throw new AtlasBaseException(AtlasErrorCode.RELATIONSHIP_ALREADY_DELETED, guid);
         }
+
         deleteDelegate.getHandler().resetHasLineageOnInputOutputDelete(Collections.singleton(edge), null);
         deleteDelegate.getHandler().deleteRelationships(Collections.singleton(edge), forceDelete);
 
@@ -380,6 +381,7 @@ public class AtlasRelationshipStoreV2 implements AtlasRelationshipStore {
         }
 
         onRelationshipsMutated(RequestContext.get().getRelationshipMutationMap());
+
         if (LOG.isDebugEnabled()) {
             LOG.debug("<== deleteById({}): {}", guid);
         }

@@ -36,6 +36,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 
+
 /**
  * REST interface for entity relationships.
  */
@@ -85,7 +86,6 @@ public class RelationshipREST {
             if (AtlasPerfTracer.isPerfTraceEnabled(PERF_LOG)) {
                 perf = AtlasPerfTracer.getPerfTracer(PERF_LOG, "RelationshipREST.createOrUpdate(" + relationships + ")");
             }
-
             return relationshipStore.createOrUpdate(relationships);
         } finally {
             AtlasPerfTracer.log(perf);
@@ -104,7 +104,6 @@ public class RelationshipREST {
             if (AtlasPerfTracer.isPerfTraceEnabled(PERF_LOG)) {
                 perf = AtlasPerfTracer.getPerfTracer(PERF_LOG, "RelationshipREST.update(" + relationship + ")");
             }
-
             return relationshipStore.update(relationship);
         } finally {
             AtlasPerfTracer.log(perf);

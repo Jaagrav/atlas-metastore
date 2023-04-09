@@ -634,7 +634,7 @@
                 </property>
             </activation>
             <properties>
-                <distro.exclude.packages>WEB-INF/lib/je-*.jar,WEB-INF/lib/solr-test-framework-*.jar, WEB-INF/lib/jts-*.jar,WEB-INF/lib/logback-*.jar,WEB-INF/lib/dom4j-*.jar,WEB-INF/lib/ant-*.jar</distro.exclude.packages>
+                <distro.exclude.packages>WEB-INF/lib/jsr311-api-*.jar,WEB-INF/lib/je-*.jar,WEB-INF/lib/solr-test-framework-*.jar, WEB-INF/lib/jts-*.jar,WEB-INF/lib/logback-*.jar,WEB-INF/lib/dom4j-*.jar,WEB-INF/lib/ant-*.jar</distro.exclude.packages>
                 <graph.index.backend>solr</graph.index.backend>
                 <graphArtifact>atlas-graphdb-janus</graphArtifact>
                 <graphdb.backend.impl>org.apache.atlas.repository.graphdb.janus.AtlasJanusGraphDatabase</graphdb.backend.impl>
@@ -653,7 +653,7 @@
                 </property>
             </activation>
             <properties>
-                <distro.exclude.packages>WEB-INF/lib/je-*.jar,WEB-INF/lib/solr-test-framework-*.jar, WEB-INF/lib/jts-*.jar,WEB-INF/lib/logback-*.jar,WEB-INF/lib/dom4j-*.jar,WEB-INF/lib/ant-*.jar</distro.exclude.packages>
+                <distro.exclude.packages>WEB-INF/lib/jsr311-api-*.jar,WEB-INF/lib/je-*.jar,WEB-INF/lib/solr-test-framework-*.jar, WEB-INF/lib/jts-*.jar,WEB-INF/lib/logback-*.jar,WEB-INF/lib/dom4j-*.jar,WEB-INF/lib/ant-*.jar</distro.exclude.packages>
                 <graph.index.backend>solr</graph.index.backend>
                 <graphArtifact>atlas-graphdb-janus</graphArtifact>
                 <graphdb.backend.impl>org.apache.atlas.repository.graphdb.janus.AtlasJanusGraphDatabase</graphdb.backend.impl>
@@ -729,11 +729,13 @@
         <joda-time.version>2.10.6</joda-time.version>
         <json.version>3.2.11</json.version>
         <jsr.version>1.1</jsr.version>
+        <okhttp3.version>4.9.0</okhttp3.version>
         <junit.version>4.13.1</junit.version>
         <kafka.scala.binary.version>2.12</kafka.scala.binary.version>
         <kafka.version>2.8.1</kafka.version>
         <keycloak.version>15.0.2.1</keycloak.version>
         <owasp-html-sanitizer.version>20220608.1</owasp-html-sanitizer.version>
+        <launch-darkly.version>6.0.5</launch-darkly.version>
         <reload4j.version>1.2.19</reload4j.version>
         <log4j2.version>2.17.1</log4j2.version>
         <lucene-solr.version>8.6.3</lucene-solr.version>
@@ -784,11 +786,19 @@
         <module>server-api</module>
         <module>notification</module>
         <module>client</module>
+        <module>client-keycloak</module>
         <module>graphdb</module>
+
         <module>repository</module>
         <module>authorization</module>
         <module>dashboardv2</module>
         <module>dashboardv3</module>
+
+        <module>auth-agents-cred</module>
+        <module>auth-agents-common</module>
+        <module>auth-audits</module>
+        <module>auth-plugin-atlas</module>
+
         <module>webapp</module>
         <module>docs</module>
 
@@ -1692,6 +1702,12 @@
             <groupId>cglib</groupId>
             <artifactId>cglib</artifactId>
             <version>2.2.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${okhttp3.version}</version>
         </dependency>
 
     </dependencies>

@@ -1,5 +1,6 @@
 package org.apache.atlas.discovery;
 
+import org.apache.atlas.RequestContext;
 import org.apache.atlas.model.discovery.SearchParameters;
 import org.apache.atlas.model.lineage.LineageOnDemandBaseParams;
 import org.apache.atlas.model.lineage.LineageOnDemandConstraints;
@@ -7,6 +8,7 @@ import org.apache.atlas.model.lineage.LineageOnDemandRequest;
 import org.apache.atlas.repository.graphdb.AtlasEdge;
 import org.apache.atlas.repository.graphdb.AtlasVertex;
 import org.apache.atlas.type.AtlasTypeRegistry;
+import org.apache.atlas.utils.AtlasPerfMetrics;
 import org.apache.commons.collections.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,17 +88,12 @@ public class AtlasLineageOnDemandContext {
         return lineageSearchProcessor.constructInMemoryPredicate(typeRegistry, filterCriteria);
     }
 
-    protected boolean evaluate(AtlasVertex vertex) {
+    protected boolean evaluate(Object object) {
+        AtlasPerfMetrics.MetricRecorder evaluateFilterCriteria = RequestContext.get().startMetricRecord("evaluateFilterCriteria");
         if (vertexPredicate != null) {
-            return vertexPredicate.evaluate(vertex);
+            return vertexPredicate.evaluate(object);
         }
-        return true;
-    }
-
-    protected boolean evaluate(AtlasEdge edge) {
-        if (edgePredicate != null) {
-            return edgePredicate.evaluate(edge);
-        }
+        RequestContext.get().endMetricRecord(evaluateFilterCriteria);
         return true;
     }
 }

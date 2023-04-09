@@ -1,0 +1,618 @@
+{
+    "entities":
+    [
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "all - entity-type, entity-classification, entity, entity-business-metadata",
+                "qualifiedName": "ALL_TYPE_TAG_ENTITY_BM",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "allow",
+                "policyUsers":
+                [
+                    "service-account-atlan-argo",
+                    "service-account-atlan-backend"
+                ],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [],
+                "policyResourceCategory": "ENTITY",
+                "policyResources":
+                [
+                    "entity:*",
+                    "entity-type:*",
+                    "entity-classification:*",
+                    "entity-business-metadata:*"
+                ],
+                "policyActions":
+                [
+                    "entity-update-business-metadata"
+                ]
+            }
+        },
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "all - entity-type, entity-classification, entity",
+                "qualifiedName": "ALL_TYPE_TAG_ENTITY",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "allow",
+                "policyUsers":
+                [
+                    "service-account-atlan-argo",
+                    "service-account-atlan-backend"
+                ],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [],
+                "policyResourceCategory": "ENTITY",
+                "policyResources":
+                [
+                    "entity:*",
+                    "entity-type:*",
+                    "entity-classification:*"
+                ],
+                "policyActions":
+                [
+                    "entity-read",
+                    "entity-create",
+                    "entity-update",
+                    "entity-delete"
+                ]
+            }
+        },
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "all - entity-type, entity-classification, entity, classification",
+                "qualifiedName": "ALL_TYPE_TAG_ENTITY_TAG",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "allow",
+                "policyUsers":
+                [
+                    "service-account-atlan-argo",
+                    "service-account-atlan-backend"
+                ],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [],
+                "policyResourceCategory": "ENTITY",
+                "policyResources":
+                [
+                    "entity:*",
+                    "entity-type:*",
+                    "entity-classification:*",
+                    "classification:*"
+                ],
+                "policyActions":
+                [
+                    "entity-add-classification",
+                    "entity-update-classification",
+                    "entity-remove-classification"
+                ]
+            }
+        },
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "all - atlas-service",
+                "qualifiedName": "ALL_ATLAS_SERVICE",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "allow",
+                "policyUsers":
+                [
+                    "service-account-atlan-argo",
+                    "service-account-atlan-backend"
+                ],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [],
+                "policyResourceCategory": "ADMIN",
+                "policyResources":
+                [
+                    "atlas-service:*"
+                ],
+                "policyActions":
+                [
+                    "admin-export",
+                    "admin-import",
+                    "admin-purge",
+                    "admin-audits"
+                ]
+            }
+        },
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "all - entity-type, entity-classification, entity, entity-label",
+                "qualifiedName": "ALL_TYPE_TAG_ENTITY_LABEL",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "allow",
+                "policyUsers":
+                [
+                    "service-account-atlan-argo",
+                    "service-account-atlan-backend"
+                ],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [],
+                "policyResourceCategory": "ENTITY",
+                "policyResources":
+                [
+                    "entity:*",
+                    "entity-type:*",
+                    "entity-classification:*",
+                    "entity-label:*"
+                ],
+                "policyActions":
+                [
+                    "entity-add-label",
+                    "entity-remove-label"
+                ]
+            }
+        },
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "all - relationship-type, end-one-entity-type, end-one-entity-classification, end-one-entity, end-two-entity-type, end-two-entity-classification, end-two-entity",
+                "qualifiedName": "ALL_RELATIONSHIP_ALL",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "allow",
+                "policyUsers":
+                [
+                    "service-account-atlan-argo",
+                    "service-account-atlan-backend"
+                ],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [],
+                "policyResourceCategory": "RELATIONSHIP",
+                "policyResources":
+                [
+                    "relationship-type:*",
+                    "end-one-entity:*",
+                    "end-one-entity-type:*",
+                    "end-one-entity-classification:*",
+                    "end-two-entity:*",
+                    "end-two-entity-type:*",
+                    "end-two-entity-classification:*"
+                ],
+                "policyActions":
+                [
+                    "add-relationship",
+                    "update-relationship",
+                    "remove-relationship"
+                ]
+            }
+        },
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "all - type-category, type",
+                "qualifiedName": "ALL_TYPE_CATEGORY_TYPE",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "allow",
+                "policyUsers":
+                [
+                    "service-account-atlan-argo",
+                    "service-account-atlan-backend"
+                ],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [],
+                "policyResourceCategory": "TYPEDEFS",
+                "policyResources":
+                [
+                    "type-category:*",
+                    "type:*"
+                ],
+                "policyActions":
+                [
+                    "type-read",
+                    "type-create",
+                    "type-update",
+                    "type-delete"
+                ]
+            }
+        },
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "read - type-category, type",
+                "qualifiedName": "READ_TYPE_CATEGORY_TYPE",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "allow",
+                "policyUsers":
+                [],
+                "policyGroups":
+                [
+                    "public"
+                ],
+                "policyRoles":
+                [],
+                "policyResourceCategory": "TYPEDEFS",
+                "policyResources":
+                [
+                    "type-category:*",
+                    "type:*"
+                ],
+                "policyActions":
+                [
+                    "type-read"
+                ]
+            }
+        },
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "Allow users to manage favorite searches",
+                "qualifiedName": "ALLOW_MANAGE_FAV_SEARCHES",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "allow",
+                "policyUsers":
+                [
+                    "{USER}"
+                ],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [],
+                "policyResourceCategory": "ENTITY",
+                "policyResources":
+                [
+                    "entity:{USER}",
+                    "entity:{USER}:*",
+                    "entity-type:__AtlasUserProfile",
+                    "entity-type:__AtlasUserSavedSearch",
+                    "entity-classification:*"
+                ],
+                "policyActions":
+                [
+                    "entity-read",
+                    "entity-create",
+                    "entity-update",
+                    "entity-delete"
+                ]
+            }
+        },
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "deny querying for guests",
+                "qualifiedName": "DENY_QUERY_FOR_GUESTS",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "heka",
+                "policyType": "deny",
+                "policyUsers":
+                [],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [
+                    "$guest"
+                ],
+                "policyResourceCategory": "ENTITY",
+                "policyResources":
+                [
+                    "entity:*",
+                    "entity-type:*"
+                ],
+                "policyActions":
+                [
+                    "select"
+                ]
+            }
+        },
+
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "Allow users to manage own collection, queries and folders",
+                "qualifiedName": "ALLOW_MANAGE_COLLECTION_QUERIES_FOLDERS",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "allow",
+                "policyUsers":
+                [
+                    "{USER}"
+                ],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [
+                    "$member",
+                    "$admin"
+                ],
+                "policyResourceCategory": "ENTITY",
+                "policyResources":
+                [
+                    "entity:*/{USER}/*",
+                    "entity-type:Collection",
+                    "entity-type:Query",
+                    "entity-type:Folder",
+                    "entity-classification:*"
+                ],
+                "policyActions":
+                [
+                    "entity-read",
+                    "entity-create",
+                    "entity-update",
+                    "entity-delete"
+                ]
+            }
+        },
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "link assets to collection for collection creator",
+                "qualifiedName": "LINK_ASSETS_TO_COLLECTION",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "allow",
+                "policyUsers":
+                [
+                    "{USER}"
+                ],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [],
+                "policyResourceCategory": "RELATIONSHIP",
+                "policyResources":
+                [
+                    "relationship-type:*",
+                    "end-one-entity-classification:*",
+                    "end-two-entity-classification:*",
+                    "end-one-entity:*/{USER}/*",
+                    "end-two-entity:*",
+                    "end-one-entity-type:*",
+                    "end-two-entity-type:Catalog",
+                    "end-two-entity-type:Connection",
+                    "end-two-entity-type:Process",
+                    "end-two-entity-type:ProcessExecution",
+                    "end-two-entity-type:Namespace"
+                ],
+                "policyActions":
+                [
+                    "add-relationship",
+                    "update-relationship",
+                    "remove-relationship"
+                ]
+            }
+        },
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "connection update deny for members",
+                "qualifiedName": "DENY_UPDATE_CONNECTION_FOR_MEMBERS",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "deny",
+                "policyUsers":
+                [],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [
+                    "$member"
+                ],
+                "policyResourceCategory": "ENTITY",
+                "policyResources":
+                [
+                    "entity:*",
+                    "entity-type:Connection",
+                    "entity-classification:*"
+                ],
+                "policyActions":
+                [
+                    "entity-update"
+                ]
+            }
+        },
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "CUD deny for guest users",
+                "qualifiedName": "DENY_CUD_FOR_GUESTS",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "deny",
+                "policyUsers":
+                [],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [
+                    "$guest"
+                ],
+                "policyResourceCategory": "ENTITY",
+                "policyResources":
+                [
+                    "entity:*",
+                    "entity-type:AtlasGlossaryTerm",
+                    "entity-type:AtlasGlossaryCategory",
+                    "entity-type:AtlasGlossary",
+                    "entity-type:Catalog",
+                    "entity-type:Process",
+                    "entity-type:Connection",
+                    "entity-type:ProcessExecution",
+                    "entity-classification:*"
+                ],
+                "policyActions":
+                [
+                    "entity-create",
+                    "entity-update",
+                    "entity-delete"
+                ]
+            }
+        },
+
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "deny guest update entity-business-metadata",
+                "qualifiedName": "DENY_BM_UPDATE_FOR_GUESTS",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "deny",
+                "policyUsers":
+                [],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [
+                    "$guest"
+                ],
+                "policyResourceCategory": "ENTITY",
+                "policyResources":
+                [
+                    "entity:*",
+                    "entity:_",
+                    "entity-type:*",
+                    "entity-classification:*",
+                    "entity-business-metadata:*"
+                ],
+                "policyActions":
+                [
+                    "entity-update-business-metadata"
+                ]
+            }
+        },
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "deny guest update cud classification to assets",
+                "qualifiedName": "DENY_CUD_TAG_FOR_GUESTS",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "deny",
+                "policyUsers":
+                [],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [
+                    "$guest"
+                ],
+                "policyResourceCategory": "ENTITY",
+                "policyResources":
+                [
+                    "entity:*",
+                    "entity:_",
+                    "entity-type:*",
+                    "entity-classification:*",
+                    "classification:*"
+                ],
+                "policyActions":
+                [
+                    "entity-add-classification",
+                    "entity-update-classification",
+                    "entity-remove-classification"
+                ]
+            }
+        },
+
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "Guest deny cud type",
+                "qualifiedName": "DENY_CUD_TYPEDEFS_GUEST",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "deny",
+                "policyUsers":
+                [],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [
+                    "$guest"
+                ],
+                "policyResourceCategory": "TYPEDEFS",
+                "policyResources":
+                [
+                    "type-category:*",
+                    "type-category:_",
+                    "type:*"
+                ],
+                "policyActions":
+                [
+                    "type-create",
+                    "type-update",
+                    "type-delete"
+                ]
+            }
+        },
+
+        {
+            "typeName": "AuthPolicy",
+            "attributes":
+            {
+                "name": "Guest cud deny for relationship",
+                "qualifiedName": "DENY_CUD_RELATIONSHIP_GUEST",
+                "policyCategory": "bootstrap",
+                "policyServiceName": "atlas",
+                "policyType": "deny",
+                "policyUsers":
+                [],
+                "policyGroups":
+                [],
+                "policyRoles":
+                [
+                    "$guest"
+                ],
+                "policyResourceCategory": "RELATIONSHIP",
+                "policyResources":
+                [
+                    "relationship-type:*",
+                    "end-one-entity:*",
+                    "end-one-entity-type:*",
+                    "end-one-entity-classification:*",
+                    "end-two-entity:*",
+                    "end-two-entity:_",
+                    "end-two-entity-type:*",
+                    "end-two-entity-classification:*"
+                ],
+                "policyActions":
+                [
+                    "add-relationship",
+                    "update-relationship",
+                    "remove-relationship"
+                ]
+            }
+        }
+    ]
+}

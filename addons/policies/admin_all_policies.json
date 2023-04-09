@@ -1,0 +1,174 @@
+{
+  "entities": [
+    {
+      "typeName": "AuthPolicy",
+      "guid": -4,
+      "attributes": {
+        "qualifiedName": "admin_policy_0",
+        "name": "admin_policy_0",
+        "policyCategory": "bootstrap",
+        "policyType": "allow",
+        "policyServiceName": "atlas",
+        "policyUsers": [
+          "admin"
+        ],
+        "policyGroups": [],
+        "policyRoles": [],
+        "policyActions": [
+          "entity-read",
+          "entity-create",
+          "entity-update",
+          "entity-delete"
+        ],
+        "policyResourceCategory": "ENTITY",
+        "policyResources": [
+          "entity:*",
+          "entity-type:*",
+          "entity-classification:*"
+        ]
+      }
+    },
+    {
+      "typeName": "AuthPolicy",
+      "guid": -5,
+      "attributes": {
+        "qualifiedName": "admin_policy_1",
+        "name": "admin_policy_1",
+        "policyCategory": "bootstrap",
+        "policyType": "allow",
+        "policyServiceName": "atlas",
+        "policyUsers": [
+          "admin"
+        ],
+        "policyGroups": [],
+        "policyRoles": [],
+        "policyActions": [
+          "entity-add-classification",
+          "entity-update-classification",
+          "entity-remove-classification"
+        ],
+        "policyResourceCategory": "ENTITY",
+        "policyResources": [
+          "entity:*",
+          "entity-type:*",
+          "entity-classification:*",
+          "classification:*"
+        ]
+      }
+    },
+    {
+      "typeName": "AuthPolicy",
+      "guid": -6,
+      "attributes": {
+        "qualifiedName": "admin_policy_2",
+        "name": "admin_policy_2",
+        "policyCategory": "bootstrap",
+        "policyType": "allow",
+        "policyServiceName": "atlas",
+        "policyUsers": [
+          "admin"
+        ],
+        "policyGroups": [],
+        "policyRoles": [],
+        "policyActions": [
+          "entity-update-business-metadata"
+        ],
+        "policyResourceCategory": "ENTITY",
+        "policyResources": [
+          "entity-type:*",
+          "entity-business-metadata:*",
+          "entity-classification:*",
+          "entity:*"
+        ]
+      }
+    },
+    {
+      "typeName": "AuthPolicy",
+      "guid": -7,
+      "attributes": {
+        "qualifiedName": "admin_policy_3",
+        "name": "admin_policy_3",
+        "policyCategory": "bootstrap",
+        "policyType": "allow",
+        "policyServiceName": "atlas",
+        "policyUsers": [
+          "admin"
+        ],
+        "policyGroups": [],
+        "policyRoles": [],
+        "policyActions": [
+          "add-relationship",
+          "update-relationship",
+          "remove-relationship"
+        ],
+        "policyResourceCategory": "RELATIONSHIP",
+        "policyResources": [
+          "end-one-entity-classification:*",
+          "end-one-entity:*",
+          "end-one-entity-type:*",
+
+          "end-two-entity-classification:*",
+          "end-two-entity:*",
+          "end-two-entity-type:*",
+
+          "relationship-type:*"
+        ]
+      }
+    },
+    {
+      "typeName": "AuthPolicy",
+      "guid": -8,
+      "attributes": {
+        "qualifiedName": "admin_policy_4",
+        "name": "admin_policy_4",
+        "policyCategory": "bootstrap",
+        "policyType": "allow",
+        "policyServiceName": "atlas",
+        "policyUsers": [
+          "admin"
+        ],
+        "policyGroups": [],
+        "policyRoles": [],
+        "policyActions": [
+          "entity-add-label",
+          "entity-remove-label"
+        ],
+        "policyResourceCategory": "ENTITY",
+        "policyResources": [
+          "entity-type:*",
+          "entity-classification:*",
+          "entity:*",
+          "entity-label:*"
+        ]
+      }
+    },
+    {
+      "typeName": "AuthPolicy",
+      "guid": -9,
+      "attributes": {
+        "qualifiedName": "admin_policy_5",
+        "name": "admin_policy_5",
+        "policyCategory": "bootstrap",
+        "policyType": "allow",
+        "policyServiceName": "atlas",
+        "policyUsers": [
+          "admin"
+        ],
+        "policyGroups": [],
+        "policyRoles": [],
+        "policyActions": [
+          "type-read",
+          "type-create",
+          "type-update",
+          "type-delete"
+        ],
+        "policyResourceCategory": "TYPEDEFS",
+        "policyResources": [
+          "type-category:*",
+          "type:*"
+        ]
+      }
+    }
+  ]
+}
+

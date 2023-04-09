@@ -21,10 +21,20 @@ package org.apache.atlas.repository;
 import org.apache.atlas.ApplicationProperties;
 import org.apache.atlas.AtlasException;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import static org.apache.atlas.type.AtlasStructType.AtlasAttribute.encodePropertyKey;
 
@@ -33,6 +43,7 @@ import static org.apache.atlas.type.AtlasStructType.AtlasAttribute.encodePropert
  *
  */
 public final class Constants {
+    private static final Logger LOG = LoggerFactory.getLogger(Constants.class);
 
     /**
      * Globally Unique identifier property key.
@@ -45,6 +56,7 @@ public final class Constants {
     public static final String HISTORICAL_GUID_PROPERTY_KEY     = encodePropertyKey(INTERNAL_PROPERTY_KEY_PREFIX + "historicalGuids");
     public static final String FREETEXT_REQUEST_HANDLER         = "/freetext";
     public static final String TERMS_REQUEST_HANDLER            = "/terms";
+    public static final String ES_API_ALIASES                   = "/_aliases";
 
     /**
      * Entity type name property key.
@@ -127,8 +139,29 @@ public final class Constants {
      */
     public static final String CONNECTION_ENTITY_TYPE       = "Connection";
     public static final String QUERY_ENTITY_TYPE            = "Query";
+    public static final String README_ENTITY_TYPE           = "Readme";
     public static final String QUERY_FOLDER_ENTITY_TYPE     = "Folder";
     public static final String QUERY_COLLECTION_ENTITY_TYPE = "Collection";
+
+    public static final String ACCESS_CONTROL_RELATION_TYPE  = "access_control_policies";
+
+    public static final String POLICY_TYPE_METADATA = "metadata";
+    public static final String POLICY_TYPE_GLOSSARY = "glossary";
+    public static final String POLICY_TYPE_DATA     = "data";
+
+    public static final String POLICY_CATEGORY_PERSONA = "persona";
+    public static final String POLICY_CATEGORY_PURPOSE = "purpose";
+
+    /*
+     * Purpose / Persona
+     */
+    public static final String ACCESS_CONTROL_ENTITY_TYPE = "AccessControl";
+    public static final String PERSONA_ENTITY_TYPE = "Persona";
+    public static final String PURPOSE_ENTITY_TYPE = "Purpose";
+    public static final String POLICY_ENTITY_TYPE  = "AuthPolicy";
+
+    public static final List<String> ACCESS_CONTROL_ENTITY_TYPES  = Arrays.asList(PERSONA_ENTITY_TYPE, PURPOSE_ENTITY_TYPE, POLICY_ENTITY_TYPE, ACCESS_CONTROL_ENTITY_TYPE);
+
 
 
     /**
@@ -196,14 +229,21 @@ public final class Constants {
      */
     public static final String INDEX_PREFIX = "janusgraph_";
 
+    public static final String VERTEX_INDEX_NAME = INDEX_PREFIX + VERTEX_INDEX;
+
     public static final String NAME                                    = "name";
     public static final String QUALIFIED_NAME                          = "qualifiedName";
+    public static final String ASSET                                   = "asset";
     public static final String TYPE_NAME_PROPERTY_KEY                  = INTERNAL_PROPERTY_KEY_PREFIX + "typeName";
     public static final String INDEX_SEARCH_MAX_RESULT_SET_SIZE        = "atlas.graph.index.search.max-result-set-size";
     public static final String INDEX_SEARCH_TYPES_MAX_QUERY_STR_LENGTH = "atlas.graph.index.search.types.max-query-str-length";
     public static final String INDEX_SEARCH_TAGS_MAX_QUERY_STR_LENGTH  = "atlas.graph.index.search.tags.max-query-str-length";
     public static final String INDEX_SEARCH_VERTEX_PREFIX_PROPERTY     = "atlas.graph.index.search.vertex.prefix";
     public static final String INDEX_SEARCH_VERTEX_PREFIX_DEFAULT      = "$v$";
+
+    public static final String ATTR_TENANT_ID = "tenantId";
+    public static final String DEFAULT_TENANT_ID = "default";
+
 
     public static final String MAX_FULLTEXT_QUERY_STR_LENGTH = "atlas.graph.fulltext-max-query-str-length";
     public static final String MAX_DSL_QUERY_STR_LENGTH      = "atlas.graph.dsl-max-query-str-length";
@@ -344,6 +384,16 @@ public final class Constants {
         put(CLASSIFICATION_PROPAGATION_MODE_DEFAULT, null);
     }};
 
+    public static final String ATTR_ADMIN_USERS = "adminUsers";
+    public static final String ATTR_ADMIN_GROUPS = "adminGroups";
+    public static final String ATTR_ADMIN_ROLES = "adminRoles";
+    public static final String ATTR_VIEWER_USERS = "viewerUsers";
+    public static final String ATTR_VIEWER_GROUPS = "viewerGroups";
+
+    public static final String REQUEST_HEADER_USER_AGENT = "User-Agent";
+    public static final String REQUEST_HEADER_HOST = "Host";
+
+
     private Constants() {
     }
 
@@ -361,5 +411,22 @@ public final class Constants {
         } catch (AtlasException e) {
             return encodePropertyKey(defaultKey);
         }
+    }
+
+    public static String getStaticFileAsString(String fileName) throws IOException {
+        String atlasHomeDir  = System.getProperty("atlas.home");
+        atlasHomeDir = StringUtils.isEmpty(atlasHomeDir) ? "." : atlasHomeDir;
+
+        String elasticsearchFilePath = atlasHomeDir + File.separator + "static" + File.separator + fileName;
+        Path es_schema_path = Paths.get(elasticsearchFilePath);
+        String resourceAsString = null;
+        try {
+            resourceAsString = new String(Files.readAllBytes(es_schema_path), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            LOG.error("Failed to get static file as string: {}", fileName);
+            throw e;
+        }
+
+        return resourceAsString;
     }
 }
