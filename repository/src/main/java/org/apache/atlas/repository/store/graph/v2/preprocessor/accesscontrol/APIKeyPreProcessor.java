@@ -242,7 +242,7 @@ public class APIKeyPreProcessor implements PreProcessor {
             }
 
             if (apiKey.hasRelationshipAttribute(REL_ATTR_API_KEY_ACCESS_PERSONAS)) {
-                List<AtlasObjectId> personas = (List<AtlasObjectId>) apiKey.getRelationshipAttribute(REL_ATTR_API_KEY_ACCESS_PERSONAS);
+                List<AtlasRelatedObjectId> personas = getActivePersonaObjectIds(apiKey);
 
                 for (AtlasObjectId objectId : personas) {
                     personaQNames.add(getObjectIdQualifiedName(objectId));
@@ -255,6 +255,53 @@ public class APIKeyPreProcessor implements PreProcessor {
             ret = heraclesService.createAPIToken(request);
         } finally {
             RequestContext.get().endMetricRecord(recorder);
+        }
+
+        return ret;
+    }
+
+    private APIKeyResponse removeKeycloakAndLadonPolicies(AtlasEntity apiKey) throws AtlasBaseException {
+        AtlasPerfMetrics.MetricRecorder recorder = RequestContext.get().startMetricRecord("removeKeycloakAndLadonPolicies");
+        APIKeyResponse ret = null;
+
+        try {
+            APIKeyRequest request = new APIKeyRequest();
+
+            request.setDisplayName((String) apiKey.getAttribute(NAME));
+            request.setDescription((String) apiKey.getAttribute(DESCRIPTION));
+
+            if (apiKey.hasAttribute(ATTR_API_KEY_TOKEN_LIFE)) {
+                request.setValiditySeconds((Long) apiKey.getAttribute(ATTR_API_KEY_TOKEN_LIFE));
+            }
+
+            if (apiKey.hasRelationshipAttribute(REL_ATTR_API_KEY_ACCESS_PERSONAS)) {
+                List<AtlasRelatedObjectId> personas = getActivePersonaObjectIds(apiKey);
+
+                for (AtlasObjectId objectId : personas) {
+                    personaQNames.add(getObjectIdQualifiedName(objectId));
+                }
+
+                //TODO: enable once Heracles Bad request issue is resolved
+                //request.setPersonas(personaQNames);
+            }
+
+            ret = heraclesService.createAPIToken(request);
+        } finally {
+            RequestContext.get().endMetricRecord(recorder);
+        }
+
+        return ret;
+    }
+
+    private List<AtlasRelatedObjectId> getActivePersonaObjectIds(AtlasEntity apiKey) {
+        List<AtlasRelatedObjectId> ret = new ArrayList<>(0);
+
+        if (apiKey.hasAttribute(REL_ATTR_API_KEY_ACCESS_PERSONAS)) {
+            ret = (List<AtlasRelatedObjectId>) apiKey.getRelationshipAttribute(REL_ATTR_API_KEY_ACCESS_PERSONAS);
+
+            ret = ret.stream()
+                    .filter(x -> x.getRelationshipStatus().equals(AtlasRelationship.Status.ACTIVE))
+                    .collect(Collectors.toList());
         }
 
         return ret;
@@ -298,11 +345,7 @@ public class APIKeyPreProcessor implements PreProcessor {
                 if (APIKey.hasRelationshipAttribute(REL_ATTR_API_KEY_ACCESS_PERSONAS)) {
 
                     List<AtlasRelatedObjectId> newPersonas = (List<AtlasRelatedObjectId>) APIKey.getRelationshipAttribute(REL_ATTR_API_KEY_ACCESS_PERSONAS);
-                    List<AtlasRelatedObjectId> currentPersonas = (List<AtlasRelatedObjectId>) currentEntity.getRelationshipAttribute(REL_ATTR_API_KEY_ACCESS_PERSONAS);
-
-                    currentPersonas = currentPersonas.stream()
-                            .filter(x -> x.getRelationshipStatus().equals(AtlasRelationship.Status.ACTIVE))
-                            .collect(Collectors.toList());
+                    List<AtlasRelatedObjectId> currentPersonas = getActivePersonaObjectIds(currentEntity);
 
                     List<String> newPersonasQnames = new ArrayList<>();
                     List<String> currentPersonasQnames = new ArrayList<>();
@@ -352,10 +395,40 @@ public class APIKeyPreProcessor implements PreProcessor {
     @Override
     public void processDelete(AtlasVertex vertex) throws AtlasBaseException {
         AtlasPerfMetrics.MetricRecorder recorder = RequestContext.get().startMetricRecord("processDeleteAPIKey");
-        AtlasEntity APIKey = entityRetriever.toAtlasEntity(vertex);
+        AtlasEntity apiKey = entityRetriever.toAtlasEntity(vertex);
 
         try {
-            List<AtlasObjectId> newAccessControls = (List<AtlasObjectId>) APIKey.getRelationshipAttribute(REL_ATTR_API_KEY_ACCESS_PERSONAS);
+            String source = (String) apiKey.getAttribute(ATTR_API_KEY_SOURCE);
+            String category = (String) apiKey.getAttribute(ATTR_API_KEY_CATEGORY);
+
+            if (isInternal(source, category)) {
+                List<String> permissions = (List<String>) apiKey.getAttribute(ATTR_API_KEY_PERMISSIONS);
+                List<AtlasEntity> policies = getPoliciesForPermissions(permissions);
+
+                String tokenUserName = (String) apiKey.getAttribute(ATTR_API_KEY_SERVICE_USER_NAME);
+
+                if (CollectionUtils.isNotEmpty(policies)) {
+                    for (AtlasEntity policy : policies) {
+                        List<String> users = AccessControlUtils.getPolicyUsers(policy);
+                        users.remove(tokenUserName);
+                        policy.setAttribute(ATTR_POLICY_USERS, users);
+                    }
+
+                    AtlasEntityStream stream = new AtlasEntityStream(policies);
+                    entityStore.createOrUpdate(stream, false);
+                }
+
+                if (apiKey.hasRelationshipAttribute(REL_ATTR_API_KEY_ACCESS_PERSONAS)) {
+                    List<AtlasRelatedObjectId> personas = getActivePersonaObjectIds(apiKey);
+
+                    for (AtlasObjectId objectId : personas) {
+                        personaQNames.add(getObjectIdQualifiedName(objectId));
+                    }
+
+                    //TODO: enable once Heracles Bad request issue is resolved
+                    //request.setPersonas(personaQNames);
+                }
+            }
         } finally {
             RequestContext.get().endMetricRecord(recorder);
         }
