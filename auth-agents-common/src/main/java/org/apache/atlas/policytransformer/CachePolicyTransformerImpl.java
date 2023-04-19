@@ -36,7 +36,6 @@ import org.apache.atlas.ranger.plugin.model.RangerServiceDef;
 import org.apache.atlas.ranger.plugin.model.RangerValiditySchedule;
 import org.apache.atlas.ranger.plugin.util.ServicePolicies;
 import org.apache.atlas.ranger.plugin.util.ServicePolicies.TagPolicies;
-import org.apache.atlas.repository.audit.ESBasedAuditRepository;
 import org.apache.atlas.repository.graphdb.AtlasGraph;
 import org.apache.atlas.repository.graphdb.janus.AtlasJanusGraph;
 import org.apache.atlas.repository.store.graph.v2.EntityGraphRetriever;
