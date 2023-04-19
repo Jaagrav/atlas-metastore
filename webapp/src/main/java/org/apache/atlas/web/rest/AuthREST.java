@@ -26,6 +26,7 @@ import org.apache.atlas.ranger.plugin.util.RangerUserStore;
 import org.apache.atlas.ranger.plugin.util.ServicePolicies;
 import org.apache.atlas.repository.audit.ESBasedAuditRepository;
 import org.apache.atlas.tasks.TaskService;
+import org.apache.atlas.type.AtlasTypeRegistry;
 import org.apache.atlas.utils.AtlasPerfTracer;
 import org.apache.atlas.web.util.Servlets;
 import org.slf4j.Logger;
@@ -57,15 +58,19 @@ public class AuthREST {
     private static final Logger LOG      = LoggerFactory.getLogger(AuthREST.class);
     private static final Logger PERF_LOG = AtlasPerfTracer.getPerfLogger("rest.AuthREST");
 
-    private CachePolicyTransformerImpl policyTransformer;
-    private final ESBasedAuditRepository esBasedAuditRepository;
+    private AtlasTypeRegistry typeRegistry;
+    //private CachePolicyTransformerImpl policyTransformer;
+    //private final ESBasedAuditRepository esBasedAuditRepository;
 
     @Inject
-    public AuthREST(CachePolicyTransformerImpl policyTransformer,
+    public AuthREST(AtlasTypeRegistry typeRegistry) {
+        this.typeRegistry = typeRegistry;
+    }
+/*    public AuthREST(CachePolicyTransformerImpl policyTransformer,
                     ESBasedAuditRepository esBasedAuditRepository) {
         this.policyTransformer = policyTransformer;
         this.esBasedAuditRepository = esBasedAuditRepository;
-    }
+    }*/
 
     @GET
     @Path("download/roles/{serviceName}")
@@ -134,7 +139,14 @@ public class AuthREST {
                 perf = AtlasPerfTracer.getPerfTracer(PERF_LOG, "AuthREST.downloadPolicies");
             }
 
-            ServicePolicies ret = policyTransformer.getPolicies(serviceName, pluginId, lastUpdatedTime, esBasedAuditRepository);
+            CachePolicyTransformerImpl policyTransformer = null;
+            try {
+                policyTransformer = new CachePolicyTransformerImpl(typeRegistry);
+            } catch (AtlasBaseException e) {
+                LOG.warn("Failed to initialize policyTransformer, fetching policies");
+            }
+
+            ServicePolicies ret = policyTransformer.getPolicies(serviceName, pluginId, lastUpdatedTime);
 
             return ret;
         } finally {

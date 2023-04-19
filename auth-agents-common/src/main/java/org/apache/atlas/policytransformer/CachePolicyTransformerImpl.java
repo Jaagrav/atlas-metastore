@@ -44,6 +44,7 @@ import org.apache.atlas.repository.graphdb.janus.AtlasJanusGraph;
 import org.apache.atlas.repository.store.graph.v2.EntityGraphRetriever;
 import org.apache.atlas.type.AtlasType;
 import org.apache.atlas.type.AtlasTypeRegistry;
+import org.apache.atlas.util.BeanUtil;
 import org.apache.atlas.utils.AtlasPerfMetrics;
 import org.apache.atlas.v1.model.instance.Id;
 import org.apache.commons.collections.CollectionUtils;
@@ -71,7 +72,6 @@ import static org.apache.atlas.repository.util.AccessControlUtils.POLICY_CATEGOR
 import static org.apache.atlas.repository.util.AccessControlUtils.POLICY_CATEGORY_PURPOSE;
 import static org.apache.atlas.repository.util.AccessControlUtils.getPolicyCategory;
 
-@Component
 public class CachePolicyTransformerImpl {
     private static final Logger LOG = LoggerFactory.getLogger(CachePolicyTransformerImpl.class);
 
@@ -99,13 +99,15 @@ public class CachePolicyTransformerImpl {
     private EntityGraphRetriever      entityRetriever;
 
     private PersonaCachePolicyTransformer personaTransformer;
+    private ESBasedAuditRepository auditRepository;
 
-    @Inject
     public CachePolicyTransformerImpl(AtlasTypeRegistry typeRegistry) throws AtlasBaseException {
         this.graph                = new AtlasJanusGraph();
         this.entityRetriever      = new EntityGraphRetriever(graph, typeRegistry);
 
         personaTransformer = new PersonaCachePolicyTransformer(entityRetriever);
+
+        auditRepository = BeanUtil.getBean(ESBasedAuditRepository.class);
 
         try {
             this.discoveryService = new EntityDiscoveryService(typeRegistry, graph, null, null, null, null);
@@ -129,6 +131,11 @@ public class CachePolicyTransformerImpl {
                                     ESBasedAuditRepository auditRepository) {
         AtlasPerfMetrics.MetricRecorder recorder = RequestContext.get().startMetricRecord("CachePolicyTransformerImpl.isPolicyUpdated" + serviceName);
 
+        if (auditRepository == null) {
+            LOG.warn("auditRepository is not initialized, fetching policies");
+            return true;
+        }
+
         AuditSearchParams parameters = new AuditSearchParams();
         Map<String, Object> dsl = getMap("size", 1);
 
@@ -150,8 +157,8 @@ public class CachePolicyTransformerImpl {
                 return false;
             }
         } catch (AtlasBaseException e) {
-            LOG.error("ERROR in getPoliciesIfUpdated while fetching entity audits {}: ", e.getMessage());
-            return false;
+            LOG.error("ERROR in getPoliciesIfUpdated while fetching entity audits {}, fetching policies: ", e.getMessage());
+            return true;
         } finally {
             RequestContext.get().endMetricRecord(recorder);
         }
@@ -161,6 +168,11 @@ public class CachePolicyTransformerImpl {
 
     public ServicePolicies getPolicies(String serviceName, String pluginId, Long lastUpdatedTime) {
         //TODO: return only if updated
+
+        if (!isPolicyUpdated(lastUpdatedTime, serviceName, auditRepository)){
+            return null;
+        }
+
         AtlasPerfMetrics.MetricRecorder recorder = RequestContext.get().startMetricRecord("CachePolicyTransformerImpl.getPolicies" + serviceName);
 
         ServicePolicies servicePolicies = new ServicePolicies();
