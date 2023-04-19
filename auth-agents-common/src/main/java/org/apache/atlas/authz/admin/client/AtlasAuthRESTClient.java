@@ -46,6 +46,7 @@ public class AtlasAuthRESTClient implements AtlasAuthAdminClient {
         adminUrl = url;
         long tmpReadTimeout = config.getLong(configPropertyPrefix + ".policy.rest.client.read.timeoutMs", 20000);
         init(serviceName, tmpReadTimeout);
+        LOG.info("adminUrl " + adminUrl);
     }
 
     public String getPluginId(String serviceName, String appId) {
