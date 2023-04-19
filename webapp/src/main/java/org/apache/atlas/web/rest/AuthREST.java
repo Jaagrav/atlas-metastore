@@ -19,12 +19,11 @@ package org.apache.atlas.web.rest;
 
 import org.apache.atlas.annotation.Timed;
 import org.apache.atlas.exception.AtlasBaseException;
-import org.apache.atlas.policytransformer.CachePolicyTransformerImpl;
 import org.apache.atlas.ranger.plugin.util.KeycloakUserStore;
 import org.apache.atlas.ranger.plugin.util.RangerRoles;
 import org.apache.atlas.ranger.plugin.util.RangerUserStore;
 import org.apache.atlas.ranger.plugin.util.ServicePolicies;
-import org.apache.atlas.tasks.TaskService;
+import org.apache.atlas.transformer.policytransformer.CachePolicyTransformerImpl;
 import org.apache.atlas.utils.AtlasPerfTracer;
 import org.apache.atlas.web.util.Servlets;
 import org.slf4j.Logger;

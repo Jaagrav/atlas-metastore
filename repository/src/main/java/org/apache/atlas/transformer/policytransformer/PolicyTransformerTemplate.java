@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.atlas.policytransformer;
+package org.apache.atlas.transformer.policytransformer;
 
 import org.apache.atlas.type.AtlasType;
 import org.slf4j.Logger;
