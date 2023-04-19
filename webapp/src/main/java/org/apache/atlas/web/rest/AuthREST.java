@@ -24,6 +24,7 @@ import org.apache.atlas.ranger.plugin.util.KeycloakUserStore;
 import org.apache.atlas.ranger.plugin.util.RangerRoles;
 import org.apache.atlas.ranger.plugin.util.RangerUserStore;
 import org.apache.atlas.ranger.plugin.util.ServicePolicies;
+import org.apache.atlas.repository.audit.ESBasedAuditRepository;
 import org.apache.atlas.tasks.TaskService;
 import org.apache.atlas.utils.AtlasPerfTracer;
 import org.apache.atlas.web.util.Servlets;
@@ -57,10 +58,13 @@ public class AuthREST {
     private static final Logger PERF_LOG = AtlasPerfTracer.getPerfLogger("rest.AuthREST");
 
     private CachePolicyTransformerImpl policyTransformer;
+    private final ESBasedAuditRepository esBasedAuditRepository;
 
     @Inject
-    public AuthREST(CachePolicyTransformerImpl policyTransformer) {
+    public AuthREST(CachePolicyTransformerImpl policyTransformer,
+                    ESBasedAuditRepository esBasedAuditRepository) {
         this.policyTransformer = policyTransformer;
+        this.esBasedAuditRepository = esBasedAuditRepository;
     }
 
     @GET
@@ -130,7 +134,7 @@ public class AuthREST {
                 perf = AtlasPerfTracer.getPerfTracer(PERF_LOG, "AuthREST.downloadPolicies");
             }
 
-            ServicePolicies ret = policyTransformer.getPolicies(serviceName, pluginId, lastUpdatedTime);
+            ServicePolicies ret = policyTransformer.getPolicies(serviceName, pluginId, lastUpdatedTime, esBasedAuditRepository);
 
             return ret;
         } finally {
