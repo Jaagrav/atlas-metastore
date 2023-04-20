@@ -8,13 +8,17 @@ import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.redisson.config.ReadMode;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public abstract class AbstractRedisService implements RedisService {
 
+    private static final String REDIS_URL_PREFIX = "redis://";
     private static final String ATLAS_REDIS_URL = "atlas.redis.url";
+    private static final String ATLAS_REDIS_SENTINEL_URLS = "atlas.redis.sentinel.urls";
     private static final String ATLAS_REDIS_USERNAME = "atlas.redis.username";
     private static final String ATLAS_REDIS_PASSWORD = "atlas.redis.password";
     private static final String ATLAS_REDIS_MASTER_NAME = "atlas.redis.master_name";
@@ -51,12 +55,20 @@ public abstract class AbstractRedisService implements RedisService {
         Config config = new Config();
         config.useSentinelServers()
                 .setReadMode(ReadMode.MASTER_SLAVE)
-                .setCheckSentinelsList(false)
                 .setMasterName(atlasConfig.getString(ATLAS_REDIS_MASTER_NAME))
-                .addSentinelAddress(atlasConfig.getString(ATLAS_REDIS_URL))
+                .addSentinelAddress(formatSentinelUrls(atlasConfig.getString(ATLAS_REDIS_SENTINEL_URLS)))
                 .setUsername(atlasConfig.getString(ATLAS_REDIS_USERNAME))
                 .setPassword(atlasConfig.getString(ATLAS_REDIS_PASSWORD));
         return config;
+    }
+
+    private String[] formatSentinelUrls(String urls) {
+        return Arrays.stream(urls.split(",")).map(url -> {
+            if (url.startsWith(REDIS_URL_PREFIX)) {
+                return url;
+            }
+            return REDIS_URL_PREFIX + url;
+        }).collect(Collectors.toList()).stream().toArray(String[]::new);
     }
 
     @Override
