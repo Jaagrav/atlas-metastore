@@ -3,16 +3,17 @@ package org.apache.atlas.service.redis;
 import org.apache.atlas.ApplicationProperties;
 import org.apache.atlas.AtlasException;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.lang.ArrayUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.redisson.config.ReadMode;
 
+import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public abstract class AbstractRedisService implements RedisService {
 
@@ -44,7 +45,7 @@ public abstract class AbstractRedisService implements RedisService {
         initAtlasConfig();
         Config config = new Config();
         config.useSingleServer()
-                .setAddress(atlasConfig.getString(ATLAS_REDIS_URL))
+                .setAddress(formatSentinelUrls(atlasConfig.getStringArray(ATLAS_REDIS_URL))[0])
                 .setUsername(atlasConfig.getString(ATLAS_REDIS_USERNAME))
                 .setPassword(atlasConfig.getString(ATLAS_REDIS_PASSWORD));
         return config;
@@ -63,30 +64,34 @@ public abstract class AbstractRedisService implements RedisService {
         return config;
     }
 
-    private String[] formatSentinelUrls(String[] urls) {
+    private String[] formatSentinelUrls(String[] urls) throws IllegalArgumentException {
+        if(ArrayUtils.isEmpty(urls)) {
+            getLogger().error("Invalid redis cluster urls");
+            throw new IllegalArgumentException("Invalid redis cluster urls");
+        }
         return Arrays.stream(urls).map(url -> {
             if (url.startsWith(REDIS_URL_PREFIX)) {
                 return url;
             }
             return REDIS_URL_PREFIX + url;
-        }).collect(Collectors.toList()).stream().toArray(String[]::new);
+        }).toArray(String[]::new);
     }
 
     @Override
-    public boolean acquireDistributedLock(String key) throws AtlasException {
-        getLogger().info("Attempting to acquire distributed lock for {}", key);
+    public boolean acquireDistributedLock(String key) throws Exception {
+        getLogger().info("Attempting to acquire distributed lock for {}, host:{}", key, InetAddress.getLocalHost().getAddress());
         boolean isLockAcquired;
         try {
             RLock lock = redisClient.getFairLock(key);
             isLockAcquired = lock.tryLock(waitTimeInMS, leaseTimeInMS, TimeUnit.MILLISECONDS);
             if (isLockAcquired) {
                 keyLockMap.put(key, lock);
-                getLogger().info("Acquired distributed lock on task for {}", key);
+                getLogger().info("Acquired distributed lock on task for {}, host:{}", key, InetAddress.getLocalHost().getAddress());
             } else {
-                getLogger().info("Attempt failed as lock {} is already acquired.", key);
+                getLogger().info("Attempt failed as lock {} is already acquired, host: {}.", key, InetAddress.getLocalHost().getAddress());
             }
         } catch (InterruptedException e) {
-            getLogger().error("Failed to acquire distributed lock.", e);
+            getLogger().error("Failed to acquire distributed lock, host: {}", InetAddress.getLocalHost().getAddress(),e);
             throw new AtlasException(e);
         }
         return isLockAcquired;
