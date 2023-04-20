@@ -259,7 +259,7 @@
 
     <property>
         <name>dfs.namenode.inode.attributes.provider.class</name>
-        <value>org.apache.ranger.authorization.hadoop.RangerHdfsAuthorizer</value>
+        <value>org.apache.atlas.ranger.authorization.hadoop.RangerHdfsAuthorizer</value>
     </property>
 
     <property>

@@ -55,12 +55,14 @@ import org.apache.atlas.repository.graphdb.AtlasVertex;
 import org.apache.atlas.repository.store.graph.AtlasRelationshipStore;
 import org.apache.atlas.repository.store.graph.EntityGraphDiscoveryContext;
 import org.apache.atlas.repository.store.graph.v1.DeleteHandlerDelegate;
-import org.apache.atlas.repository.store.graph.v2.preprocessor.accesscontrol.AccessControlPolicyPreProcessor;
-import org.apache.atlas.repository.store.graph.v2.preprocessor.accesscontrol.AccessControlPreProcessor;
+import org.apache.atlas.repository.store.graph.v2.preprocessor.AuthPolicyPreProcessor;
+import org.apache.atlas.repository.store.graph.v2.preprocessor.accesscontrol.PersonaPreProcessor;
+import org.apache.atlas.repository.store.graph.v2.preprocessor.accesscontrol.PurposePreProcessor;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.glossary.CategoryPreProcessor;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.glossary.GlossaryPreProcessor;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.glossary.TermPreProcessor;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.PreProcessor;
+import org.apache.atlas.repository.store.graph.v2.preprocessor.readme.ReadmePreProcessor;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.sql.QueryCollectionPreProcessor;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.sql.QueryFolderPreProcessor;
 import org.apache.atlas.repository.store.graph.v2.preprocessor.sql.QueryPreProcessor;
@@ -374,11 +376,6 @@ public class EntityGraphMapper {
                     AtlasVertex vertex = context.getVertex(guid);
                     AtlasEntityType entityType = context.getType(guid);
 
-                    PreProcessor preProcessor = getPreProcessor(entityType.getTypeName());
-                    if (preProcessor != null) {
-                        preProcessor.processAttributes(createdEntity, context, CREATE);
-                    }
-
                     mapAttributes(createdEntity, entityType, vertex, CREATE, context);
                     mapRelationshipAttributes(createdEntity, entityType, vertex, CREATE, context);
 
@@ -398,7 +395,7 @@ public class EntityGraphMapper {
                         if (CollectionUtils.isNotEmpty(context.getEntitiesToRestore())) {
                             isRestoreEntity = context.getEntitiesToRestore().contains(vertex);
                         }
-                        addHasLineage(inOutEdges, isRestoreEntity);
+                        addHasLineage(inOutEdges, isRestoreEntity, guid);
                     }
 
                     Set<AtlasEdge> removedEdges = getRemovedInputOutputEdges(guid);
@@ -434,11 +431,6 @@ public class EntityGraphMapper {
                     AtlasVertex     vertex     = context.getVertex(guid);
                     AtlasEntityType entityType = context.getType(guid);
 
-                    PreProcessor preProcessor = getPreProcessor(entityType.getTypeName());
-                    if (preProcessor != null) {
-                        preProcessor.processAttributes(updatedEntity, context, UPDATE);
-                    }
-
                     mapAttributes(updatedEntity, entityType, vertex, updateType, context);
                     mapRelationshipAttributes(updatedEntity, entityType, vertex, UPDATE, context);
 
@@ -459,20 +451,17 @@ public class EntityGraphMapper {
                             addOrUpdateBusinessAttributes(guid, updatedEntity.getBusinessAttributes(), isOverwriteBusinessAttribute);
                         }
                     }
-                    
-                    setSystemAttributesToEntity(vertex,updatedEntity);
-                    resp.addEntity(updateType, constructHeader(updatedEntity, vertex, entityType.getAllAttributes()));
 
                     // Add hasLineage for newly created edges
                     Set<AtlasEdge> newlyCreatedEdges = getNewCreatedInputOutputEdges(guid);
                     if (newlyCreatedEdges.size() > 0) {
-                        addHasLineage(newlyCreatedEdges, false);
+                        addHasLineage(newlyCreatedEdges, false, guid);
                     }
 
                     // Add hasLineage for restored edges
                     if (CollectionUtils.isNotEmpty(context.getEntitiesToRestore()) && context.getEntitiesToRestore().contains(vertex)) {
                         Set<AtlasEdge> restoredInputOutputEdges = getRestoredInputOutputEdges(vertex);
-                        addHasLineage(restoredInputOutputEdges, true);
+                        addHasLineage(restoredInputOutputEdges, true, guid);
                     }
 
                     Set<AtlasEdge> removedEdges = getRemovedInputOutputEdges(guid);
@@ -482,6 +471,9 @@ public class EntityGraphMapper {
                     }
 
                     reqContext.cache(updatedEntity);
+                    setSystemAttributesToEntity(vertex,updatedEntity);
+                    resp.addEntity(updateType, constructHeader(updatedEntity, vertex, entityType.getAllAttributes()));
+
 
                     if (DEFERRED_ACTION_ENABLED) {
                         Set<String> deletedEdgeIds = reqContext.getDeletedEdgesIds();
@@ -552,48 +544,6 @@ public class EntityGraphMapper {
         }
 
         exception.setEntityGuid(guid);
-    }
-
-    public PreProcessor getPreProcessor(String typeName) throws AtlasBaseException {
-        PreProcessor preProcessor = null;
-
-        switch (typeName) {
-            case ATLAS_GLOSSARY_ENTITY_TYPE:
-                preProcessor = new GlossaryPreProcessor(typeRegistry, entityRetriever);
-                break;
-
-            case ATLAS_GLOSSARY_TERM_ENTITY_TYPE:
-                preProcessor = new TermPreProcessor(typeRegistry, entityRetriever, graph, taskManagement);
-                break;
-
-            case ATLAS_GLOSSARY_CATEGORY_ENTITY_TYPE:
-                preProcessor = new CategoryPreProcessor(typeRegistry, entityRetriever);
-                break;
-
-            case QUERY_ENTITY_TYPE:
-                preProcessor = new QueryPreProcessor(typeRegistry, entityRetriever);
-                break;
-
-            case QUERY_FOLDER_ENTITY_TYPE:
-                preProcessor = new QueryFolderPreProcessor(typeRegistry, entityRetriever);
-                break;
-
-            case QUERY_COLLECTION_ENTITY_TYPE:
-                preProcessor = new QueryCollectionPreProcessor(typeRegistry, entityRetriever);
-                break;
-
-            case PERSONA_ENTITY_TYPE:
-            case PURPOSE_ENTITY_TYPE:
-                preProcessor = new AccessControlPreProcessor(typeRegistry, graph, entityRetriever);
-                break;
-
-            case POLICY_ENTITY_TYPE:
-                preProcessor = new AccessControlPolicyPreProcessor(typeRegistry, graph, entityRetriever);
-                break;
-
-        }
-
-        return preProcessor;
     }
 
     public void setCustomAttributes(AtlasVertex vertex, AtlasEntity entity) {
@@ -4066,7 +4016,7 @@ public class EntityGraphMapper {
     }
 
 
-    public void addHasLineage(Set<AtlasEdge> inputOutputEdges, boolean isRestoreEntity) {
+    public void addHasLineage(Set<AtlasEdge> inputOutputEdges, boolean isRestoreEntity, String guid) {
         AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("addHasLineage");
 
         for (AtlasEdge atlasEdge : inputOutputEdges) {
@@ -4093,6 +4043,11 @@ public class EntityGraphMapper {
                     if (!isHasLineageSet) {
                         AtlasGraphUtilsV2.setEncodedProperty(assetVertex, HAS_LINEAGE, true);
                         AtlasGraphUtilsV2.setEncodedProperty(processVertex, HAS_LINEAGE, true);
+                        AtlasEntity diffEntity = RequestContext.get().getDifferentialEntity(guid);
+                        if(diffEntity != null) {
+                            diffEntity.setAttribute(HAS_LINEAGE, true);
+                            RequestContext.get().cacheDifferentialEntity(diffEntity);
+                        }
                         isHasLineageSet = true;
                     }
 

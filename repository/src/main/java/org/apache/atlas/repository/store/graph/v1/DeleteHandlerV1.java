@@ -145,6 +145,8 @@ public abstract class DeleteHandlerV1 {
             }
         }
 
+        //TODO: preprocessor
+
         // Delete traits and vertices.
         for (AtlasVertex deletionCandidateVertex : deletionCandidateVertices) {
             RequestContext.get().getDeletedEdgesIds().clear();

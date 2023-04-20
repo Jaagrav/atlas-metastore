@@ -77,6 +77,7 @@ public class RequestContext {
     private int maxAttempts = 1;
     private int attemptCount = 1;
     private boolean isImportInProgress = false;
+    private boolean isPoliciesBootstrappingInProgress = false;
     private boolean     isInNotificationProcessing = false;
     private boolean     isInTypePatching           = false;
     private boolean     createShellEntityForNonExistingReference = false;
@@ -181,6 +182,8 @@ public class RequestContext {
         this.relationshipMutationMap.clear();
         this.currentTask = null;
         setTraceId(null);
+
+        this.isPoliciesBootstrappingInProgress = false;
 
         if (metrics != null && !metrics.isEmpty()) {
             METRICS.debug(metrics.toString());
@@ -287,6 +290,14 @@ public class RequestContext {
 
     public void setImportInProgress(boolean importInProgress) {
         isImportInProgress = importInProgress;
+    }
+
+    public boolean isPoliciesBootstrappingInProgress() {
+        return isPoliciesBootstrappingInProgress;
+    }
+
+    public void setPoliciesBootstrappingInProgress(boolean policiesBootstrappingInProgress) {
+        isPoliciesBootstrappingInProgress = policiesBootstrappingInProgress;
     }
 
     public boolean isPurgeRequested() { return isPurgeRequested; }

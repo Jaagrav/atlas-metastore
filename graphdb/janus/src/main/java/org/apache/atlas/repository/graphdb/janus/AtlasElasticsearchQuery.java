@@ -128,13 +128,8 @@ public class AtlasElasticsearchQuery implements AtlasIndexQuery<AtlasJanusVertex
 
         } catch (IOException e) {
             LOG.error("Failed to execute direct query on ES {}", e.getMessage());
-            int statusCode = ((ResponseException) e).getResponse().getStatusLine().getStatusCode();
+            throw new AtlasBaseException(AtlasErrorCode.INDEX_SEARCH_FAILED, e.getMessage());
 
-            if (statusCode == 404) {
-                throw new AtlasBaseException(AtlasErrorCode.ES_INDEX_NOT_FOUND, e.getMessage());
-            } else {
-                throw new AtlasBaseException(AtlasErrorCode.INDEX_SEARCH_FAILED, e.getMessage());
-            }
         }
 
         return result;

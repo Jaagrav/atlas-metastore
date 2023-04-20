@@ -1132,28 +1132,6 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
         }
     }
 
-    private String getIndexName(IndexSearchParams params) throws AtlasBaseException {
-        if (StringUtils.isEmpty(params.getPersona()) && StringUtils.isEmpty(params.getPurpose())) {
-            return VERTEX_INDEX_NAME;
-        }
-
-        String qualifiedName = "";
-        if (StringUtils.isNotEmpty(params.getPersona())) {
-            qualifiedName = params.getPersona();
-        } else {
-            qualifiedName = params.getPurpose();
-        }
-
-        String[] parts = qualifiedName.split("/");
-        String aliasName = parts[parts.length - 1];
-
-        if (StringUtils.isNotEmpty(aliasName)) {
-            return aliasName;
-        } else {
-            throw new AtlasBaseException("ES alias not found for purpose/persona " + params.getPurpose());
-        }
-    }
-
     private Map<String, Object> getMap(String key, Object value) {
         Map<String, Object> map = new HashMap<>();
         map.put(key, value);
@@ -1174,5 +1152,27 @@ public class EntityDiscoveryService implements AtlasDiscoveryService {
         searchResult = directIndexSearch(indexSearchParams);
         List<AtlasEntityHeader> entityHeaders = searchResult.getEntities();
         return  entityHeaders;
+    }
+
+    private String getIndexName(IndexSearchParams params) throws AtlasBaseException {
+        if (StringUtils.isEmpty(params.getPersona()) && StringUtils.isEmpty(params.getPurpose())) {
+            return VERTEX_INDEX_NAME;
+        }
+
+        String qualifiedName = "";
+        if (StringUtils.isNotEmpty(params.getPersona())) {
+            qualifiedName = params.getPersona();
+        } else {
+            qualifiedName = params.getPurpose();
+        }
+
+        String[] parts = qualifiedName.split("/");
+        String aliasName = parts[parts.length - 1];
+
+        if (StringUtils.isNotEmpty(aliasName)) {
+            return aliasName;
+        } else {
+            throw new AtlasBaseException("ES alias not found for purpose/persona " + params.getPurpose());
+        }
     }
 }

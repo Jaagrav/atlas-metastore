@@ -180,19 +180,16 @@ public final class AtlasSimpleAuthorizer implements AtlasAuthorizer {
 
     @Override
     public AtlasAccessorResponse getAccessors(AtlasEntityAccessRequest request) {
-        //TODO: implement method
         return null;
     }
 
     @Override
     public AtlasAccessorResponse getAccessors(AtlasRelationshipAccessRequest request) {
-        //TODO: implement method
         return null;
     }
 
     @Override
     public AtlasAccessorResponse getAccessors(AtlasTypeAccessRequest request) {
-        //TODO: implement method
         return null;
     }
 

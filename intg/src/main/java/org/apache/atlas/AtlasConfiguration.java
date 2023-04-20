@@ -98,8 +98,11 @@ public enum AtlasConfiguration {
     RANGER_ATLAS_SERVICE_TYPE("atlas.ranger.service.type.atlas", "atlas"),
     RANGER_HEKA_SERVICE_TYPE("atlas.ranger.service.type.heka", "heka"),
     SUPPORTED_RELATIONSHIP_EVENTS("atlas.notification.relationships.filter", "asset_readme,asset_links"),
+    SUPPORTED_LINEAGE_RELATIONSHIP_EVENTS_VIA_FEATURE_FLAG("atlas.notification.lineage.events.feature.flag.enabled.filter", "catalog_process_inputs,process_catalog_outputs,column_lineage"),
     REST_API_XSS_FILTER_MASK_STRING("atlas.rest.xss.filter.mask.string", "map<[a-zA-Z _,:<>0-9\\x60]*>|struct<[a-zA-Z _,:<>0-9\\x60]*>|array<[a-zA-Z _,:<>0-9\\x60]*>|\\{\\{[a-zA-Z _,-:0-9\\x60\\{\\}]*\\}\\}"),
-    REST_API_XSS_FILTER_EXLUDE_SERVER_NAME("atlas.rest.xss.filter.exclude.server.name", "atlas-service-atlas.atlas.svc.cluster.local");
+    REST_API_XSS_FILTER_EXLUDE_SERVER_NAME("atlas.rest.xss.filter.exclude.server.name", "atlas-service-atlas.atlas.svc.cluster.local"),
+    LINEAGE_DEFAULT_MAX_COUNT("atlas.lineage.default.max.count", 1000),
+    LINEAGE_DEFAULT_MAX_DEPTH("atlas.lineage.default.max.depth", 21);
 
 
     private static final Configuration APPLICATION_PROPERTIES;

@@ -60,12 +60,15 @@ public class IndexSearchParams extends SearchParams {
     public String getPurpose() {
         return purpose;
     }
+
     public void setPurpose(String purpose) {
         this.purpose = purpose;
     }
+
     public String getPersona() {
         return persona;
     }
+
     public void setPersona(String persona) {
         this.persona = persona;
     }
