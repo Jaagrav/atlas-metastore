@@ -56,14 +56,14 @@ public abstract class AbstractRedisService implements RedisService {
         config.useSentinelServers()
                 .setReadMode(ReadMode.MASTER_SLAVE)
                 .setMasterName(atlasConfig.getString(ATLAS_REDIS_MASTER_NAME))
-                .addSentinelAddress(formatSentinelUrls(atlasConfig.getString(ATLAS_REDIS_SENTINEL_URLS)))
+                .addSentinelAddress(formatSentinelUrls(atlasConfig.getStringArray(ATLAS_REDIS_SENTINEL_URLS)))
                 .setUsername(atlasConfig.getString(ATLAS_REDIS_USERNAME))
                 .setPassword(atlasConfig.getString(ATLAS_REDIS_PASSWORD));
         return config;
     }
 
-    private String[] formatSentinelUrls(String urls) {
-        return Arrays.stream(urls.split(",")).map(url -> {
+    private String[] formatSentinelUrls(String[] urls) {
+        return Arrays.stream(urls).map(url -> {
             if (url.startsWith(REDIS_URL_PREFIX)) {
                 return url;
             }
