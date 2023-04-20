@@ -10,6 +10,7 @@ import org.redisson.config.Config;
 import org.redisson.config.ReadMode;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -79,22 +80,26 @@ public abstract class AbstractRedisService implements RedisService {
 
     @Override
     public boolean acquireDistributedLock(String key) throws Exception {
-        getLogger().info("Attempting to acquire distributed lock for {}, host:{}", key, InetAddress.getLocalHost().getAddress());
+        getLogger().info("Attempting to acquire distributed lock for {}, host:{}", key, getHostAddress());
         boolean isLockAcquired;
         try {
             RLock lock = redisClient.getFairLock(key);
             isLockAcquired = lock.tryLock(waitTimeInMS, leaseTimeInMS, TimeUnit.MILLISECONDS);
             if (isLockAcquired) {
                 keyLockMap.put(key, lock);
-                getLogger().info("Acquired distributed lock on task for {}, host:{}", key, InetAddress.getLocalHost().getAddress());
+                getLogger().info("Acquired distributed lock on task for {}, host:{}", key, getHostAddress());
             } else {
-                getLogger().info("Attempt failed as lock {} is already acquired, host: {}.", key, InetAddress.getLocalHost().getAddress());
+                getLogger().info("Attempt failed as lock {} is already acquired, host: {}.", key, getHostAddress());
             }
         } catch (InterruptedException e) {
-            getLogger().error("Failed to acquire distributed lock, host: {}", InetAddress.getLocalHost().getAddress(),e);
+            getLogger().error("Failed to acquire distributed lock, host: {}", getHostAddress(), e);
             throw new AtlasException(e);
         }
         return isLockAcquired;
+    }
+
+    private byte[] getHostAddress() throws UnknownHostException {
+        return InetAddress.getLocalHost().getAddress();
     }
 
     @Override

@@ -386,7 +386,7 @@ public class TypesREST {
                 LOG.info("Lock is already acquired. Returning now :: traceId {}", traceId);
                 throw new AtlasBaseException(AtlasErrorCode.FAILED_TO_OBTAIN_TYPE_UPDATE_LOCK);
             }
-            LOG.info("successfully acquired lock :: traceId {}", traceId);
+            LOG.info("successfully acquired lock :: traceId {}, host: {}", traceId);
         } catch (AtlasBaseException e) {
             throw e;
         } catch (Exception e) {
