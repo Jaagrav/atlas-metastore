@@ -55,6 +55,7 @@ public abstract class AbstractRedisService implements RedisService {
         Config config = new Config();
         config.useSentinelServers()
                 .setReadMode(ReadMode.MASTER_SLAVE)
+                .setCheckSentinelsList(false)
                 .setMasterName(atlasConfig.getString(ATLAS_REDIS_MASTER_NAME))
                 .addSentinelAddress(formatSentinelUrls(atlasConfig.getStringArray(ATLAS_REDIS_SENTINEL_URLS)))
                 .setUsername(atlasConfig.getString(ATLAS_REDIS_USERNAME))
