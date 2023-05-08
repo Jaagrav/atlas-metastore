@@ -132,7 +132,7 @@ atlas.graph.storage.hbase.regions-per-server=1
                                         <descriptor>src/main/assemblies/atlas-server-package.xml</descriptor>
                                         <descriptor>src/main/assemblies/standalone-package.xml</descriptor>
                                         <descriptor>src/main/assemblies/src-package.xml</descriptor>
-                                        <descriptor>src/main/assemblies/atlas-repair-index-package.xml</descriptor>
+<!--                                        <descriptor>src/main/assemblies/atlas-repair-index-package.xml</descriptor>-->
                                         <!--<descriptor>src/main/assemblies/migration-exporter.xml</descriptor>-->
                                         <descriptor>src/main/assemblies/classification-updater.xml</descriptor>
                                     </descriptors>
