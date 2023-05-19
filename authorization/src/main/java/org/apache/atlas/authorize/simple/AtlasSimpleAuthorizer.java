@@ -318,39 +318,6 @@ public final class AtlasSimpleAuthorizer implements AtlasAuthorizer {
     }
 
     @Override
-    public void scrubSearchResults(AtlasSearchResultScrubRequest request) throws AtlasAuthorizationException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("==> SimpleAtlasAuthorizer.scrubSearchResults({})", request);
-        }
-
-        final AtlasSearchResult result = request.getSearchResult();
-
-        if (CollectionUtils.isNotEmpty(result.getEntities())) {
-            for (AtlasEntityHeader entity : result.getEntities()) {
-                checkAccessAndScrub(entity, request);
-            }
-        }
-
-        if (CollectionUtils.isNotEmpty(result.getFullTextResult())) {
-            for (AtlasFullTextResult fullTextResult : result.getFullTextResult()) {
-                if (fullTextResult != null) {
-                    checkAccessAndScrub(fullTextResult.getEntity(), request);
-                }
-            }
-        }
-
-        if (MapUtils.isNotEmpty(result.getReferredEntities())) {
-            for (AtlasEntityHeader entity : result.getReferredEntities().values()) {
-                checkAccessAndScrub(entity, request);
-            }
-        }
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("<== SimpleAtlasAuthorizer.scrubSearchResults({}): {}", request, result);
-        }
-    }
-
-    @Override
     public void filterTypesDef(AtlasTypesDefFilterRequest request) throws AtlasAuthorizationException {
         AtlasTypesDef typesDef = request.getTypesDef();
 
@@ -495,19 +462,6 @@ public final class AtlasSimpleAuthorizer implements AtlasAuthorizer {
         }
 
         return ret;
-    }
-
-    private void checkAccessAndScrub(AtlasEntityHeader entity, AtlasSearchResultScrubRequest request) throws AtlasAuthorizationException {
-        if (entity != null && request != null) {
-            final AtlasEntityAccessRequest entityAccessRequest = new AtlasEntityAccessRequest(request.getTypeRegistry(), AtlasPrivilege.ENTITY_READ, entity, request.getUser(), request.getUserGroups());
-
-            entityAccessRequest.setClientIPAddress(request.getClientIPAddress());
-
-
-            if (!isAccessAllowed(entityAccessRequest)) {
-                scrubEntityHeader(entity, request.getTypeRegistry());
-            }
-        }
     }
 
     private boolean isLabelMatch(AtlasEntityAccessRequest request, AtlasEntityPermission permission) {

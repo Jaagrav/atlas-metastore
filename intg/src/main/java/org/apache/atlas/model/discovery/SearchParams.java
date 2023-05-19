@@ -12,6 +12,7 @@ public abstract class SearchParams {
     boolean suppressLogs;
     boolean excludeMeanings;
     boolean excludeClassifications;
+    boolean enrichAccessControlMetadata = false;
 
     public abstract String getQuery();
 
@@ -77,5 +78,13 @@ public abstract class SearchParams {
 
     public void setExcludeMeanings(boolean excludeMeanings) {
         this.excludeMeanings = excludeMeanings;
+    }
+
+    public boolean isEnrichAccessControlMetadata() {
+        return enrichAccessControlMetadata;
+    }
+
+    public void setEnrichAccessControlMetadata(boolean enrichAccessControlMetadata) {
+        this.enrichAccessControlMetadata = enrichAccessControlMetadata;
     }
 }

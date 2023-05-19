@@ -66,12 +66,16 @@ public class AtlasEntityHeader extends AtlasStruct implements Serializable {
     private Boolean                         isIncomplete        = Boolean.FALSE;
     private Set<String>                     labels              = null;
     private Boolean                         isScrubbed          = null;
+    private String                          policyId            = null;
     private String                          createdBy           = null;
     private String                          updatedBy           = null;
     private Date                            createTime          = null;
     private Date                            updateTime          = null;
     private String                          deleteHandler       = null;
     private Map<String, AtlasSearchResult>  collapse    = null;
+
+    private String accessControlTypeName = null;
+    private String accessControlGuid = null;
 
     public AtlasEntityHeader() {
         this(null, null);
@@ -211,6 +215,13 @@ public class AtlasEntityHeader extends AtlasStruct implements Serializable {
         isScrubbed = scrubbed;
     }
 
+    public String getPolicyId() {
+        return policyId;
+    }
+
+    public void setPolicyId(String policyId) {
+        this.policyId = policyId;
+    }
 
     public String getCreatedBy() {
         return createdBy;
@@ -258,6 +269,22 @@ public class AtlasEntityHeader extends AtlasStruct implements Serializable {
 
     public void setCollapse(Map<String, AtlasSearchResult> collapse) {
         this.collapse = collapse;
+    }
+
+    public String getAccessControlTypeName() {
+        return accessControlTypeName;
+    }
+
+    public void setAccessControlTypeName(String accessControlTypeName) {
+        this.accessControlTypeName = accessControlTypeName;
+    }
+
+    public String getAccessControlGuid() {
+        return accessControlGuid;
+    }
+
+    public void setAccessControlGuid(String accessControlGuid) {
+        this.accessControlGuid = accessControlGuid;
     }
 
     @Override
