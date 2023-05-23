@@ -786,7 +786,7 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
 
     private AtlasAccessDetailsResponse getAccessDetails(AtlasEntityAccessRequest request, RangerAtlasAuditHandler auditHandler) {
         RangerAccessResult result = null;
-        AtlasAccessDetailsResponse ret = null;
+        AtlasAccessDetailsResponse ret = new AtlasAccessDetailsResponse();
 
         RangerBasePlugin plugin = atlasPlugin;
 
@@ -840,10 +840,20 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
                     result = plugin.isAccessAllowed(rangerRequest, auditHandler);
                 }
 
-                if (result != null) {
-                    ret = new AtlasAccessDetailsResponse();
-                    ret.setAllowed(result.getIsAllowed());
-                    ret.setPolicyId(result.getPolicyId());
+                ret.setAllowed(result.getIsAllowed());
+
+                if (RequestContext.get().isEnrichIndexSearchResponseAuthDetails()) {
+                    AtlasPerfMetrics.MetricRecorder recorder = RequestContext.get().startMetricRecord("Authorizer.enrich");
+
+                    if (result.getPolicy() != null) {
+                        Map<String, String> authDetails = new HashMap<>();
+                        authDetails.put("policyId", result.getPolicyId());
+                        authDetails.put("typeName", (String) result.getPolicy().getOption("parentType"));
+                        authDetails.put("entityReference", result.getPolicy().getName());
+
+                        ret.setAuthDetails(authDetails);
+                    }
+                    RequestContext.get().endMetricRecord(recorder);
                 }
 
             } finally {
@@ -909,16 +919,17 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
             if (!response.isAllowed()) {
                 scrubEntityHeader(entity, request.getTypeRegistry());
             }
-            addPolicyDetails(entity, response);
+
+            if (RequestContext.get().isEnrichIndexSearchResponseAuthDetails()) {
+                addPolicyDetails(entity, response);
+            }
         }
     }
 
     private void addPolicyDetails(AtlasEntityHeader entity, AtlasAccessDetailsResponse response) {
         AtlasPerfMetrics.MetricRecorder recorder = RequestContext.get().startMetricRecord("addPolicyDetails");
-        if (entity.getAttributes() != null) {
-            entity.setPolicyId(
-                    response.getPolicyId().equals("-1") ? "-1" : response.getPolicyId().substring(0, 36)
-            );
+        if (response.getAuthDetails() != null) {
+            entity.setAuthDetails(response.getAuthDetails());
         }
         RequestContext.get().endMetricRecord(recorder);
     }

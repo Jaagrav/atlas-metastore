@@ -1126,6 +1126,7 @@ public class RangerBasePlugin {
 		if (overrideResult) {
 			result.setIsAllowed(chainedResult.getIsAllowed());
 			result.setIsAccessDetermined(chainedResult.getIsAccessDetermined());
+			result.setPolicy(chainedResult.getPolicy());
 			result.setPolicyId(chainedResult.getPolicyId());
 			result.setPolicyVersion(chainedResult.getPolicyVersion());
 			result.setPolicyPriority(chainedResult.getPolicyPriority());

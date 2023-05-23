@@ -49,6 +49,7 @@ public class RangerAccessResult {
 	private String     auditPolicyId  = "-1";
 	private String   auditLogId;
 	private String     policyId  = "-1";
+	private RangerPolicy     policy;
 	private int      policyPriority;
 	private String   zoneName;
 	private Long   policyVersion;
@@ -78,6 +79,7 @@ public class RangerAccessResult {
 	public void setAccessResultFrom(final RangerAccessResult other) {
 		this.isAccessDetermined = other.getIsAccessDetermined();
 		this.isAllowed   = other.getIsAllowed();
+		this.policy    = other.getPolicy();
 		this.policyId    = other.getPolicyId();
 		this.policyPriority = other.getPolicyPriority();
 		this.zoneName       = other.zoneName;
@@ -93,6 +95,14 @@ public class RangerAccessResult {
 		this.isAudited = other.getIsAudited();
 		this.auditPolicyId = other.getAuditPolicyId();
 		this.policyVersion = other.policyVersion;
+	}
+
+	public RangerPolicy getPolicy() {
+		return policy;
+	}
+
+	public void setPolicy(RangerPolicy policy) {
+		this.policy = policy;
 	}
 
 	/**

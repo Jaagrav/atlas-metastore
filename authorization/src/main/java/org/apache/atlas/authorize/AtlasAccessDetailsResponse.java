@@ -20,11 +20,15 @@ package org.apache.atlas.authorize;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AtlasAccessDetailsResponse {
 
     private String   policyId  = "-1";
     private boolean  isAllowed;
+    private Map<String, String> authDetails;
 
     public String getPolicyId() {
         return policyId;
@@ -32,6 +36,21 @@ public class AtlasAccessDetailsResponse {
 
     public void setPolicyId(String policyId) {
         this.policyId = policyId;
+    }
+
+    public Map<String, String> getAuthDetails() {
+        return authDetails;
+    }
+
+    public void setAuthDetails(Map<String, String> authDetails) {
+        this.authDetails = authDetails;
+    }
+
+    public void addAuthDetail(String key, String value) {
+        if (this.authDetails == null) {
+            authDetails = new HashMap<>();
+        }
+        this.authDetails.put(key, value);
     }
 
     public boolean isAllowed() {

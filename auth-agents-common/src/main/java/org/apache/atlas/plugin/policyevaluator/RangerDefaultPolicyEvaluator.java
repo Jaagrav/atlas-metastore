@@ -513,6 +513,7 @@ public class RangerDefaultPolicyEvaluator extends RangerAbstractPolicyEvaluator 
 			if (resource != null && MapUtils.isNotEmpty(resource.getAsMap())) {
 				result.setIsAllowed(false);
 				result.setPolicyPriority(getPolicyPriority());
+				result.setPolicy(getPolicy());
 				result.setPolicyId(getGuid());
 				result.setReason(reason);
 				result.setPolicyVersion(getPolicy().getVersion());
@@ -522,6 +523,7 @@ public class RangerDefaultPolicyEvaluator extends RangerAbstractPolicyEvaluator 
 				if (matchType != RangerPolicyResourceMatcher.MatchType.ANCESTOR) {
 					result.setIsAllowed(true);
 					result.setPolicyPriority(getPolicyPriority());
+					result.setPolicy(getPolicy());
 					result.setPolicyId(getGuid());
 					result.setReason(reason);
 					result.setPolicyVersion(getPolicy().getVersion());

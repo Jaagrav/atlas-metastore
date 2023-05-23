@@ -35,6 +35,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -66,13 +67,14 @@ public class AtlasEntityHeader extends AtlasStruct implements Serializable {
     private Boolean                         isIncomplete        = Boolean.FALSE;
     private Set<String>                     labels              = null;
     private Boolean                         isScrubbed          = null;
-    private String                          policyId            = null;
     private String                          createdBy           = null;
     private String                          updatedBy           = null;
     private Date                            createTime          = null;
     private Date                            updateTime          = null;
     private String                          deleteHandler       = null;
     private Map<String, AtlasSearchResult>  collapse    = null;
+
+    private Map<String, String> authDetails;
 
     private String accessControlTypeName = null;
     private String accessControlGuid = null;
@@ -215,14 +217,6 @@ public class AtlasEntityHeader extends AtlasStruct implements Serializable {
         isScrubbed = scrubbed;
     }
 
-    public String getPolicyId() {
-        return policyId;
-    }
-
-    public void setPolicyId(String policyId) {
-        this.policyId = policyId;
-    }
-
     public String getCreatedBy() {
         return createdBy;
     }
@@ -285,6 +279,21 @@ public class AtlasEntityHeader extends AtlasStruct implements Serializable {
 
     public void setAccessControlGuid(String accessControlGuid) {
         this.accessControlGuid = accessControlGuid;
+    }
+
+    public Map<String, String> getAuthDetails() {
+        return authDetails;
+    }
+
+    public void setAuthDetails(Map<String, String> authDetails) {
+        this.authDetails = authDetails;
+    }
+
+    public void addAuthDetails(String key, String value) {
+        if (this.authDetails == null){
+            this.authDetails = new HashMap<>();
+        }
+        this.authDetails.put(key, value);
     }
 
     @Override

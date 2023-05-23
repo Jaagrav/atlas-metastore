@@ -473,6 +473,10 @@ public class RangerPolicy extends RangerBaseModelObject implements java.io.Seria
 
     public Map<String, Object> getOptions() { return options; }
 
+	public Object getOption(String key) {
+		return options == null ? null : options.get(key);
+	}
+
     public void setOptions(Map<String, Object> options) {
 	    if (this.options == null) {
 	        this.options = new HashMap<>();
@@ -488,6 +492,14 @@ public class RangerPolicy extends RangerBaseModelObject implements java.io.Seria
             }
         }
     }
+
+	public void addOption(String key, Object value) {
+		if (this.options == null) {
+			this.options = new HashMap<>();
+		}
+
+		this.options.put(key, value);
+	}
 
     public List<RangerValiditySchedule> getValiditySchedules() { return validitySchedules; }
 

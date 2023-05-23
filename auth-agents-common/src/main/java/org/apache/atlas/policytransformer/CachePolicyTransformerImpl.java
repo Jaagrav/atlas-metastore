@@ -63,6 +63,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.atlas.repository.Constants.NAME;
+import static org.apache.atlas.repository.Constants.PERSONA_ENTITY_TYPE;
+import static org.apache.atlas.repository.Constants.PURPOSE_ENTITY_TYPE;
 import static org.apache.atlas.repository.Constants.QUALIFIED_NAME;
 import static org.apache.atlas.repository.Constants.SERVICE_ENTITY_TYPE;
 import static org.apache.atlas.repository.util.AccessControlUtils.ATTR_POLICY_CATEGORY;
@@ -223,7 +225,10 @@ public class CachePolicyTransformerImpl {
                     }
 
                 } else if (POLICY_CATEGORY_PURPOSE.equals(policyCategory)) {
-                    rangerPolicies.add(toRangerPolicy(atlasPolicy, serviceType));
+                    RangerPolicy rangerPolicy = toRangerPolicy(atlasPolicy, serviceType);
+                    rangerPolicy.addOption("parentType", PURPOSE_ENTITY_TYPE);
+
+                    rangerPolicies.add(rangerPolicy);
 
                 } else {
                     rangerPolicies.add(toRangerPolicy(atlasPolicy, serviceType));
@@ -521,6 +526,10 @@ public class CachePolicyTransformerImpl {
 
         if (atlasPolicy.hasAttribute(ATTR_POLICY_PRIORITY)) {
             policy.setPolicyPriority((Integer) atlasPolicy.getAttribute(ATTR_POLICY_PRIORITY));
+        }
+
+        if (atlasPolicy.hasAttribute("options")) {
+            policy.setOptions((Map<String, Object>) atlasPolicy.getAttribute("options"));
         }
 
         return policy;
