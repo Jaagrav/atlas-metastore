@@ -21,6 +21,7 @@ package org.apache.atlas.repository.store.graph.v2.preprocessor;
 import org.apache.atlas.AtlasErrorCode;
 import org.apache.atlas.RequestContext;
 import org.apache.atlas.authorize.AtlasAuthorizationUtils;
+import org.apache.atlas.featureflag.FeatureFlagStore;
 import org.apache.atlas.repository.store.aliasstore.ESAliasStore;
 import org.apache.atlas.repository.store.aliasstore.IndexAliasStore;
 import org.apache.atlas.exception.AtlasBaseException;
@@ -76,6 +77,7 @@ import static org.apache.atlas.repository.util.AccessControlUtils.POLICY_CATEGOR
 import static org.apache.atlas.repository.util.AccessControlUtils.POLICY_CATEGORY_PURPOSE;
 import static org.apache.atlas.repository.util.AccessControlUtils.REL_ATTR_ACCESS_CONTROL;
 import static org.apache.atlas.repository.util.AccessControlUtils.REL_ATTR_POLICIES;
+import static org.apache.atlas.repository.util.AccessControlUtils.ARGO_SERVICE_USER_NAME;
 import static org.apache.atlas.repository.util.AccessControlUtils.getConnectionForPolicy;
 import static org.apache.atlas.repository.util.AccessControlUtils.getEntityQualifiedName;
 import static org.apache.atlas.repository.util.AccessControlUtils.getIsEnabled;
@@ -97,13 +99,15 @@ public class AuthPolicyPreProcessor implements PreProcessor {
     private final AtlasTypeRegistry typeRegistry;
     private final EntityGraphRetriever entityRetriever;
     private IndexAliasStore aliasStore;
+    private final FeatureFlagStore featureFlagStore;
 
     public AuthPolicyPreProcessor(AtlasGraph graph,
                                   AtlasTypeRegistry typeRegistry,
-                                  EntityGraphRetriever entityRetriever) {
+                                  EntityGraphRetriever entityRetriever, FeatureFlagStore featureFlagStore) {
         this.graph = graph;
         this.typeRegistry = typeRegistry;
         this.entityRetriever = entityRetriever;
+        this.featureFlagStore = featureFlagStore;
 
         aliasStore = new ESAliasStore(graph, entityRetriever);
     }
@@ -277,7 +281,13 @@ public class AuthPolicyPreProcessor implements PreProcessor {
             Set<String> userRoles = AtlasAuthorizationUtils.getRolesForCurrentUser();
 
             if (!userRoles.contains(connectionRoleName) || !userRoles.contains("$admin")) {
-                throw new AtlasBaseException(UNAUTHORIZED_CONNECTION_ADMIN, getCurrentUserName(), connection.getGuid());
+             if (RequestContext.getCurrentUser().equals(ARGO_SERVICE_USER_NAME) && AccessControlUtils.getAccessControlFeatureFlag(featureFlagStore)) {
+                    //Allowing Argo service user to create policy
+                    // TODO: Remove this part after all migration works out perfectly!
+                }else {
+                 throw new AtlasBaseException(UNAUTHORIZED_CONNECTION_ADMIN, getCurrentUserName(), connection.getGuid());
+             }
+
             }
         }
 

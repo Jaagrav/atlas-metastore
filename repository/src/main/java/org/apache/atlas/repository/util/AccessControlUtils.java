@@ -90,6 +90,7 @@ public class AccessControlUtils {
     public static final String ATTR_POLICY_PRIORITY  = "policyPriority";
 
     public static final String REL_ATTR_ACCESS_CONTROL = "accessControl";
+    public static final String ARGO_SERVICE_USER_NAME  = "service-account-atlan-argo";
     public static final String REL_ATTR_POLICIES       = "policies";
 
     public static final String POLICY_TYPE_ALLOW  = "allow";
