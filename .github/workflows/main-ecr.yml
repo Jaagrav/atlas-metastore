@@ -20,7 +20,7 @@ jobs:
         fetch-depth: 0
 
     - name: Get branch name
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
       id: get_branch
 
     - name: Get repository name
@@ -63,11 +63,11 @@ jobs:
               iamRole=${{ secrets.AWS_DEV_PLATFORM_ECR_ACCESS }}
               region='ap-south-1'
         fi
-        echo "##[set-output name=iamRole;]$(echo ${iamRole})"
-        echo "##[set-output name=region;]$(echo ${region})"
+        echo "iamRole=$(echo ${iamRole})" >> $GITHUB_OUTPUT
+        echo "region=$(echo ${region})" >> $GITHUB_OUTPUT
       
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
+      uses: aws-actions/configure-aws-credentials@v2.0.0
       with:
         role-to-assume: ${{ steps.get_ecr-details.outputs.iamRole }}
         aws-region: ${{ steps.get_ecr-details.outputs.region }}
@@ -129,8 +129,8 @@ jobs:
             echo "No associated tag found, tagging $GITHUB_SHA with $updated_full_tag"
             git tag $updated_full_tag $GITHUB_SHA
             git push --tags
-            echo "##[set-output name=build;]$(echo true)"
-            echo "##[set-output name=new_tag;]$(echo $new_tag)"
+            echo "build=$(echo true)" >> $GITHUB_OUTPUT
+            echo "new_tag=$(echo $new_tag)" >> $GITHUB_OUTPUT
             echo "Image will be tagged with $new_tag"
         else
             echo "$GITHUB_SHA is already tagged with $commit_tag"
@@ -138,15 +138,15 @@ jobs:
             if [[ $IMAGE_META == "no_tag_found" ]]; then
                 echo "Image with specified tag does not exist, proceeding to build and push"
                 existing_tag=$(echo $commit_tag | cut -d '-' -f 1)
-                echo "##[set-output name=new_tag;]$(echo $existing_tag)"
-                echo "##[set-output name=build;]$(echo true)"
+                echo "new_tag=$(echo $existing_tag)" >> $GITHUB_OUTPUT
+                echo "build=$(echo true)" >> $GITHUB_OUTPUT
                 echo "Image will be tagged with $existing_tag"
             else
                 IMAGE_TAGS="$( echo ${IMAGE_META} | jq '.imageDetails[0].imageTags[0]' -r )"
                 echo "Image with the specified tag exists, Skipping build"
                 existing_tag=$(echo $commit_tag | cut -d '-' -f 1)
-                echo "##[set-output name=new_tag;]$(echo $existing_tag)"
-                echo "##[set-output name=build;]$(echo false)"
+                echo "new_tag=$(echo $existing_tag)" >> $GITHUB_OUTPUT
+                echo "build=$(echo false)" >> $GITHUB_OUTPUT
             fi
         fi
 
@@ -179,14 +179,14 @@ jobs:
     - name: Set up Buildx 
       id: buildx
       if: steps.semver_tag.outputs.build == 'true'
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v2.5.0
       with:
         driver-opts: image=moby/buildkit:master
     
     - name: Build and push docker image
       id: docker_build
       if: steps.semver_tag.outputs.build == 'true'
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4.0.0
       with:
         context: .
         file: ./Dockerfile
