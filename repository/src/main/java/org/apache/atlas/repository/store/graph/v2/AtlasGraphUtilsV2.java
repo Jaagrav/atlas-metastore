@@ -50,7 +50,19 @@ import org.slf4j.LoggerFactory;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.apache.atlas.repository.Constants.*;
+import static org.apache.atlas.repository.Constants.ATLAS_GLOSSARY_ENTITY_TYPE;
+import static org.apache.atlas.repository.Constants.CLASSIFICATION_NAMES_KEY;
+import static org.apache.atlas.repository.Constants.ENTITY_TYPE_PROPERTY_KEY;
+import static org.apache.atlas.repository.Constants.GLOSSARY_TERMS_EDGE_LABEL;
+import static org.apache.atlas.repository.Constants.INDEX_SEARCH_VERTEX_PREFIX_DEFAULT;
+import static org.apache.atlas.repository.Constants.INDEX_SEARCH_VERTEX_PREFIX_PROPERTY;
+import static org.apache.atlas.repository.Constants.NAME;
+import static org.apache.atlas.repository.Constants.PROPAGATED_CLASSIFICATION_NAMES_KEY;
+import static org.apache.atlas.repository.Constants.QUALIFIED_NAME;
+import static org.apache.atlas.repository.Constants.STATE_PROPERTY_KEY;
+import static org.apache.atlas.repository.Constants.SUPER_TYPES_PROPERTY_KEY;
+import static org.apache.atlas.repository.Constants.TYPENAME_PROPERTY_KEY;
+import static org.apache.atlas.repository.Constants.TYPE_NAME_PROPERTY_KEY;
 import static org.apache.atlas.repository.graph.AtlasGraphProvider.getGraphInstance;
 import static org.apache.atlas.repository.graphdb.AtlasGraphQuery.SortOrder.ASC;
 import static org.apache.atlas.repository.graphdb.AtlasGraphQuery.SortOrder.DESC;
@@ -620,28 +632,6 @@ public class AtlasGraphUtilsV2 {
 
         RequestContext.get().endMetricRecord(metric);
         return false;
-    }
-
-    public static boolean termExists1(String name) {
-        MetricRecorder  metric = RequestContext.get().startMetricRecord("AtlasGraphUtilsV2.termExists");
-        boolean ret = false;
-        AtlasGraphQuery query = getGraphInstance().query()
-                .has(ENTITY_TYPE_PROPERTY_KEY, ATLAS_GLOSSARY_TERM_ENTITY_TYPE);
-
-        Iterator<AtlasVertex> result = query.vertices().iterator();
-
-        while (result.hasNext()) {
-            AtlasVertex glossaryTermVertex = result.next();
-            if (getState(glossaryTermVertex) == Status.ACTIVE) {
-                String existingGlossaryTermName = glossaryTermVertex.getProperty(NAME, String.class);
-                if (name.equals(existingGlossaryTermName)) {
-                    ret = true;
-                }
-            }
-        }
-
-        RequestContext.get().endMetricRecord(metric);
-        return ret;
     }
 
     public static AtlasVertex findByTypeAndPropertyName(AtlasGraph graph, String typeName, Map<String, Object> attributeValues) {

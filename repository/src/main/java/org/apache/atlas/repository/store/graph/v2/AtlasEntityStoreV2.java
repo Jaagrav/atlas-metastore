@@ -1677,7 +1677,7 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
                 break;
 
             case ATLAS_GLOSSARY_CATEGORY_ENTITY_TYPE:
-                preProcessor = new CategoryPreProcessor(typeRegistry, entityRetriever, graphHelper, deleteDelegate, graph, atlasRelationshipStore);
+                preProcessor = new CategoryPreProcessor(typeRegistry, entityRetriever);
                 break;
 
             case QUERY_ENTITY_TYPE:
@@ -1753,6 +1753,12 @@ public class AtlasEntityStoreV2 implements AtlasEntityStore {
         MetricRecorder metric = RequestContext.get().startMetricRecord("filterCategoryVertices");
         for (AtlasVertex vertex : deletionCandidates) {
             String typeName = getTypeName(vertex);
+
+            PreProcessor preProcessor = getPreProcessor(typeName);
+            if (preProcessor != null) {
+                preProcessor.processDelete(vertex);
+            }
+
             if (ATLAS_GLOSSARY_CATEGORY_ENTITY_TYPE.equals(typeName)) {
                 categories.add(vertex);
             } else {

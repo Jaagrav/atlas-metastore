@@ -355,7 +355,7 @@ public abstract class DeleteHandlerV1 {
         }
 
         boolean isInternalType = isInternalType(entityVertex);
-        boolean forceDelete    = (typeCategory == STRUCT || typeCategory == CLASSIFICATION || edge.getLabel().equals(GLOSSARY_TERMS_EDGE_LABEL) || edge.getLabel().equals(GLOSSARY_CATEGORY_EDGE_LABEL) || edge.getLabel().equals(CATEGORY_TERMS_EDGE_LABEL) || edge.getLabel().equals(CATEGORY_PARENT_EDGE_LABEL)) && (forceDeleteStructTrait || isInternalType);
+        boolean forceDelete    = (typeCategory == STRUCT || typeCategory == CLASSIFICATION) && (forceDeleteStructTrait || isInternalType);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("isInternal = {}, forceDelete = {}", isInternalType, forceDelete);
@@ -380,7 +380,7 @@ public abstract class DeleteHandlerV1 {
 
             // for relationship edges, inverse vertex's relationship attribute doesn't need to be updated.
             // only delete the reference relationship edge
-            if (GraphHelper.isRelationshipEdge(edge) && !edge.getLabel().equals(GLOSSARY_TERMS_EDGE_LABEL) && !edge.getLabel().equals(GLOSSARY_CATEGORY_EDGE_LABEL) && edge.getLabel().equals(CATEGORY_TERMS_EDGE_LABEL) && edge.getLabel().equals(CATEGORY_PARENT_EDGE_LABEL)) {
+            if (GraphHelper.isRelationshipEdge(edge)) {
                 deleteEdge(edge, isInternalType);
                 AtlasVertex referencedVertex = entityRetriever.getReferencedEntityVertex(edge, relationshipDirection, entityVertex);
 
@@ -398,11 +398,7 @@ public abstract class DeleteHandlerV1 {
                 //legacy case - not a relationship edge
                 //If deleting just the edge, reverse attribute should be updated for any references
                 //For example, for the department type system, if the person's manager edge is deleted, subordinates of manager should be updated
-                if (edge.getLabel().equals(GLOSSARY_TERMS_EDGE_LABEL) || edge.getLabel().equals(GLOSSARY_CATEGORY_EDGE_LABEL) || edge.getLabel().equals(CATEGORY_TERMS_EDGE_LABEL) || edge.getLabel().equals(CATEGORY_PARENT_EDGE_LABEL)) {
-                    deleteEdge(edge, true, forceDelete);
-                } else {
-                    deleteEdge(edge, true, isInternalType);
-                }
+                deleteEdge(edge, true, isInternalType);
             }
         }
 

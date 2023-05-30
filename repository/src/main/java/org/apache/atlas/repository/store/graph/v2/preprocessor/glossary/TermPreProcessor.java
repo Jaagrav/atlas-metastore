@@ -105,7 +105,7 @@ public class TermPreProcessor implements PreProcessor {
                 processCreateTerm(entity, vertex);
                 break;
             case UPDATE:
-                processUpdateTerm(entity, vertex, context);
+                processUpdateTerm(entity, vertex);
                 break;
         }
     }
@@ -119,7 +119,7 @@ public class TermPreProcessor implements PreProcessor {
             throw new AtlasBaseException(AtlasErrorCode.INVALID_DISPLAY_NAME);
         }
 
-        if (termExists1(termName)) {
+        if (termExists(termName)) {
             throw new AtlasBaseException(AtlasErrorCode.GLOSSARY_TERM_ALREADY_EXISTS, termName);
         }
 
@@ -130,12 +130,12 @@ public class TermPreProcessor implements PreProcessor {
         RequestContext.get().endMetricRecord(metricRecorder);
     }
 
-    private void processUpdateTerm(AtlasEntity entity, AtlasVertex vertex, EntityMutationContext context) throws AtlasBaseException {
+    private void processUpdateTerm(AtlasEntity entity, AtlasVertex vertex) throws AtlasBaseException {
         AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("processUpdateTerm");
         String termName = (String) entity.getAttribute(NAME);
         String vertexName = vertex.getProperty(NAME, String.class);
 
-        if (!vertexName.equals(termName) && termExists1(termName)) {
+        if (!vertexName.equals(termName) && termExists(termName)) {
             throw new AtlasBaseException(AtlasErrorCode.GLOSSARY_TERM_ALREADY_EXISTS, termName);
         }
 
@@ -145,26 +145,25 @@ public class TermPreProcessor implements PreProcessor {
 
         AtlasEntity storeObject = entityRetriever.toAtlasEntity(vertex);
         AtlasRelatedObjectId existingAnchor = (AtlasRelatedObjectId) storeObject.getRelationshipAttribute(ANCHOR);
-        boolean x = !existingAnchor.getGuid().equals(anchor.getGuid());
-        if (existingAnchor != null && x){
-            updateTermResourceAttributes(typeRegistry, entityRetriever, entity, vertex, context);
+        if (existingAnchor != null && !existingAnchor.getGuid().equals(anchor.getGuid())){
+            throw new AtlasBaseException(AtlasErrorCode.ACHOR_UPDATION_NOT_SUPPORTED);
         }
-        else {
-            String vertexQName = vertex.getProperty(QUALIFIED_NAME, String.class);
 
-            entity.setAttribute(QUALIFIED_NAME, vertexQName);
+        String vertexQName = vertex.getProperty(QUALIFIED_NAME, String.class);
 
-            String termGuid = GraphHelper.getGuid(vertex);
+        entity.setAttribute(QUALIFIED_NAME, vertexQName);
 
-            if (!termName.equals(vertexName) && checkEntityTermAssociation(vertexQName)) {
-                if (taskManagement != null && DEFERRED_ACTION_ENABLED) {
+        String termGuid = GraphHelper.getGuid(vertex);
+
+        if(!termName.equals(vertexName) && checkEntityTermAssociation(vertexQName)){
+            if (taskManagement != null && DEFERRED_ACTION_ENABLED) {
                     createAndQueueTask(UPDATE_ENTITY_MEANINGS_ON_TERM_UPDATE, vertexName, termName, vertexQName, vertex);
                 } else {
                     updateMeaningsNamesInEntitiesOnTermUpdate(vertexName, termName, vertexQName, termGuid);
                 }
-            }
-
         }
+
+
         RequestContext.get().endMetricRecord(metricRecorder);
     }
 
@@ -237,16 +236,6 @@ public class TermPreProcessor implements PreProcessor {
         String glossaryQName = (String) anchor.getAttribute(QUALIFIED_NAME);
 
         ret = AtlasGraphUtilsV2.termExists(termName, glossaryQName);
-
-        RequestContext.get().endMetricRecord(metricRecorder);
-        return ret;
-    }
-
-    private boolean termExists1(String termName) {
-        AtlasPerfMetrics.MetricRecorder metricRecorder = RequestContext.get().startMetricRecord("termExists");
-        boolean ret;
-
-        ret = AtlasGraphUtilsV2.termExists1(termName);
 
         RequestContext.get().endMetricRecord(metricRecorder);
         return ret;
