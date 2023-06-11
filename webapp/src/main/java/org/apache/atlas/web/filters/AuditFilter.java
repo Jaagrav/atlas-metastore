@@ -20,9 +20,9 @@ package org.apache.atlas.web.filters;
 
 import org.apache.atlas.AtlasClient;
 import org.apache.atlas.AtlasException;
+import org.apache.atlas.DeleteType;
 import org.apache.atlas.RequestContext;
 import org.apache.atlas.authorize.AtlasAuthorizationUtils;
-import org.apache.atlas.DeleteType;
 import org.apache.atlas.util.AtlasRepositoryConfiguration;
 import org.apache.atlas.web.util.DateTimeHelper;
 import org.apache.atlas.web.util.Servlets;
@@ -33,12 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -46,7 +41,8 @@ import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.apache.atlas.AtlasConfiguration.*;
+import static org.apache.atlas.AtlasConfiguration.REST_API_CREATE_SHELL_ENTITY_FOR_NON_EXISTING_REF;
+import static org.apache.atlas.AtlasConfiguration.REST_API_ENABLE_DELETE_TYPE_OVERRIDE;
 
 /**
  * This records audit information as part of the filter after processing the request
@@ -57,6 +53,7 @@ public class AuditFilter implements Filter {
     private static final Logger LOG       = LoggerFactory.getLogger(AuditFilter.class);
     private static final Logger AUDIT_LOG = LoggerFactory.getLogger("AUDIT");
     public static final String TRACE_ID   = "trace_id";
+    public static final String X_ATLAN_REQUEST_ID   = "x-atlan-request-id";
 
     private boolean deleteTypeOverrideEnabled                = false;
     private boolean createShellEntityForNonExistingReference = false;
@@ -88,7 +85,6 @@ public class AuditFilter implements Filter {
 
         try {
             currentThread.setName(formatName(oldName, requestId));
-
             RequestContext.clear();
             RequestContext requestContext = RequestContext.get();
             requestContext.setTraceId(UUID.randomUUID().toString());
@@ -97,7 +93,10 @@ public class AuditFilter implements Filter {
             requestContext.setCreateShellEntityForNonExistingReference(createShellEntityForNonExistingReference);
             requestContext.setForwardedAddresses(AtlasAuthorizationUtils.getForwardedAddressesFromRequest(httpRequest));
             requestContext.setSkipFailedEntities(skipFailedEntities);
+
+            String xAtlanRequestId = httpRequest.getHeader("x-atlan-request-id");
             MDC.put(TRACE_ID, requestContext.getTraceId());
+            MDC.put(X_ATLAN_REQUEST_ID, xAtlanRequestId);
             if (StringUtils.isNotEmpty(deleteType)) {
                 if (deleteTypeOverrideEnabled) {
                     if(DeleteType.PURGE.name().equals(deleteType)) {
