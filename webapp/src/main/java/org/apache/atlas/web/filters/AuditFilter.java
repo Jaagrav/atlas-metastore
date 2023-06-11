@@ -54,6 +54,7 @@ public class AuditFilter implements Filter {
     private static final Logger AUDIT_LOG = LoggerFactory.getLogger("AUDIT");
     public static final String TRACE_ID   = "trace_id";
     public static final String X_ATLAN_REQUEST_ID   = "x-atlan-request-id";
+    public static final String URI   = "uri";
 
     private boolean deleteTypeOverrideEnabled                = false;
     private boolean createShellEntityForNonExistingReference = false;
@@ -97,6 +98,8 @@ public class AuditFilter implements Filter {
             String xAtlanRequestId = httpRequest.getHeader("x-atlan-request-id");
             MDC.put(TRACE_ID, requestContext.getTraceId());
             MDC.put(X_ATLAN_REQUEST_ID, xAtlanRequestId);
+            MDC.put(URI, httpRequest.getRequestURI());
+            LOG.info("Request received");
             if (StringUtils.isNotEmpty(deleteType)) {
                 if (deleteTypeOverrideEnabled) {
                     if(DeleteType.PURGE.name().equals(deleteType)) {
