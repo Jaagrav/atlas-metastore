@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -96,8 +97,10 @@ public class AuditFilter implements Filter {
             requestContext.setSkipFailedEntities(skipFailedEntities);
 
             String xAtlanRequestId = httpRequest.getHeader("x-atlan-request-id");
+            if(!Objects.isNull(xAtlanRequestId)){
+                MDC.put(X_ATLAN_REQUEST_ID, xAtlanRequestId);
+            }
             MDC.put(TRACE_ID, requestContext.getTraceId());
-            MDC.put(X_ATLAN_REQUEST_ID, xAtlanRequestId);
             MDC.put(URI, httpRequest.getRequestURI());
             LOG.info("Request received");
             if (StringUtils.isNotEmpty(deleteType)) {
