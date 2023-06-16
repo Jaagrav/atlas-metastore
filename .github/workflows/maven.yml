@@ -27,6 +27,7 @@ on:
       - master
       - staging
       - lineageondemand
+      - PLT-635-beta-temp
 
 jobs:
   build:
