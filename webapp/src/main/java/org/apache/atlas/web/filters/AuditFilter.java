@@ -95,7 +95,7 @@ public class AuditFilter implements Filter {
             requestContext.setForwardedAddresses(AtlasAuthorizationUtils.getForwardedAddressesFromRequest(httpRequest));
             requestContext.setSkipFailedEntities(skipFailedEntities);
             MDC.put(TRACE_ID, internalRequestId);
-            MDC.put(X_ATLAN_REQUEST_ID, httpRequest.getHeader(X_ATLAN_REQUEST_ID));
+            //MDC.put(X_ATLAN_REQUEST_ID, httpRequest.getHeader(X_ATLAN_REQUEST_ID));
             if (StringUtils.isNotEmpty(deleteType)) {
                 if (deleteTypeOverrideEnabled) {
                     if(DeleteType.PURGE.name().equals(deleteType)) {
