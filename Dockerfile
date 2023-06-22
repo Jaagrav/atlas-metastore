@@ -64,8 +64,6 @@ COPY atlas-hub/pre-conf/atlas-log4j2.xml /opt/apache-atlas/conf/
 COPY atlas-hub/pre-conf/ranger/ /opt/ranger-atlas-plugin/
 COPY atlas-hub/env_change.sh /
 
-RUN rm /opt/apache-atlas/server/webapp/atlas/WEB-INF/lib/jsr311-api-1.1.1.jar
-
 RUN curl https://repo1.maven.org/maven2/org/jolokia/jolokia-jvm/1.6.2/jolokia-jvm-1.6.2-agent.jar -o /opt/apache-atlas/libext/jolokia-jvm-agent.jar
 
 RUN cd /opt/apache-atlas/bin \
