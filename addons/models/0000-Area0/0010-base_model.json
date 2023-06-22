@@ -53,7 +53,7 @@
       "name": "AuthPolicyType",
       "description": "Policy Item type",
       "serviceType": "atlas_core",
-      "typeVersion": "1.0",
+      "typeVersion": "1.1",
       "elementDefs":
       [
         {
@@ -87,7 +87,7 @@
       "name": "AuthPolicyCategory",
       "description": "Policy category",
       "serviceType": "atlas_core",
-      "typeVersion": "1.0",
+      "typeVersion": "1.1",
       "elementDefs": [
         {
           "value": "bootstrap",
@@ -108,7 +108,7 @@
       "name": "AuthPolicyResourceCategory",
       "description": "Policy resource category",
       "serviceType": "atlas_core",
-      "typeVersion": "1.0",
+      "typeVersion": "1.1",
       "elementDefs":
       [
         {
@@ -143,7 +143,7 @@
       "name": "AuthPolicyValiditySchedule",
       "description": "Validity schedule struct for policy",
       "serviceType": "atlan",
-      "typeVersion": "1.0",
+      "typeVersion": "1.1",
       "attributeDefs":
       [
         {
@@ -179,7 +179,7 @@
       "name": "AuthPolicyCondition",
       "description": "Policy condition schedule struct",
       "serviceType": "atlan",
-      "typeVersion": "1.0",
+      "typeVersion": "1.1",
       "attributeDefs":
       [
         {
@@ -616,7 +616,7 @@
       ],
       "description": "Model to store auth service in Atlas",
       "serviceType": "atlan",
-      "typeVersion": "1.0",
+      "typeVersion": "1.1",
       "attributeDefs": [
         {
           "name": "authServiceType",
@@ -681,7 +681,7 @@
         "Asset"
       ],
       "serviceType": "atlan",
-      "typeVersion": "1.0",
+      "typeVersion": "1.1",
       "attributeDefs":
       [
         {
@@ -879,7 +879,7 @@
       ],
       "description": "Atlan Type representing parent model for Persona, Purpose",
       "serviceType": "atlan",
-      "typeVersion": "1.0",
+      "typeVersion": "1.1",
       "attributeDefs": [
         {
           "name": "isAccessControlEnabled",
@@ -933,7 +933,7 @@
       ],
       "description": "Atlan Type representing a Persona model",
       "serviceType": "atlan",
-      "typeVersion": "1.0",
+      "typeVersion": "1.1",
       "attributeDefs": [
         {
           "name": "personaGroups",
@@ -976,7 +976,7 @@
       ],
       "description": "Atlan Type representing a Purpose model",
       "serviceType": "atlan",
-      "typeVersion": "1.1",
+      "typeVersion": "1.2",
       "attributeDefs": [
         {
           "name": "purposeClassifications",
@@ -1014,7 +1014,7 @@
     },
     {
       "name": "access_control_policies",
-      "typeVersion": "1.0",
+      "typeVersion": "1.1",
       "relationshipCategory": "AGGREGATION",
       "relationshipLabel": "__AccessControl.policies",
       "serviceType": "atlan",
