@@ -27,6 +27,7 @@ on:
       - master
       - staging
       - lineageondemand
+      - promatlas
 
 jobs:
   build:
