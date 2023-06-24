@@ -36,6 +36,7 @@
          start_atlas_server(atlas_classpath, atlas_pid_file, jvm_logdir, jvm_opts_list, web_app_path)
 -        mc.wait_for_startup(confdir, 300)
 -        print "Apache Atlas Server started!!!\n"
+         os.system("rm -f /opt/apache-atlas/server/webapp/atlas/WEB-INF/lib/jsr311-api-1.1.1.jar")
 +        mc.wait_for_startup(confdir, 600)
 +        print "Apache Atlas Server process started!\n"
 +
