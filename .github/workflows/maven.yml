@@ -48,7 +48,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Get branch name
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
         id: get_branch
 
       - name: Build with Maven
