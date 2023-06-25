@@ -522,6 +522,12 @@ public class AdminResource {
             }
         }
     }
+    @GET
+    @Path("metrics/error")
+    @Timed(percentiles = {0.90,0.95,0.99}, value = "http_request")
+    public void raiseError(@Context HttpServletResponse httpServletResponse) throws IOException {
+        httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST,"Custom error raised");
+    }
 
     @GET
     @Path("pushMetricsToStatsd")
