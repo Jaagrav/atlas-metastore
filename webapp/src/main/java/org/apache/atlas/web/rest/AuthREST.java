@@ -134,9 +134,13 @@ public class AuthREST {
             }
 
             return userStore;
-        } finally {
+        }catch (Exception e){
+            e.printStackTrace();
+            LOG.error(e.getMessage());
+        }finally {
             AtlasPerfTracer.log(perf);
         }
+        return new RangerUserStore();
     }
 
     @GET
