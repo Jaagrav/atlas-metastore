@@ -119,6 +119,13 @@
             <artifactId>launchdarkly-java-server-sdk</artifactId>
             <version>${launch-darkly.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.sun.jersey/jersey-bundle -->
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-bundle</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
