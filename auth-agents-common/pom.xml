@@ -76,7 +76,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider -->
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
