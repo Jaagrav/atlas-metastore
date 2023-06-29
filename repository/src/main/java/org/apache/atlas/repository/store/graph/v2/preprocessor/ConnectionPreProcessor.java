@@ -18,6 +18,7 @@
 package org.apache.atlas.repository.store.graph.v2.preprocessor;
 
 
+import org.apache.atlas.DeleteType;
 import org.apache.atlas.RequestContext;
 import org.apache.atlas.discovery.EntityDiscoveryService;
 import org.apache.atlas.exception.AtlasBaseException;
@@ -217,23 +218,28 @@ public class ConnectionPreProcessor implements PreProcessor {
     @Override
     public void processDelete(AtlasVertex vertex) throws AtlasBaseException {
         checkAccessControlFeatureStatus(featureFlagStore);
+        // Process Delete connection role and policies in case of hard delete or purge
+        if (!isDeleteTypePurgeOrHard()) {
+            LOG.info("Skipping processDelete for connection as delete type is {}", RequestContext.get().getDeleteType());
+            return;
+        }
 
         if (ATLAS_AUTHORIZER_IMPL.equalsIgnoreCase(CURRENT_AUTHORIZER_IMPL)) {
             AtlasEntity.AtlasEntityWithExtInfo entityWithExtInfo = entityRetriever.toAtlasEntityWithExtInfo(vertex);
             AtlasEntity connection = entityWithExtInfo.getEntity();
             String roleName = String.format(CONN_NAME_PATTERN, connection.getGuid());
 
-            if (!AtlasEntity.Status.ACTIVE.equals(connection.getStatus())) {
-                throw new AtlasBaseException("Connection is already deleted/purged");
-            }
-
             //delete connection policies
             List<AtlasEntityHeader> policies = getConnectionPolicies(connection.getGuid(), roleName);
-            EntityMutationResponse response = entityStore.deleteByIds(policies.stream().map(x -> x.getGuid()).collect(Collectors.toList()));
+            entityStore.deleteByIds(policies.stream().map(x -> x.getGuid()).collect(Collectors.toList()));
 
-            //delete connection role
             keycloakStore.removeRoleByName(roleName);
         }
+    }
+
+    private boolean isDeleteTypePurgeOrHard() {
+        DeleteType deleteType = RequestContext.get().getDeleteType();
+        return deleteType == DeleteType.PURGE || deleteType == DeleteType.HARD;
     }
 
     private List<AtlasEntityHeader> getConnectionPolicies(String guid, String roleName) throws AtlasBaseException {
@@ -244,9 +250,6 @@ public class ConnectionPreProcessor implements PreProcessor {
 
         List mustClauseList = new ArrayList();
         mustClauseList.add(mapOf("term", mapOf("__typeName.keyword", POLICY_ENTITY_TYPE)));
-        mustClauseList.add(mapOf("term", mapOf("__state", "ACTIVE")));
-
-
         mustClauseList.add(mapOf("wildcard", mapOf(QUALIFIED_NAME, guid + "/*")));
         mustClauseList.add(mapOf("term", mapOf("policyRoles", roleName)));
 
