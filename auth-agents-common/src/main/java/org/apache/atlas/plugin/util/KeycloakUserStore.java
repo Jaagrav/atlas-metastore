@@ -140,10 +140,6 @@ public class KeycloakUserStore {
                 return true;
             }
 
-        } catch (AtlasBaseException fbde) {
-            //TODO: handle forbidden ex.
-            LOG.error("ForbiddenException while fetching latest event time, Reinitializing Keycloak Client to refresh", fbde);
-            getKeycloakClient().reInit();
         } catch (Exception e) {
             LOG.error("Error while fetching latest event time", e);
         } finally {

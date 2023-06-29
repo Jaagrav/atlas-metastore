@@ -23,6 +23,9 @@ import java.util.Set;
 
 import static org.apache.atlas.ApplicationProperties.ATLAS_CONFIGURATION_DIRECTORY_PROPERTY;
 
+/**
+ * Keycloak client, deals with token creation refresh.
+ */
 public final class AtlasKeycloakClient {
 
     public static final Logger LOG = LoggerFactory.getLogger(AtlasKeycloakClient.class);
@@ -89,7 +92,6 @@ public final class AtlasKeycloakClient {
     public List<GroupRepresentation> getGroupsForUserById(String userId) throws AtlasBaseException {
         return KEYCLOAK.getGroupsForUserById(userId).body();
     }
-
 
     public List<GroupRepresentation> getAllGroups() throws AtlasBaseException {
         int start = 0;
@@ -197,11 +199,6 @@ public final class AtlasKeycloakClient {
         return KEYCLOAK_CLIENT;
     }
 
-    public void reInit() {
-        KEYCLOAK.close();
-        init(KEYCLOAK.getConfig());
-    }
-
     private static void init(KeycloakConfig config) {
         synchronized (AtlasKeycloakClient.class) {
             if (KEYCLOAK_CLIENT == null) {
@@ -222,7 +219,7 @@ public final class AtlasKeycloakClient {
                 JSONObject object = new JSONObject(keyConf);
 
                 String REALM_ID = object.getString(KEY_REALM_ID);
-                String AUTH_SERVER_URL = object.getString(KEY_AUTH_SERVER_URL);
+                String AUTH_SERVER_URL = object.getString(KEY_AUTH_SERVER_URL) + "/";
                 String CLIENT_ID = object.getString(KEY_CLIENT_ID);
                 String GRANT_TYPE = DEFAULT_GRANT_TYPE;
                 String CLIENT_SECRET = object.getJSONObject(KEY_CREDENTIALS).getString(KEY_SECRET);
