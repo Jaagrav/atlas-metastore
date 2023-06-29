@@ -24,6 +24,7 @@ import org.apache.atlas.model.instance.AtlasEntityHeader;
 import org.apache.atlas.repository.store.graph.v2.EntityGraphRetriever;
 import org.apache.atlas.utils.AtlasPerfMetrics;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +38,13 @@ import static org.apache.atlas.repository.util.AccessControlUtils.ATTR_POLICY_IS
 import static org.apache.atlas.repository.util.AccessControlUtils.ATTR_POLICY_RESOURCES_CATEGORY;
 import static org.apache.atlas.repository.util.AccessControlUtils.POLICY_SUB_CATEGORY_DATA;
 import static org.apache.atlas.repository.util.AccessControlUtils.POLICY_SUB_CATEGORY_METADATA;
-import static org.apache.atlas.repository.util.AccessControlUtils.getConnectionEntity;
+import static org.apache.atlas.repository.util.AccessControlUtils.RESOURCES_ENTITY;
+import static org.apache.atlas.repository.util.AccessControlUtils.RESOURCES_ENTITY_TYPE;
+import static org.apache.atlas.repository.util.AccessControlUtils.getEntityByQualifiedName;
+import static org.apache.atlas.repository.util.AccessControlUtils.getFilteredPolicyResources;
 import static org.apache.atlas.repository.util.AccessControlUtils.getIsPolicyEnabled;
 import static org.apache.atlas.repository.util.AccessControlUtils.getPolicyActions;
-import static org.apache.atlas.repository.util.AccessControlUtils.getPolicyAssets;
+import static org.apache.atlas.repository.util.AccessControlUtils.getPolicyConnectionQN;
 import static org.apache.atlas.repository.util.AccessControlUtils.getPolicyResources;
 import static org.apache.atlas.repository.util.AccessControlUtils.getPolicySubCategory;
 
@@ -60,7 +64,8 @@ public class PersonaCachePolicyTransformer extends AbstractCachePolicyTransforme
 
         List<String> atlasActions = getPolicyActions(atlasPolicy);
         List<String> atlasResources = getPolicyResources(atlasPolicy);
-        List<String> entityResources = getPolicyAssets(atlasResources);
+        List<String> entityResources = getFilteredPolicyResources(atlasResources, RESOURCES_ENTITY);
+        List<String> typeResources = getFilteredPolicyResources(atlasResources, RESOURCES_ENTITY_TYPE);
 
         int index = 0;
         for (String atlasAction : atlasActions) {
@@ -91,17 +96,22 @@ public class PersonaCachePolicyTransformer extends AbstractCachePolicyTransforme
                         }
 
                     } else if (templateResource.contains(PLACEHOLDER_ENTITY_TYPE)) {
-                        boolean isConnection = false;
 
-                        if (POLICY_SUB_CATEGORY_METADATA.equals(subCategory) || POLICY_SUB_CATEGORY_DATA.equals(subCategory)) {
-                            isConnection = isConnectionPolicy(entityResources);
-                        }
-
-                        if (isConnection) {
-                            finalResources.add(templateResource.replace(PLACEHOLDER_ENTITY_TYPE, "*"));
+                        if (CollectionUtils.isNotEmpty(typeResources)) {
+                            typeResources.forEach(x -> finalResources.add(templateResource.replace(PLACEHOLDER_ENTITY_TYPE, x)));
                         } else {
-                            finalResources.add(templateResource.replace(PLACEHOLDER_ENTITY_TYPE, "Process"));
-                            finalResources.add(templateResource.replace(PLACEHOLDER_ENTITY_TYPE, "Catalog"));
+                            boolean isConnection = false;
+
+                            if (POLICY_SUB_CATEGORY_METADATA.equals(subCategory) || POLICY_SUB_CATEGORY_DATA.equals(subCategory)) {
+                                isConnection = isConnectionPolicy(entityResources, atlasPolicy);
+                            }
+
+                            if (isConnection) {
+                                finalResources.add(templateResource.replace(PLACEHOLDER_ENTITY_TYPE, "*"));
+                            } else {
+                                finalResources.add(templateResource.replace(PLACEHOLDER_ENTITY_TYPE, "Process"));
+                                finalResources.add(templateResource.replace(PLACEHOLDER_ENTITY_TYPE, "Catalog"));
+                            }
                         }
                     } else {
                         finalResources.add(templateResource);
@@ -119,16 +129,22 @@ public class PersonaCachePolicyTransformer extends AbstractCachePolicyTransforme
         return ret;
     }
 
-    private boolean isConnectionPolicy(List<String> assets) {
+    private boolean isConnectionPolicy(List<String> assets, AtlasEntityHeader atlasPolicy) {
 
         if (assets.size() == 1) {
-            AtlasEntity connection;
-            try {
-                connection = getConnectionEntity(entityRetriever, assets.get(0));
-            } catch (AtlasBaseException abe) {
-                return false;
+            String connQNAttr = getPolicyConnectionQN(atlasPolicy);
+
+            if (StringUtils.isNotEmpty(connQNAttr)) {
+                return connQNAttr.equals(assets.get(0));
+            } else {
+                AtlasEntity connection;
+                try {
+                    connection = getEntityByQualifiedName(entityRetriever, assets.get(0));
+                } catch (AtlasBaseException abe) {
+                    return false;
+                }
+                return connection != null;
             }
-            return connection != null;
         }
 
         return false;

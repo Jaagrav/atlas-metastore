@@ -17,7 +17,6 @@
  */
 package org.apache.atlas.repository.util;
 
-import org.apache.atlas.AtlasErrorCode;
 import org.apache.atlas.exception.AtlasBaseException;
 import org.apache.atlas.featureflag.FeatureFlagStore;
 import org.apache.atlas.model.discovery.IndexSearchParams;
@@ -29,6 +28,7 @@ import org.apache.atlas.repository.graphdb.AtlasGraph;
 import org.apache.atlas.repository.graphdb.AtlasIndexQuery;
 import org.apache.atlas.repository.graphdb.AtlasVertex;
 import org.apache.atlas.repository.graphdb.DirectIndexQueryResult;
+import org.apache.atlas.repository.store.graph.AtlasEntityStore;
 import org.apache.atlas.repository.store.graph.v2.EntityGraphRetriever;
 import org.apache.atlas.util.NanoIdUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -46,6 +46,7 @@ import static org.apache.atlas.AtlasErrorCode.ACCESS_CONTROL_ALREADY_EXISTS;
 import static org.apache.atlas.AtlasErrorCode.DISABLED_OPERATION;
 import static org.apache.atlas.AtlasErrorCode.OPERATION_NOT_SUPPORTED;
 import static org.apache.atlas.featureflag.AtlasFeatureFlagClient.INSTANCE_DOMAIN_NAME;
+import static org.apache.atlas.featureflag.FeatureFlagStore.FeatureFlag.ALLOW_CONNECTION_ADMIN_OPS;
 import static org.apache.atlas.featureflag.FeatureFlagStore.FeatureFlag.DISABLE_ACCESS_CONTROL;
 import static org.apache.atlas.repository.Constants.ATTR_ADMIN_GROUPS;
 import static org.apache.atlas.repository.Constants.ATTR_ADMIN_ROLES;
@@ -83,6 +84,7 @@ public final class AccessControlUtils {
     public static final String ATTR_POLICY_SUB_CATEGORY  = "policySubCategory";
     public static final String ATTR_POLICY_RESOURCES  = "policyResources";
     public static final String ATTR_POLICY_IS_ENABLED  = "isPolicyEnabled";
+    public static final String ATTR_POLICY_CONNECTION_QN  = "connectionQualifiedName";
     public static final String ATTR_POLICY_RESOURCES_CATEGORY  = "policyResourceCategory";
     public static final String ATTR_POLICY_SERVICE_NAME  = "policyServiceName";
     public static final String ATTR_POLICY_PRIORITY  = "policyPriority";
@@ -101,16 +103,22 @@ public final class AccessControlUtils {
     public static final String POLICY_CATEGORY_PURPOSE  = "purpose";
     public static final String POLICY_CATEGORY_BOOTSTRAP  = "bootstrap";
 
+    public static final String POLICY_RESOURCE_CATEGORY_PERSONA_CUSTOM  = "CUSTOM";
+    public static final String POLICY_RESOURCE_CATEGORY_PERSONA_ENTITY  = "ENTITY";
+    public static final String POLICY_RESOURCE_CATEGORY_PURPOSE  = "TAG";
+
     public static final String POLICY_SUB_CATEGORY_METADATA  = "metadata";
     public static final String POLICY_SUB_CATEGORY_GLOSSARY  = "glossary";
     public static final String POLICY_SUB_CATEGORY_DATA  = "data";
 
     public static final String RESOURCES_ENTITY = "entity:";
+    public static final String RESOURCES_ENTITY_TYPE = "entity-type:";
     public static final String RESOURCES_SPLITTER = ":";
 
     private static final String CONNECTION_QN = "%s/%s/%s";
     public static final String CONN_NAME_PATTERN = "connection_admins_%s";
     public static final String ARGO_SERVICE_USER_NAME = "service-account-atlan-argo";
+    public static final String BACKEND_SERVICE_USER_NAME = "service-account-atlan-backend";
 
     public static final String INSTANCE_DOMAIN_KEY = "instance";
 
@@ -127,14 +135,22 @@ public final class AccessControlUtils {
     public static List<String> getPolicyAssets(AtlasEntity policyEntity) throws AtlasBaseException {
         List<String> resources = getPolicyResources(policyEntity);
 
-        return getPolicyAssets(resources);
+        return getFilteredPolicyResources(resources, RESOURCES_ENTITY);
     }
 
-    public static List<String> getPolicyAssets(List<String> resources) {
+    public static List<String> getFilteredPolicyResources(List<String> resources, String resourcePrefix) {
         return resources.stream()
-                .filter(x -> x.startsWith(RESOURCES_ENTITY))
-                .map(x -> x.split(RESOURCES_SPLITTER)[1])
+                .filter(x -> x.startsWith(resourcePrefix))
+                .map(x -> x.substring(resourcePrefix.length()))
                 .collect(Collectors.toList());
+    }
+
+    public static String getPolicyConnectionQN(AtlasEntity policyEntity) {
+        return getStringAttribute(policyEntity, ATTR_POLICY_CONNECTION_QN);
+    }
+
+    public static String getPolicyConnectionQN(AtlasEntityHeader policyEntity) {
+        return getStringAttribute(policyEntity, ATTR_POLICY_CONNECTION_QN);
     }
 
     public static List<String> getPolicyResources(AtlasEntity policyEntity) throws AtlasBaseException {
@@ -198,11 +214,11 @@ public final class AccessControlUtils {
         } else if (POLICY_TYPE_DENY.equals(policyType)) {
             return false;
         } else {
-            throw new AtlasBaseException("Unsuppported policy type while creating index alias filters");
+            throw new AtlasBaseException("Unsupported policy type while creating index alias filters");
         }
     }
 
-    public static AtlasEntity getConnectionEntity(EntityGraphRetriever entityRetriever, String connectionQualifiedName) throws AtlasBaseException {
+    public static AtlasEntity getEntityByQualifiedName(EntityGraphRetriever entityRetriever, String connectionQualifiedName) throws AtlasBaseException {
         AtlasObjectId objectId = new AtlasObjectId(CONNECTION_ENTITY_TYPE, mapOf(QUALIFIED_NAME, connectionQualifiedName));
 
         AtlasEntity entity = entityRetriever.toAtlasEntity(objectId);
@@ -232,7 +248,7 @@ public final class AccessControlUtils {
             return null;
         }
 
-        connection = getConnectionEntity(entityRetriever, connectionQName);
+        connection = getEntityByQualifiedName(entityRetriever, connectionQName);
 
         return connection;
     }
@@ -325,18 +341,6 @@ public final class AccessControlUtils {
         if (CollectionUtils.isNotEmpty(policies)) {
             throw new AtlasBaseException(OPERATION_NOT_SUPPORTED, "Can not attach a policy while creating/updating Persona/Purpose");
         }
-    }
-
-    public static AtlasEntity getConnectionForPolicy(EntityGraphRetriever entityRetriever, List<String> resources) throws AtlasBaseException {
-        AtlasEntity ret = null;
-        if (CollectionUtils.isNotEmpty(resources)) {
-
-            String entityId = resources.get(0).split(RESOURCES_SPLITTER)[1];
-
-            ret = extractConnectionFromResource(entityRetriever, entityId);
-        }
-
-        return ret;
     }
 
     public static String getUUID(){
@@ -436,6 +440,24 @@ public final class AccessControlUtils {
         if (isDisabled) {
             validateAttributeUpdateForFeatureFlag(ATTR_ADMIN_USERS, entity, vertex);
             validateAttributeUpdateForFeatureFlag(ATTR_ADMIN_GROUPS, entity, vertex);
+            validateAttributeUpdateForFeatureFlag(ATTR_ADMIN_ROLES, entity, vertex);
+        }
+    }
+
+    public static void checkAllowConnectionAdminUpdateFeatureStatus(FeatureFlagStore featureFlagStore, AtlasStruct struct) throws AtlasBaseException {
+        if (!featureFlagStore.evaluate(ALLOW_CONNECTION_ADMIN_OPS, INSTANCE_DOMAIN_KEY, INSTANCE_DOMAIN_NAME)) {
+            AtlasEntity entity = (AtlasEntity) struct;
+            if (entity.hasAttribute(ATTR_ADMIN_ROLES)) {
+                throw new AtlasBaseException(DISABLED_OPERATION);
+            }
+        }
+    }
+
+    public static void checkAllowConnectionAdminUpdateForUpdate(FeatureFlagStore featureFlagStore, AtlasStruct entity,
+                                                                AtlasVertex vertex) throws AtlasBaseException {
+        boolean isDisabled = !featureFlagStore.evaluate(ALLOW_CONNECTION_ADMIN_OPS, INSTANCE_DOMAIN_KEY, INSTANCE_DOMAIN_NAME);
+
+        if (isDisabled) {
             validateAttributeUpdateForFeatureFlag(ATTR_ADMIN_ROLES, entity, vertex);
         }
     }
