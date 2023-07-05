@@ -30,16 +30,16 @@ public class MetricsRegistryServiceImpl implements MetricsRegistry {
     private final DistributionStatisticConfig distributionStatisticConfig;
 
     @Inject
-    public MetricsRegistryServiceImpl(PrometheusMeterRegistry prometheusMeterRegistry, ApplicationContext applicationContext) {
+    public MetricsRegistryServiceImpl(PrometheusMeterRegistry prometheusMeterRegistry) {
         this.prometheusMeterRegistry = prometheusMeterRegistry;
         this.prometheusMeterRegistry.config().withHighCardinalityTagsDetector().commonTags(SERVICE, ATLAS_METASTORE);
         this.distributionStatisticConfig =  DistributionStatisticConfig.builder().percentilePrecision(2)
-                                            .percentiles(PERCENTILES)
-                                            .bufferLength(3)
-                                            .percentilesHistogram(false)
-                                            .minimumExpectedValue(1.0)
-                                            .maximumExpectedValue(Double.MAX_VALUE)
-                                            .expiry(Duration.ofMinutes(2)).build();
+                .percentiles(PERCENTILES)
+                .bufferLength(3)
+                .percentilesHistogram(false)
+                .minimumExpectedValue(1.0)
+                .maximumExpectedValue(Double.MAX_VALUE)
+                .expiry(Duration.ofMinutes(2)).build();
     }
 
     @Override
@@ -48,8 +48,8 @@ public class MetricsRegistryServiceImpl implements MetricsRegistry {
             AtlasPerfMetrics.Metric metric = metrics.getMetric(name);
             this.prometheusMeterRegistry.newDistributionSummary(new Meter.Id(METHOD_DIST_SUMMARY,
                                     Tags.of(NAME, metric.getName()), BaseUnits.MILLISECONDS, METHOD_DIST_SUMMARY, Meter.Type.TIMER),
-                                     distributionStatisticConfig, SEC_MILLIS_SCALE)
-                                    .record(metric.getTotalTimeMSecs());
+                            distributionStatisticConfig, SEC_MILLIS_SCALE)
+                    .record(metric.getTotalTimeMSecs());
         }
     }
 
