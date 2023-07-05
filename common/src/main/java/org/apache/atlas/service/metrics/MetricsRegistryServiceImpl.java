@@ -24,14 +24,22 @@ public class MetricsRegistryServiceImpl implements MetricsRegistry {
     private static final String NAME = "name";
     private static final String METHOD_DIST_SUMMARY = "method_dist_summary";
     private static final double[] PERCENTILES = {0.90, 0.99};
-    private static final int SEC_MILLIS_SCALE = 1000;
+    private static final int SEC_MILLIS_SCALE = 1;
 
     private final PrometheusMeterRegistry prometheusMeterRegistry;
+    private final DistributionStatisticConfig distributionStatisticConfig;
 
     @Inject
     public MetricsRegistryServiceImpl(PrometheusMeterRegistry prometheusMeterRegistry, ApplicationContext applicationContext) {
         this.prometheusMeterRegistry = prometheusMeterRegistry;
         this.prometheusMeterRegistry.config().withHighCardinalityTagsDetector().commonTags(SERVICE, ATLAS_METASTORE);
+        this.distributionStatisticConfig =  DistributionStatisticConfig.builder().percentilePrecision(2)
+                                            .percentiles(PERCENTILES)
+                                            .bufferLength(3)
+                                            .percentilesHistogram(false)
+                                            .minimumExpectedValue(1.0)
+                                            .maximumExpectedValue(Double.MAX_VALUE)
+                                            .expiry(Duration.ofMinutes(2)).build();
     }
 
     @Override
@@ -40,13 +48,7 @@ public class MetricsRegistryServiceImpl implements MetricsRegistry {
             AtlasPerfMetrics.Metric metric = metrics.getMetric(name);
             this.prometheusMeterRegistry.newDistributionSummary(new Meter.Id(METHOD_DIST_SUMMARY,
                                     Tags.of(NAME, metric.getName()), BaseUnits.MILLISECONDS, METHOD_DIST_SUMMARY, Meter.Type.TIMER),
-                                     DistributionStatisticConfig.builder().percentilePrecision(2)
-                                    .percentiles(PERCENTILES)
-                                    .bufferLength(3)
-                                    .percentilesHistogram(false)
-                                    .minimumExpectedValue(1.0)
-                                    .maximumExpectedValue(Double.MAX_VALUE)
-                                    .expiry(Duration.ofMinutes(1)).build(), SEC_MILLIS_SCALE)
+                                     distributionStatisticConfig, SEC_MILLIS_SCALE)
                                     .record(metric.getTotalTimeMSecs());
         }
     }
