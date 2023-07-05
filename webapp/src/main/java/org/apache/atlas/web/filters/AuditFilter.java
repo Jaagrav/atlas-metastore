@@ -21,6 +21,7 @@ package org.apache.atlas.web.filters;
 import org.apache.atlas.*;
 import org.apache.atlas.authorize.AtlasAuthorizationUtils;
 import org.apache.atlas.DeleteType;
+import org.apache.atlas.service.metrics.MetricsRegistry;
 import org.apache.atlas.util.AtlasRepositoryConfiguration;
 import org.apache.atlas.web.util.DateTimeHelper;
 import org.apache.atlas.web.util.Servlets;
@@ -30,7 +31,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
+import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -60,13 +63,16 @@ public class AuditFilter implements Filter {
     private boolean deleteTypeOverrideEnabled                = false;
     private boolean createShellEntityForNonExistingReference = false;
 
+    @Inject
+    private MetricsRegistry metricsRegistry;
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         LOG.info("AuditFilter initialization started");
 
         deleteTypeOverrideEnabled                = REST_API_ENABLE_DELETE_TYPE_OVERRIDE.getBoolean();
         createShellEntityForNonExistingReference = REST_API_CREATE_SHELL_ENTITY_FOR_NON_EXISTING_REF.getBoolean();
-
+        SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
         LOG.info("REST_API_ENABLE_DELETE_TYPE_OVERRIDE={}", deleteTypeOverrideEnabled);
     }
 
@@ -96,6 +102,7 @@ public class AuditFilter implements Filter {
             requestContext.setCreateShellEntityForNonExistingReference(createShellEntityForNonExistingReference);
             requestContext.setForwardedAddresses(AtlasAuthorizationUtils.getForwardedAddressesFromRequest(httpRequest));
             requestContext.setSkipFailedEntities(skipFailedEntities);
+            requestContext.setMetricRegistry(metricsRegistry);
             MDC.put(TRACE_ID, internalRequestId);
             MDC.put(X_ATLAN_REQUEST_ID, ofNullable(httpRequest.getHeader(X_ATLAN_REQUEST_ID)).orElse(EMPTY));
             if (StringUtils.isNotEmpty(deleteType)) {
