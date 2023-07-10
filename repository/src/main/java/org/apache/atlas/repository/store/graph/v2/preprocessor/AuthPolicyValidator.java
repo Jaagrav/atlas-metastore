@@ -19,15 +19,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.atlas.AtlasErrorCode.BAD_REQUEST;
 import static org.apache.atlas.AtlasErrorCode.OPERATION_NOT_SUPPORTED;
-import static org.apache.atlas.authorize.AtlasPrivilege.ENTITY_ADD_CLASSIFICATION;
-import static org.apache.atlas.authorize.AtlasPrivilege.ENTITY_CREATE;
-import static org.apache.atlas.authorize.AtlasPrivilege.ENTITY_DELETE;
-import static org.apache.atlas.authorize.AtlasPrivilege.ENTITY_READ;
-import static org.apache.atlas.authorize.AtlasPrivilege.ENTITY_READ_CLASSIFICATION;
-import static org.apache.atlas.authorize.AtlasPrivilege.ENTITY_REMOVE_CLASSIFICATION;
-import static org.apache.atlas.authorize.AtlasPrivilege.ENTITY_UPDATE;
-import static org.apache.atlas.authorize.AtlasPrivilege.ENTITY_UPDATE_BUSINESS_METADATA;
-import static org.apache.atlas.authorize.AtlasPrivilege.ENTITY_UPDATE_CLASSIFICATION;
+import static org.apache.atlas.authorize.AtlasPrivilege.*;
 import static org.apache.atlas.model.instance.EntityMutations.EntityOperation.CREATE;
 import static org.apache.atlas.repository.Constants.CONNECTION_ENTITY_TYPE;
 import static org.apache.atlas.repository.Constants.PERSONA_ENTITY_TYPE;
@@ -96,6 +88,9 @@ public class AuthPolicyValidator {
         add(ENTITY_UPDATE_CLASSIFICATION.getType());
         add(ENTITY_REMOVE_CLASSIFICATION.getType());
         add(ENTITY_UPDATE_BUSINESS_METADATA.getType());
+        add(RELATIONSHIP_ADD.getType());
+        add(RELATIONSHIP_UPDATE.getType());
+        add(RELATIONSHIP_REMOVE.getType());
     }};
 
     private static final Map<String, Set<String>> PURPOSE_POLICY_VALID_ACTIONS = new HashMap<String, Set<String>>(){{
