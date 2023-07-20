@@ -31,6 +31,8 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.util.ShutdownHookManager;
+import org.eclipse.jetty.util.thread.ExecutorThreadPool;
+import org.eclipse.jetty.util.thread.ThreadPool;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -294,5 +296,17 @@ public final class Atlas {
                 throw e;
             }
         }
+    }
+
+    public static Map<String, Integer> getJettyPoolDetails() {
+        Map<String, Integer> poolMetrics = new HashMap<>();
+        ExecutorThreadPool threadPool = (ExecutorThreadPool)server.getThreadPool();
+        poolMetrics.put("idle_threads", threadPool.getIdleThreads());
+        poolMetrics.put("max_threads", threadPool.getMaxThreads());
+        poolMetrics.put("min_threads", threadPool.getMinThreads());
+        poolMetrics.put("reserved_threads", threadPool.getReservedThreads());
+        poolMetrics.put("total_threads", threadPool.getThreads());
+        poolMetrics.put("active_threads", threadPool.getThreads() - threadPool.getIdleThreads());
+        return poolMetrics;
     }
 }

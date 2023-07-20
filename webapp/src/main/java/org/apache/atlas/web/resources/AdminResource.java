@@ -19,10 +19,7 @@
 package org.apache.atlas.web.resources;
 
 import com.sun.jersey.multipart.FormDataParam;
-import org.apache.atlas.ApplicationProperties;
-import org.apache.atlas.AtlasClient;
-import org.apache.atlas.AtlasConfiguration;
-import org.apache.atlas.AtlasErrorCode;
+import org.apache.atlas.*;
 import org.apache.atlas.authorize.AtlasAdminAccessRequest;
 import org.apache.atlas.authorize.AtlasAuthorizationUtils;
 import org.apache.atlas.authorize.AtlasEntityAccessRequest;
@@ -492,11 +489,10 @@ public class AdminResource {
         }
 
         AtlasMetrics metrics = metricsService.getMetrics();
-
+        metrics.addMetric("metastore","jetty", Atlas.getJettyPoolDetails());
         if (LOG.isDebugEnabled()) {
             LOG.debug("<== AdminResource.getMetrics()");
         }
-
         return metrics;
     }
 

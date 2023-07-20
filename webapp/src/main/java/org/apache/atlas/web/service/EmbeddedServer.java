@@ -30,6 +30,7 @@ import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.thread.ExecutorThreadPool;
+import org.eclipse.jetty.util.thread.ThreadPool;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,5 +141,9 @@ public class EmbeddedServer {
                 LOG.error("Exception occurred during audit", e);
             }
         }
+    }
+
+    public ThreadPool getThreadPool() {
+        return server.getThreadPool();
     }
 }
